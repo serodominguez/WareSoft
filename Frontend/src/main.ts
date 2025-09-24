@@ -9,7 +9,7 @@ import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
 // Configuración de Axios
-axios.defaults.baseURL='https://localhost:7075/'
+axios.defaults.baseURL='https://localhost:7228/'
 
 // Cargar fuentes
 loadFonts();
