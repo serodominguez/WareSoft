@@ -15,10 +15,10 @@ import type { LocaleMessages } from '@intlify/core-base';
 // Definición de mensajes para la localización
 const messages: LocaleMessages<any> =  {
   es: {
-    $vuetify: es,
+    ...es,
   },
   en: {
-    $vuetify: en,
+    ...en,
   },
 };
 
@@ -65,6 +65,7 @@ const myCustomLightTheme: ThemeDefinition = {
 const i18n: I18n = createI18n({
   legacy: false,
   locale: 'es',
+  fallbackLocale: 'en',  
   messages,
 });
 
@@ -75,7 +76,10 @@ const vuetify = createVuetify({
   },
   locale: {
     locale: 'es',
-    messages,
+    messages: {
+      es,
+      en,
+    },
   },
   icons: {
     defaultSet: 'md',

@@ -38,7 +38,7 @@ export default defineComponent({
     return {
       drawer: false,
       linkStore: [
-        { icon: 'category', text: 'Categorías', route: '' },
+        { icon: 'category', text: 'Categorías', route: '/category' },
       ] as Array<{ icon: string; text: string; route: string }>,
     };
   },

@@ -1,9 +1,14 @@
+  // Core Vue
 import { createApp } from 'vue'
 import App from './App.vue'
+
+// Plugins y Rutas
 import router from './router'
 import store from './store'
 import { vuetify, i18n  } from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
+
+// Externals
 import axios from 'axios'
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';

@@ -1,14 +1,10 @@
 import { createStore } from 'vuex'
+import Category from '@/store/modules/Category'
 
-export default createStore({
-  state: {
-  },
-  getters: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
+const store = createStore({
   modules: {
-  }
-})
+    Category,
+  },
+});
+
+export default store;
