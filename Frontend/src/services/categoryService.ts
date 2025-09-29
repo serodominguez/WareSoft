@@ -2,17 +2,25 @@ import axios from 'axios';
 import { Category } from '@/models/categoryModel';
 
 export async function fetchCategoriesService(
-  pageNumber = 1,
-  pageSize = 5,
-  order = "asc",
-  sort = "PK_CATEGORY"
+  pageNumber = 1, 
+  pageSize = 5, 
+  order = "desc", 
+  sort = "PK_CATEGORY", 
+  textFilter?: string | null, 
+  numberFilter?: number | null
 ): Promise<{ items: Category[]; totalRecords: number }> {
-  const requestBody = {
+  const requestBody: any = {
     numberPage: pageNumber,
     numberRecordsPage: pageSize,
     order,
     sort,
   };
+
+    if (textFilter && numberFilter) {
+    requestBody.textFilter = textFilter;
+    requestBody.numberFilter = numberFilter;
+  }
+  
   const response = await axios.post('api/Categories', requestBody);
   return response.data.data;
 }

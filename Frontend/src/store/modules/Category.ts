@@ -35,13 +35,30 @@ const mutations = {
 };
 
 const actions = {
-  async fetchCategories(
-    { commit }: any,
-    { pageNumber = 1, pageSize = 5, order = "asc", sort = "PK_CATEGORY" } = {}
-  ) {
+  async fetchCategories({ commit }: any,{ pageNumber = 1, pageSize = 5, order = "asc", sort = "PK_CATEGORY", textFilter = null, numberFilter = null,} = {}) {
     commit("SET_LOADING", true);
     try {
-      const data = await fetchCategoriesService(pageNumber, pageSize, order, sort);
+      const requestBody: any = {
+        numberPage: pageNumber,
+        numberRecordsPage: pageSize,
+        order,
+        sort,
+      };
+
+      if (textFilter && numberFilter) {
+        requestBody.textFilter = textFilter;
+        requestBody.numberFilter = numberFilter;
+      }
+
+      const data = await fetchCategoriesService(
+        requestBody.numberPage,
+        requestBody.numberRecordsPage,
+        requestBody.order,
+        requestBody.sort,
+        requestBody.textFilter,
+        requestBody.numberFilter
+      );
+
       commit("SET_CATEGORIES", data.items);
       commit("SET_TOTAL_CATEGORIES", data.totalRecords);
     } catch (error: any) {
