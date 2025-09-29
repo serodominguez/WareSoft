@@ -1,31 +1,31 @@
 <template>
-  <v-data-table
+  <v-data-table-server
     :headers="headers"
     :items="categories"
     :search="search || undefined"
-    :items-per-page="itemsPerPage"
-    :page.sync="currentPage"
-    :items-per-page-options="[5, 10, 20, 30]"
-    :total-items="totalRecords"
-    :loading="loading"
-    show-current-page
     :items-per-page-text="pages"
+    :items-per-page-options="[10, 20, 50]"
+    :items-per-page="itemsPerPage"
+    :items-length="totalCategories"
+    :loading="loading"
     loading-text="Cargando... Espere por favor"
-    @update:options="handlePaginationChange"
-    server
+    @update:items-per-page="updateItemsPerPage"
+    @update:page="changePage"
   >
     <template v-slot:item="{ item }">
       <tr>
         <td>{{ (item as Category).categorY_NAME }}</td>
-        <td>{{ (item as Category).statE_CATEGORY || ((item as Category).state ? 'ACTIVO' : 'INACTIVO') }}</td>
+        <td>{{ (item as Category).description}}</td>
+        <td>{{ (item as Category).audiT_CREATE_DATE }}</td>
+        <td>{{ (item as Category).statE_CATEGORY }}</td>
         <td>
-          <v-btn v-if="(item as Category).statE_CATEGORY =='ACTIVO'" color="blue" icon="edit" variant="text" @click="editCategory(item as Category)" size="small"></v-btn>
-          <template v-if="(item as Category).statE_CATEGORY == 'INACTIVO' || !(item as Category).state">
-            <v-btn icon="check" variant="text" @click="openStatusModal(item as Category, 1)"> size="small"></v-btn>
+          <v-btn v-if="(item as Category).statE_CATEGORY =='ACTIVO'" color="blue" icon="edit" variant="text" @click="editCategory(item)" size="small"></v-btn>
+          <template v-if="(item as Category).statE_CATEGORY == 'INACTIVO'">
+            <v-btn color="red" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
           </template>
-            <template v-if="(item as Category).statE_CATEGORY == 'ACTIVO' || (item as Category).state"> 
-              <v-btn color="red" icon="block" variant="text" @click="openStatusModal(item as Category, 2)"size="small"></v-btn>
-            </template>
+          <template v-if="(item as Category).statE_CATEGORY == 'ACTIVO'">  
+            <v-btn color="red" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
+          </template>
         </td>
       </tr>
     </template>
@@ -41,140 +41,108 @@
           hide-details
           single-line
           v-model="search"
-          @update:model-value="handleSearch"
         ></v-text-field>
         <v-card-actions>
-          <v-btn @click="openModal" color="primary" size="large"> Agregar </v-btn>
+          <v-btn @click="openForm" color="primary" size="large"> Nuevo </v-btn>
         </v-card-actions>
       </v-toolbar>
     </template>
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize"> Reset </v-btn>
     </template>
-  </v-data-table>
+  </v-data-table-server>
+  
 </template>
+
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapGetters, mapActions } from 'vuex';
-
-interface Category {
-  pK_CATEGORY: number | null;
-  categorY_NAME: string;
-  description?: string;
-  audiT_CREATE_DATE?: string;
-  state: boolean;
-  statE_CATEGORY?: string;
-}
-
-interface Header {
-  title: string;
-  key: string;
-  sortable?: boolean;
-}
-
-interface ComponentData {
-  pages: string;
-  search: string | null;
-  modal: boolean;
-  statusModal: boolean;
-  selectedCategory: Category | null;
-  action: number;
-}
+import { useStore } from 'vuex';
+import { Category } from '@/models/categoryModel';
 
 export default defineComponent({
-  name: 'CategoryComponent',
-  
-  data(): ComponentData {
+  data() {
     return {
+      items: [10, 20, 50],
+      currentPage: 1,
+      itemsPerPage: 10,
       pages: "Categorías por Página",
       search: null,
       modal: false,
       statusModal: false,
-      selectedCategory: null,
+      selectedCategory: null as Category | null,
       action: 0,
     };
   },
-  
   computed: {
-    ...mapGetters({
-      categories: 'category/categories',
-      loading: 'category/loading',
-      totalRecords: 'category/totalRecords',
-      currentPage: 'category/currentPage',
-      itemsPerPage: 'category/itemsPerPage',
-    }),
-    
-    headers(): Header[] {
+    headers() {
       return [
-        { title: 'Categoría', key: 'categorY_NAME', sortable: true },
-        { title: 'Estado', key: 'statE_CATEGORY', sortable: true },
+        { title: 'Categoría', key: 'categorY_NAME' },
+        { title: 'Descripción', key: 'description' },
+        { title: 'Fecha registro', key: 'audiT_CREATE_DATE' },
+        { title: 'Estado', key: 'statE_CATEGORY' },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
+    totalPages() {
+      return Math.ceil(this.store.getters['category/totalCategories'] / this.itemsPerPage);
+    },
+    categories() {
+      return this.store.getters['category/categories'];
+    },
+    loading() {
+      return this.store.getters['category/loading'];
+    },
+    totalCategories() {
+      return this.store.getters['category/totalCategories'];
+    }
   },
-  
   methods: {
-    async handlePaginationChange(options: any) {
-      const { page, itemsPerPage, sortBy, sortDesc } = options;
-      const sort = sortBy?.[0]?.key || 'PK_CATEGORY';
-      const order = sortDesc?.[0] ? 'desc' : 'asc';
-      await this.updatePagination({ page, itemsPerPage, sort, order });
-    },
+    initialize() {
 
-    async handleSearch(searchValue: string | null) {
-      this.search = searchValue;
-      await this.setCurrentPage(1);
-      await this.fetchCategories({ page: 1 });
     },
-
-    async initialize() {
-      this.search = null;
-      await this.resetPagination();
-    },
-    
-    ...mapActions({
-      fetchCategories: 'category/fetchCategories',
-      updatePagination: 'category/updatePagination',
-      setCurrentPage: 'category/setCurrentPage',
-      resetPagination: 'category/resetPagination',
-      createCategory: 'category/createCategory',
-      updateCategory: 'category/updateCategory',
-      enabledCategorie: 'category/enabledCategorie',
-      disabledCategorie: 'category/disabledCategorie',
-    }),
-    
-    openModal(): void {
+    openForm() {
       this.selectedCategory = { 
         pK_CATEGORY: null, 
         categorY_NAME: '', 
-        description: '', 
+        description: '',
         audiT_CREATE_DATE: '', 
-        state: true, 
-        statE_CATEGORY: 'ACTIVO' 
+        statE_CATEGORY: '' 
       };
       this.modal = true;
     },
-    
-    editCategory(category: Category): void {
+    editCategory(category: any) {
       this.selectedCategory = { ...category };
       this.modal = true;
     },
-    
-    openStatusModal(category: Category, action: number): void {
-      if (category.pK_CATEGORY === null) {
-        console.error('No se puede cambiar el estado de una categoría sin ID');
-        return;
-      }
-      
+    openModal(category: any, action: number) {
       this.selectedCategory = category;
       this.action = action;
       this.statusModal = true;
     },
+    async fetchCategories() {
+      await this.store.dispatch('category/fetchCategories', { 
+        pageNumber: this.currentPage, 
+        pageSize: this.itemsPerPage 
+      });
+    },
+    updateItemsPerPage(itemsPerPage: number) {
+      this.itemsPerPage = itemsPerPage; 
+      this.currentPage = 1; 
+      this.fetchCategories();
+    },
+    changePage(page: number) {
+      this.currentPage = page;
+      this.fetchCategories();
+    },
   },
-  
-  mounted(): void {
+  mounted() {
     this.fetchCategories();
   },
+  setup() {
+    const store = useStore();
+    return { store };
+  }
 });
 </script>
+
