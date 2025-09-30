@@ -35,7 +35,18 @@ const mutations = {
 };
 
 const actions = {
-  async fetchCategories({ commit }: any,{ pageNumber = 1, pageSize = 5, order = "asc", sort = "PK_CATEGORY", textFilter = null, numberFilter = null,} = {}) {
+  async fetchCategories(
+    { commit }: any,
+    { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      order = "desc", 
+      sort = "PK_CATEGORY", 
+      textFilter = null, 
+      numberFilter = null,
+      stateFilter = 1
+    } = {}
+  ) {
     commit("SET_LOADING", true);
     try {
       const requestBody: any = {
@@ -43,6 +54,7 @@ const actions = {
         numberRecordsPage: pageSize,
         order,
         sort,
+        stateFilter
       };
 
       if (textFilter && numberFilter) {
@@ -56,7 +68,8 @@ const actions = {
         requestBody.order,
         requestBody.sort,
         requestBody.textFilter,
-        requestBody.numberFilter
+        requestBody.numberFilter,
+        requestBody.stateFilter
       );
 
       commit("SET_CATEGORIES", data.items);

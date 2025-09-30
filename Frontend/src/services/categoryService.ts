@@ -3,20 +3,22 @@ import { Category } from '@/models/categoryModel';
 
 export async function fetchCategoriesService(
   pageNumber = 1, 
-  pageSize = 5, 
+  pageSize = 10, 
   order = "desc", 
   sort = "PK_CATEGORY", 
   textFilter?: string | null, 
-  numberFilter?: number | null
+  numberFilter?: number | null,
+  stateFilter: number = 1
 ): Promise<{ items: Category[]; totalRecords: number }> {
   const requestBody: any = {
     numberPage: pageNumber,
     numberRecordsPage: pageSize,
     order,
     sort,
+    stateFilter
   };
 
-    if (textFilter && numberFilter) {
+  if (textFilter && numberFilter) {
     requestBody.textFilter = textFilter;
     requestBody.numberFilter = numberFilter;
   }
@@ -40,6 +42,7 @@ export async function registerCategoryService(category: Category): Promise<void>
 }
 
 export async function editCategoryService(id: number, category: Category): Promise<void> {
+  //console.log('ID:', id, 'Category:', category);
   await axios.put(`api/Categories/Edit/${id}`, category);
 }
 
