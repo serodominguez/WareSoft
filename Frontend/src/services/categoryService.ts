@@ -42,8 +42,14 @@ export async function registerCategoryService(category: Category): Promise<void>
 }
 
 export async function editCategoryService(id: number, category: Category): Promise<void> {
-  //console.log('ID:', id, 'Category:', category);
   await axios.put(`api/Categories/Edit/${id}`, category);
+}
+
+export async function enableCategoryService(id: number): Promise<void> {
+  await axios.put(`api/Categories/Enable/${id}`);
+}
+export async function disableCategoryService(id: number): Promise<void> {
+  await axios.put(`api/Categories/Disable/${id}`);
 }
 
 export async function removeCategoryService(id: number): Promise<void> {

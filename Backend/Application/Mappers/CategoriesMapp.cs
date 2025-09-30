@@ -21,7 +21,7 @@ namespace Application.Mappers
                 PK_CATEGORY = entity.PK_CATEGORY,
                 CATEGORY_NAME = entity.CATEGORY_NAME,
                 DESCRIPTION = entity.DESCRIPTION,
-                AUDIT_CREATE_DATE = entity.AUDIT_CREATE_DATE,
+                AUDIT_CREATE_DATE = entity.AUDIT_CREATE_DATE.HasValue ? entity.AUDIT_CREATE_DATE.Value.ToString("dd/MM/yyyy HH:mm") : null,
                 STATE = entity.STATE,
                 STATE_CATEGORY = entity.STATE ? "ACTIVO" : "INACTIVO"
             };

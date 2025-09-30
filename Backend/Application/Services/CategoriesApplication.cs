@@ -144,6 +144,58 @@ namespace Application.Services
 
             return response;
         }
+        public async Task<BaseResponse<bool>> EnableCategory(int categoryId)
+        {
+            var response = new BaseResponse<bool>();
+            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
+
+            if (existingCategory is null)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
+            response.Data = await _unitOfWork.Categories.EnableCategory(categoryId);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_ACTIVATE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+
+            return response;
+        }
+        public async Task<BaseResponse<bool>> DisableCategory(int categoryId)
+        {
+            var response = new BaseResponse<bool>();
+            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
+
+            if (existingCategory is null)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                return response;
+            }
+            response.Data = await _unitOfWork.Categories.DisableCategory(categoryId);
+
+            if (response.Data)
+            {
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_INACTIVATE;
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+
+            return response;
+        }
 
         public async Task<BaseResponse<bool>> RemoveCategory(int categoryId)
         {

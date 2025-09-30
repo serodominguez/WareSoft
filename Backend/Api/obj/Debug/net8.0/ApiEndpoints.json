@@ -33,6 +33,22 @@
   },
   {
     "ContainingType": "Api.Controllers.CategoriesController",
+    "Method": "DisableCategory",
+    "RelativePath": "api/Categories/Disable/{categoryId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "categoryId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.CategoriesController",
     "Method": "EditCategory",
     "RelativePath": "api/Categories/Edit/{categoryId}",
     "HttpMethod": "PUT",
@@ -47,6 +63,22 @@
       {
         "Name": "requestDto",
         "Type": "Application.Dtos.Request.Categories.CategoriesRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.CategoriesController",
+    "Method": "EnableCategory",
+    "RelativePath": "api/Categories/Enable/{categoryId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "categoryId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],

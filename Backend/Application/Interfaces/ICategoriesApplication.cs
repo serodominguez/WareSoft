@@ -13,6 +13,8 @@ namespace Application.Interfaces
         Task<BaseResponse<CategoriesResponseDto>> CategoryById(int categoryId);
         Task<BaseResponse<bool>> RegisterCategory(CategoriesRequestDto requestDto);
         Task<BaseResponse<bool>> EditCategory(int categoryId, CategoriesRequestDto requestDto);
+        Task<BaseResponse<bool>> EnableCategory(int categoryId);
+        Task<BaseResponse<bool>> DisableCategory(int categoryId);
         Task<BaseResponse<bool>> RemoveCategory(int categoryId);
     }
 }

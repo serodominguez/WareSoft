@@ -52,6 +52,20 @@ namespace Api.Controllers
             return Ok(response);
         }
 
+        [HttpPut("Enable/{categoryId:int}")]
+        public async Task<IActionResult> EnableCategory(int categoryId)
+        {
+            var response = await _categoriesApplication.EnableCategory(categoryId);
+            return Ok(response);
+        }
+
+        [HttpPut("Disable/{categoryId:int}")]
+        public async Task<IActionResult> DisableCategory(int categoryId)
+        {
+            var response = await _categoriesApplication.DisableCategory(categoryId);
+            return Ok(response);
+        }
+
         [HttpPut("Remove/{categoryId:int}")]
         public async Task<IActionResult> RemoveCategory(int categoryId)
         {

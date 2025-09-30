@@ -28,11 +28,12 @@
               <v-btn v-if="(item as Category).statE_CATEGORY == 'ACTIVO'" color="indigo" icon="edit" variant="text"
                 @click="editCategory(item)" size="small"></v-btn>
               <template v-if="(item as Category).statE_CATEGORY == 'INACTIVO'">
-                <v-btn color="red" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
+                <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
               </template>
               <template v-if="(item as Category).statE_CATEGORY == 'ACTIVO'">
-                <v-btn color="red" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
+                <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
               </template>
+              <v-btn color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
             </td>
           </tr>
         </template>
@@ -81,7 +82,6 @@ export default defineComponent({
       search: null as string | null,
       form: false,
       modal: false,
-      statusModal: false,
       selectedCategory: null as Category | null,
       action: 0,
       selectedFilter: 'Nombre',
@@ -123,7 +123,7 @@ export default defineComponent({
     openModal(category: any, action: number) {
       this.selectedCategory = category;
       this.action = action;
-      this.statusModal = true;
+      this.modal = true;
     },
     openForm() {
       this.selectedCategory = {

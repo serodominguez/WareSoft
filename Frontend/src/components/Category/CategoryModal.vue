@@ -7,15 +7,15 @@
             <v-divider></v-divider>
             <v-card-text>
                 Estás a punto de
-                <span v-if="action === 0">Eliminar</span>
-                <span v-if="action === 1">Activar</span>
-                <span v-if="action === 2">Desactivar</span>
-                el ítem {{ localCategory.categorY_NAME }}.
+                <span v-if="action === 0">eliminar</span>
+                <span v-if="action === 1">activar</span>
+                <span v-if="action === 2">desactivar</span>
+                el ítem: {{ localCategory.categorY_NAME }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
                     <v-btn v-if="action === 0" color="blue" dark class="mr-2" elevation="4"
-                        @click="deleted">Eliminar</v-btn>
+                        @click="remove">Eliminar</v-btn>
                     <v-btn v-if="action === 1" color="blue" dark class="mr-2" elevation="4"
                         @click="enabled">Activar</v-btn>
                     <v-btn v-if="action === 2" color="blue" dark class="mr-2" elevation="4"
@@ -73,9 +73,9 @@ export default defineComponent({
             this.isOpen = false;
             this.$emit('update:modelValue', false);
         },
-        async deleted() {
+        async remove() {
             try {
-                await this.$store.dispatch('category/enabledCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/removeCategory', this.localCategory.pK_CATEGORY);
                 this.toast.success('Categoría eliminada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('category/enabledCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/enableCategory', this.localCategory.pK_CATEGORY);
                 this.toast.success('Categoría habilitada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('category/disabledCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/disableCategory', this.localCategory.pK_CATEGORY);
                 this.toast.success('Categoría deshabilitada con éxito!');
                 this.close();
             } catch (error: any) {

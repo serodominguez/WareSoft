@@ -5,6 +5,8 @@ import {
   fetchCategoryByIdService,
   registerCategoryService,
   editCategoryService,
+  enableCategoryService,
+  disableCategoryService,
   removeCategoryService,
 } from '@/services/categoryService';
 
@@ -112,6 +114,15 @@ const actions = {
 
   async editCategory({ dispatch }: any, { id, category }: { id: number; category: Category }) {
     await editCategoryService(id, category);
+    dispatch("fetchCategories", {});
+  },
+
+  async enableCategory({ dispatch }: any, id: number) {
+    await enableCategoryService(id);
+    dispatch("fetchCategories", {});
+  },
+  async disableCategory({ dispatch }: any, id: number) {
+    await disableCategoryService(id);
     dispatch("fetchCategories", {});
   },
 

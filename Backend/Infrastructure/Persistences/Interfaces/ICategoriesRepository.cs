@@ -11,6 +11,8 @@ namespace Infrastructure.Persistences.Interfaces
         Task<Categories> CategoryById(int categoryId);
         Task<bool> RegisterCategory(Categories categories);
         Task<bool> EditCategory(Categories categories);
+        Task<bool> EnableCategory(int categoryId);
+        Task<bool> DisableCategory(int categoryId);
         Task<bool> RemoveCategory(int categoryId);
     }
 }

@@ -94,6 +94,32 @@ namespace Infrastructure.Persistences.Repositories
             return recordsAffected > 0;
         }
 
+        public async Task<bool> EnableCategory(int categoryId)
+        {
+            var category = await _context.Categories.AsNoTracking().SingleOrDefaultAsync(x => x.PK_CATEGORY.Equals(categoryId));
+            
+            category!.AUDIT_UPDATE_USER = 1;
+            category.AUDIT_UPDATE_DATE = DateTime.Now;
+            category.STATE = true;
+            _context.Update(category);
+
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
+        }
+
+        public async Task<bool> DisableCategory(int categoryId)
+        {
+            var category = await _context.Categories.AsNoTracking().SingleOrDefaultAsync(x => x.PK_CATEGORY.Equals(categoryId));
+            
+            category!.AUDIT_UPDATE_USER = 1;
+            category.AUDIT_UPDATE_DATE = DateTime.Now;
+            category.STATE = false;
+            _context.Update(category);
+
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
+        }
+
         public async Task<bool> RemoveCategory(int categoryId)
         {
             var category = await _context.Categories.AsNoTracking().SingleOrDefaultAsync(x => x.PK_CATEGORY.Equals(categoryId));

@@ -15,6 +15,7 @@ namespace Utilities.Static
         public const string MESSAGE_DELETE = "Se eliminó correctamente.";
         public const string MESSAGE_EXISTS = "El registro ya existe.";
         public const string MESSAGE_ACTIVATE = "El registro a sido activado.";
+        public const string MESSAGE_INACTIVATE = "El registro a sido inactivado.";
         public const string MESSAGE_TOKEN = "Token generado correctamente.";
         public const string MESSAGE_VALIDATE = "Errores de validación.";
         public const string MESSAGE_FAILED = "Operación fallida.";
