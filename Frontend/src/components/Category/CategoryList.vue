@@ -58,16 +58,19 @@
     </v-navigation-drawer>
   </div>
   <CategoryForm v-model="form" :category="selectedCategory" @saved="fetchCategories" />
+  <CategoryModal v-model="modal" :category="selectedCategory" :action="action" @update:modelValue="modal = $event" />
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { Category } from '@/models/categoryModel';
 import CategoryForm from './CategoryForm.vue';
+import CategoryModal from './CategoryModal.vue';
 
 export default defineComponent({
   components: {
     CategoryForm,
+    CategoryModal
   },
   data() {
     return {
