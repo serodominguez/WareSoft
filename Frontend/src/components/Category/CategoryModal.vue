@@ -14,11 +14,11 @@
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
-                    <v-btn v-if="action === 0" color="blue" dark class="mr-2" elevation="4"
+                    <v-btn v-if="action === 0" color="indigo" dark class="mr-2" elevation="4"
                         @click="remove">Eliminar</v-btn>
-                    <v-btn v-if="action === 1" color="blue" dark class="mr-2" elevation="4"
+                    <v-btn v-if="action === 1" color="indigo" dark class="mr-2" elevation="4"
                         @click="enabled">Activar</v-btn>
-                    <v-btn v-if="action === 2" color="blue" dark class="mr-2" elevation="4"
+                    <v-btn v-if="action === 2" color="indigo" dark class="mr-2" elevation="4"
                         @click="disabled">Desactivar</v-btn>
                     <v-btn color="red" elevation="4" @click="close">Cancelar</v-btn>
                 </div>

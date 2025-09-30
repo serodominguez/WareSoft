@@ -10,7 +10,7 @@
           @keyup.enter="searchCategories()"></v-text-field>
       </v-col>
       <v-card-actions>
-        <v-btn @click="openForm" color="primary" size="large"> Nuevo </v-btn>
+        <v-btn @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
       </v-card-actions>
     </v-toolbar>
     <div style="display: flex; gap: 16px; margin-top: 16px;">
@@ -55,6 +55,12 @@
           <v-switch v-model="state" :label="`Estado: ${state}`" false-value="Inactivos" true-value="Activos"
             color="indigo" hide-details></v-switch>
         </v-list-item>
+        <v-list-item>
+          <v-date-input v-model="startDate" label="Desde:" prepend-icon="" variant="underlined" persistent-placeholder></v-date-input>
+        </v-list-item>
+        <v-list-item>
+          <v-date-input v-model="endDate" label="Hasta:" prepend-icon="" variant="underlined" persistent-placeholder></v-date-input>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
   </div>
@@ -88,6 +94,8 @@ export default defineComponent({
       filters: ['Nombre', 'Descripción'],
       drawer: false,
       state: 'Activos',
+      startDate: null,
+      endDate: null
     };
   },
   computed: {
@@ -118,7 +126,7 @@ export default defineComponent({
   },
   methods: {
     initialize() {
-
+      this.fetchCategories();
     },
     openModal(category: any, action: number) {
       this.selectedCategory = category;
@@ -151,12 +159,17 @@ export default defineComponent({
       }
 
       const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
+      const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
+      const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
+
       await this.store.dispatch("category/fetchCategories", {
         pageNumber: 1,
         pageSize: this.itemsPerPage,
         textFilter: textFilterValue,
         numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter
+        stateFilter: this.stateFilter,
+        startDate: startDateStr,
+        endDate: endDateStr
       });
       this.currentPage = 1;
     },
@@ -183,6 +196,16 @@ export default defineComponent({
       this.selectedCategory = { ...category };
       this.form = true;
     },
+    formatDate(date: Date | null): string | null {
+      if (!date) return null;
+
+      // Formato ISO: YYYY-MM-DD
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    }
   },
   mounted() {
     this.fetchCategories();

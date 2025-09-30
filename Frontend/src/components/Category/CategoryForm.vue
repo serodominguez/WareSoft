@@ -25,7 +25,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="blue" dark class="mb-2" elevation="4" @click="saveCategory" :disabled="!valid">Guardar</v-btn>
+          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveCategory" :disabled="!valid">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
       </v-col>
@@ -91,6 +91,7 @@ export default defineComponent({
   methods: {
     uppercase() {
       this.localCategory.categorY_NAME = this.localCategory.categorY_NAME.toUpperCase();
+      this.localCategory.description = this.localCategory.description.toUpperCase();
     },
     close() {
       this.isOpen = false;

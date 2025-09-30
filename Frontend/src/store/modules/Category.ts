@@ -46,7 +46,9 @@ const actions = {
       sort = "PK_CATEGORY", 
       textFilter = null, 
       numberFilter = null,
-      stateFilter = 1
+      stateFilter = 1,
+      startDate = null,
+      endDate = null
     } = {}
   ) {
     commit("SET_LOADING", true);
@@ -64,6 +66,14 @@ const actions = {
         requestBody.numberFilter = numberFilter;
       }
 
+      if (startDate) {
+        requestBody.startDate = startDate;
+      }
+    
+      if (endDate) {
+        requestBody.endDate = endDate;
+      }
+
       const data = await fetchCategoriesService(
         requestBody.numberPage,
         requestBody.numberRecordsPage,
@@ -71,7 +81,9 @@ const actions = {
         requestBody.sort,
         requestBody.textFilter,
         requestBody.numberFilter,
-        requestBody.stateFilter
+        requestBody.stateFilter,
+        requestBody.startDate,
+        requestBody.endDate
       );
 
       commit("SET_CATEGORIES", data.items);

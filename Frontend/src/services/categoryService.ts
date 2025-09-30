@@ -8,7 +8,9 @@ export async function fetchCategoriesService(
   sort = "PK_CATEGORY", 
   textFilter?: string | null, 
   numberFilter?: number | null,
-  stateFilter: number = 1
+  stateFilter: number = 1,
+  startDate?: string | null,
+  endDate?: string | null
 ): Promise<{ items: Category[]; totalRecords: number }> {
   const requestBody: any = {
     numberPage: pageNumber,
@@ -21,6 +23,14 @@ export async function fetchCategoriesService(
   if (textFilter && numberFilter) {
     requestBody.textFilter = textFilter;
     requestBody.numberFilter = numberFilter;
+  }
+
+  if (startDate) {
+    requestBody.startDate = startDate;
+  }
+
+  if (endDate) {
+    requestBody.endDate = endDate;
   }
   
   const response = await axios.post('api/Categories', requestBody);
