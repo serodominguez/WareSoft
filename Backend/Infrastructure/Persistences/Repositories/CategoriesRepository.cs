@@ -45,7 +45,7 @@ namespace Infrastructure.Persistences.Repositories
 
             if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
             {
-                categories = categories.Where(x => x.AUDIT_CREATE_DATE >= Convert.ToDateTime(filters.StartDate) && x.AUDIT_CREATE_DATE <= Convert.ToDateTime(filters.EndDate));
+                categories = categories.Where(x => x.AUDIT_CREATE_DATE >= Convert.ToDateTime(filters.StartDate) && x.AUDIT_CREATE_DATE <= Convert.ToDateTime(filters.EndDate).AddDays(1));
             }
 
             if (filters.Sort is null) filters.Sort = "PK_CATEGORY";

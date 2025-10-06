@@ -1,7 +1,7 @@
 {
-  "Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WarSoft\\Backend\\Api",
-  "Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WarSoft\\Backend\\Application",
-  "Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WarSoft\\Backend\\Domain",
-  "Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WarSoft\\Backend\\Infrastructure",
-  "Utilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WarSoft\\Backend\\Utilities"
+  "Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api",
+  "Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application",
+  "Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain",
+  "Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure",
+  "Utilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities"
 }

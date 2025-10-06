@@ -25,6 +25,7 @@ namespace Application.Extensions
                     });
             }
 
+            services.AddScoped<IBrandsApplication, BrandsApplication>();
             services.AddScoped<ICategoriesApplication, CategoriesApplication>();
 
             return services;

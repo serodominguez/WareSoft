@@ -14,6 +14,7 @@ namespace Application.Mappers
                 DESCRIPTION = dto.DESCRIPTION
             };
         }
+
         public static CategoriesResponseDto CategoriesResponseDtoMapping(Categories entity)
         {
             return new CategoriesResponseDto
@@ -26,6 +27,7 @@ namespace Application.Mappers
                 STATE_CATEGORY = entity.STATE ? "ACTIVO" : "INACTIVO"
             };
         }
+
         public static CategoriesSelectResponseDto CategoriesSelectResponseDtoMapping(Categories entity)
         {
             return new CategoriesSelectResponseDto

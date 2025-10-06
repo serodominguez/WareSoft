@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9EFFD90C-C7EF-4E1D-AB7F-A80AFB4CD68F}|Api\\Api.csproj|d:\\projects\\it solutions\\waresoft\\backend\\api\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9EFFD90C-C7EF-4E1D-AB7F-A80AFB4CD68F}|Api\\Api.csproj|solutionrelative:api\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F3E2C670-DE72-400A-9885-F36402DA96E3}|Application\\Application.csproj|d:\\projects\\it solutions\\waresoft\\backend\\application\\services\\brandsapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F3E2C670-DE72-400A-9885-F36402DA96E3}|Application\\Application.csproj|solutionrelative:application\\services\\brandsapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|d:\\projects\\it solutions\\waresoft\\backend\\infrastructure\\persistences\\repositories\\brandsrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\persistences\\repositories\\brandsrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CategoriesController.cs",
-              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Controllers\\CategoriesController.cs",
-              "RelativeDocumentMoniker": "Api\\Controllers\\CategoriesController.cs",
-              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Controllers\\CategoriesController.cs",
-              "RelativeToolTip": "Api\\Controllers\\CategoriesController.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAA4wD8AAAAIAAAAAAAAAA==",
+              "Title": "BrandsApplication.cs",
+              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Services\\BrandsApplication.cs",
+              "RelativeDocumentMoniker": "Application\\Services\\BrandsApplication.cs",
+              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Services\\BrandsApplication.cs",
+              "RelativeToolTip": "Application\\Services\\BrandsApplication.cs",
+              "ViewState": "AgIAAKoAAAAAAAAAAAAuwNQAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-30T19:10:53.873Z",
+              "WhenOpened": "2025-10-06T21:12:47.949Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BrandsRepository.cs",
+              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\BrandsRepository.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Persistences\\Repositories\\BrandsRepository.cs",
+              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\BrandsRepository.cs",
+              "RelativeToolTip": "Infrastructure\\Persistences\\Repositories\\BrandsRepository.cs",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAuwGsAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T21:07:46.905Z",
               "EditorCaption": ""
             }
           ]

@@ -39,6 +39,7 @@ export default defineComponent({
       drawer: false,
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/category' },
+        { icon: 'copyright', text: 'Marcas', route: '/brand' },
       ] as Array<{ icon: string; text: string; route: string }>,
     };
   },

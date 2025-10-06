@@ -7,11 +7,13 @@ namespace Infrastructure.Persistences.Repositories
     {
         private readonly DbContextSystem _context;
         public ICategoriesRepository Categories { get; private set; }
+        public IBrandsRepository Brands { get; private set; }
 
         public UnitOfWork(DbContextSystem context)
         {
             _context = context;
             Categories = new CategoriesRepository(_context);
+            Brands = new BrandsRepository(_context);
         }
 
         public void Dispose()
