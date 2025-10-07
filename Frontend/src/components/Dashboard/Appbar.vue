@@ -27,6 +27,17 @@
           <v-list-item-title v-text="link.text" style="font-size: 15px;"></v-list-item-title>
         </v-list-item>
       </v-list-group>
+      <v-list-group>
+        <template v-slot:activator="{ props }">
+          <v-list-item v-bind="props" title="Accesos"></v-list-item>
+        </template>
+        <v-list-item rounded="xl" class="ma-0 ml-n10" v-for="link in linkAccess" :key="link.text" :to="link.route">
+          <template v-slot:prepend>
+            <v-icon :icon="link.icon" style="font-size: 20px;"></v-icon>
+          </template>
+          <v-list-item-title v-text="link.text" style="font-size: 15px;"></v-list-item-title>
+        </v-list-item>
+      </v-list-group>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -40,6 +51,9 @@ export default defineComponent({
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/category' },
         { icon: 'copyright', text: 'Marcas', route: '/brand' },
+      ] as Array<{ icon: string; text: string; route: string }>,
+      linkAccess: [
+        { icon: 'manage_accounts', text: 'Roles', route: '/role' },
       ] as Array<{ icon: string; text: string; route: string }>,
     };
   },

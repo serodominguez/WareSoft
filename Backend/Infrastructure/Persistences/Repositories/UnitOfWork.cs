@@ -6,14 +6,16 @@ namespace Infrastructure.Persistences.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly DbContextSystem _context;
-        public ICategoriesRepository Categories { get; private set; }
         public IBrandsRepository Brands { get; private set; }
+        public ICategoriesRepository Categories { get; private set; }
+        public IRolesRepository Roles { get; private set; }
 
         public UnitOfWork(DbContextSystem context)
         {
             _context = context;
-            Categories = new CategoriesRepository(_context);
             Brands = new BrandsRepository(_context);
+            Categories = new CategoriesRepository(_context);
+            Roles = new RolesRepository(_context);
         }
 
         public void Dispose()

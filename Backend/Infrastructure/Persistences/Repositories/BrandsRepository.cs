@@ -42,7 +42,10 @@ namespace Infrastructure.Persistences.Repositories
 
             if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
             {
-                brands = brands.Where(x => x.AUDIT_CREATE_DATE >= Convert.ToDateTime(filters.StartDate) && x.AUDIT_CREATE_DATE <= Convert.ToDateTime(filters.EndDate).AddDays(1));
+                var startDate = Convert.ToDateTime(filters.StartDate).Date;
+                var endDate = Convert.ToDateTime(filters.EndDate).Date.AddDays(1);
+
+                brands = brands.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE <= endDate);
             }
 
             if (filters.Sort is null) filters.Sort = "PK_BRAND";
