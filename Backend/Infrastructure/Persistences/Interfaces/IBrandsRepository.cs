@@ -9,8 +9,8 @@ namespace Infrastructure.Persistences.Interfaces
         Task<BaseEntityResponse<Brands>> ListBrands(BaseFiltersRequest filters);
         Task<IEnumerable<Brands>> ListSelectBrands();
         Task<Brands> BrandById(int brandId);
-        Task<bool> RegisterBrand(Brands brands);
-        Task<bool> EditBrand(Brands brands);
+        Task<bool> RegisterBrand(Brands brand);
+        Task<bool> EditBrand(Brands brand);
         Task<bool> EnableBrand(int brandId);
         Task<bool> DisableBrand(int brandId);
         Task<bool> RemoveBrand(int brandId);

@@ -9,7 +9,7 @@ namespace Infrastructure.Persistences.Contexts.Configurations
         public void Configure(EntityTypeBuilder<Stores> builder)
         {
             builder.ToTable("Stores")
-                .HasKey(s => s.PK_SOTRE);
+                .HasKey(s => s.PK_STORE);
             builder.Property(s => s.STORE_NAME)
                 .HasMaxLength(50);
             builder.Property(s => s.MANAGER)

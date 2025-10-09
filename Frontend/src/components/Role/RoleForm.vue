@@ -28,7 +28,7 @@
   </v-dialog>
 </template>
 <script lang="ts">
-import { Store } from 'vuex';
+import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
 import { Role } from '@/models/roleModel';
@@ -39,7 +39,7 @@ interface FormRef {
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $store: Store<any>;
+    $store: VuexStore<any>;
   }
 }
 

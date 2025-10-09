@@ -9,8 +9,8 @@ namespace Infrastructure.Persistences.Interfaces
         Task<BaseEntityResponse<Roles>> ListRoles(BaseFiltersRequest filters);
         Task<IEnumerable<Roles>> ListSelectRoles();
         Task<Roles> RoleById(int roleId);
-        Task<bool> RegisterRole(Roles roles);
-        Task<bool> EditRole(Roles roles);
+        Task<bool> RegisterRole(Roles role);
+        Task<bool> EditRole(Roles role);
         Task<bool> EnableRole(int roleId);
         Task<bool> DisableRole(int roleId);
         Task<bool> RemoveRole(int roleId);

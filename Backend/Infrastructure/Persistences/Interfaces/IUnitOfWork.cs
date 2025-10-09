@@ -6,6 +6,7 @@
         IBrandsRepository Brands { get; }
         ICategoriesRepository Categories { get; }
         IRolesRepository Roles { get; }
+        IStoresRepository Stores { get; }   
         void SaveChanges();
         Task SaveChangesAsync();
     }

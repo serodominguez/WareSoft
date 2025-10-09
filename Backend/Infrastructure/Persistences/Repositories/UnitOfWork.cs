@@ -9,6 +9,7 @@ namespace Infrastructure.Persistences.Repositories
         public IBrandsRepository Brands { get; private set; }
         public ICategoriesRepository Categories { get; private set; }
         public IRolesRepository Roles { get; private set; }
+        public IStoresRepository Stores { get; private set; }
 
         public UnitOfWork(DbContextSystem context)
         {
@@ -16,6 +17,7 @@ namespace Infrastructure.Persistences.Repositories
             Brands = new BrandsRepository(_context);
             Categories = new CategoriesRepository(_context);
             Roles = new RolesRepository(_context);
+            Stores = new StoresRepository(_context);
         }
 
         public void Dispose()
