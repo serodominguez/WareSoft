@@ -11,30 +11,30 @@
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.storE_NAME"
-                  :rules="[rules.required]" counter="50" :maxlength="50" @keyup="uppercase" label="Nombre de la Tienda"
+                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" @keyup="uppercase" label="Tienda"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.manager"
-                  :rules="[rules.required]" counter="30" :maxlength="30" @keyup="uppercase" label="Encargado"
+                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" @keyup="uppercase" label="Encargado"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.address"
-                  :rules="[rules.required]" counter="50" :maxlength="60" @keyup="uppercase" label="Dirección"
+                  :rules="[rules.required]" counter="60" :maxlength="60" @keyup="uppercase" label="Dirección"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.phonE_NUMBER" counter="8"
-                  :maxlength="8" @keyup="uppercase" label="Teléfono" />
+                  :rules="[rules.onlyNumbers]" :maxlength="8" label="Teléfono" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.city" counter="15"
-                  :maxlength="15" @keyup="uppercase" label="Ciudad" />
+                  :rules="[rules.onlyLetters]" :maxlength="15" @keyup="uppercase" label="Ciudad" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.email" counter="50"
-                  :maxlength="50" label="Correo" />
+                  :rules="[rules.email]" :maxlength="50" label="Correo" />
               </v-col>
               <v-col cols="12" md="12" lg="12" xl="12">
                 <v-select color="primary" variant="underlined" v-model="localStore.type" :items="types" label="Tipo" />
@@ -97,6 +97,9 @@ export default defineComponent({
       types: ['SUCURSAL', 'ALMACÉN'],
       rules: {
         required: (value: string) => !!value || 'Este campo es requerido.',
+        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
+        onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
+        email: (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Formato de correo inválido.',
       },
     };
   },
@@ -143,7 +146,7 @@ export default defineComponent({
           this.close();
         } catch (error: any) {
           if (error.response) {
-            this.toast.error('Error en generar la Tienda.');
+            this.toast.error('Error en generar la tienda.');
           }
         }
       }

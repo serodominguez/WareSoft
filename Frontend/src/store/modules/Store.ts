@@ -52,6 +52,8 @@ const actions = {
     } = {}
   ) {
     commit("SET_LOADING", true);
+    commit("SET_STORES", []);
+    commit("SET_TOTAL_STORES", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,
@@ -97,6 +99,7 @@ const actions = {
 
   async selectStore({ commit }: any) {
     commit("SET_LOADING", true);
+    commit("SET_STORES", []);
     try {
       const stores = await selectStoreService();
       commit("SET_STORES", stores);

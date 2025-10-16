@@ -80,7 +80,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al eliminar la Tienda.');
+                    this.toast.error('Error al eliminar la tienda.');
                 }
             }
         },
@@ -91,7 +91,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al habilitar la Tienda.');
+                    this.toast.error('Error al habilitar la tienda.');
                 }
             }
         },
@@ -102,7 +102,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al deshabilitar la Tienda.');
+                    this.toast.error('Error al deshabilitar la tienda.');
                 }
             }
         },

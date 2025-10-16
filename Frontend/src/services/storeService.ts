@@ -39,7 +39,7 @@ export async function fetchStoresService(
 
 export async function selectStoreService(): Promise<Store[]> {
   const response = await axios.get("api/Stores/Select");
-  return response.data;
+  return response.data.data;
 }
 
 export async function fetchStoreByIdService(id: number): Promise<Store> {
@@ -48,7 +48,6 @@ export async function fetchStoreByIdService(id: number): Promise<Store> {
 }
 
 export async function registerStoreService(store: Store): Promise<void> {
-  console.log(store);
   await axios.post("api/Stores/Register", store);
 }
 

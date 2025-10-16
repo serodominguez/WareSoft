@@ -89,8 +89,8 @@ export default defineComponent({
       modal: false,
       selectedBrand: null as Brand | null,
       action: 0,
-      selectedFilter: 'Nombre',
-      filters: ['Nombre'],
+      selectedFilter: 'Marca',
+      filters: ['Marca'],
       drawer: false,
       state: 'Activos',
       startDate: null,
@@ -100,9 +100,9 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Marca', key: 'branD_NAME' },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE' },
-        { title: 'Estado', key: 'statE_BRAND' },
+        { title: 'Marca', key: 'branD_NAME', sortable: false },
+        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false },
+        { title: 'Estado', key: 'statE_BRAND', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -149,7 +149,7 @@ export default defineComponent({
     },
     async searchBrands() {
       let numberFilterValue: number | null = null;
-      if (this.selectedFilter === "Nombre") {
+      if (this.selectedFilter === "Marca") {
         numberFilterValue = 1;
       }
 

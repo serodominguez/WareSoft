@@ -92,8 +92,8 @@ export default defineComponent({
       modal: false,
       selectedStore: null as Store | null,
       action: 0,
-      selectedFilter: 'Nombre', 
-      filters: ['Nombre', 'Encargado', 'Dirección', 'Ciudad'],
+      selectedFilter: 'Tienda', 
+      filters: ['Tienda', 'Encargado', 'Dirección', 'Ciudad'],
       drawer: false,
       state: 'Activos',
       startDate: null,
@@ -103,12 +103,12 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Tienda', key: 'storE_NAME' },
-        { title: 'Encargado', key: 'manager' },
-        { title: 'Dirección', key: 'address' },
-        { title: 'Ciudad', key: 'city' },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE' },
-        { title: 'Estado', key: 'statE_STORE' },
+        { title: 'Tienda', key: 'storE_NAME', sortable: false },
+        { title: 'Encargado', key: 'manager', sortable: false },
+        { title: 'Dirección', key: 'address', sortable: false },
+        { title: 'Ciudad', key: 'city', sortable: false },
+        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false },
+        { title: 'Estado', key: 'statE_STORE', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -162,7 +162,7 @@ export default defineComponent({
     async searchStores() {
       let numberFilterValue: number | null = null;
       const filterMap: { [key: string]: number } = {
-        "Nombre": 1,
+        "Tienda": 1,
         "Encargado": 2,
         "Dirección": 3,
         "Ciudad": 4,

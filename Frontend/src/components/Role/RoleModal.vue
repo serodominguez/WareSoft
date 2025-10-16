@@ -80,7 +80,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al eliminar el Rol.');
+                    this.toast.error('Error al eliminar el rol.');
                 }
             }
         },
@@ -91,7 +91,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al habilitar el Rol.');
+                    this.toast.error('Error al habilitar el rol.');
                 }
             }
         },
@@ -102,7 +102,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al deshabilitar el Rol.');
+                    this.toast.error('Error al deshabilitar el rol.');
                 }
             }
         },

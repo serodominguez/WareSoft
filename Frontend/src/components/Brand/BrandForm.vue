@@ -107,7 +107,7 @@ export default defineComponent({
           this.close();
         } catch (error: any) {
           if (error.response) {
-            this.toast.error('Error en generar la Marca.');
+            this.toast.error('Error en generar la marca.');
           }
         }
       }

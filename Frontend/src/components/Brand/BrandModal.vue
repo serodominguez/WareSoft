@@ -80,7 +80,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al eliminar la Marca.');
+                    this.toast.error('Error al eliminar la marca.');
                 }
             }
         },
@@ -91,7 +91,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al habilitar la Marca.');
+                    this.toast.error('Error al habilitar la marca.');
                 }
             }
         },
@@ -102,7 +102,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al deshabilitar la Marca.');
+                    this.toast.error('Error al deshabilitar la marca.');
                 }
             }
         },

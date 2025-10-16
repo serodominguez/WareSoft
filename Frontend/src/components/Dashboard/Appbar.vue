@@ -65,6 +65,7 @@ export default defineComponent({
       ] as Array<{ icon: string; text: string; route: string }>,
       linkAccess: [
         { icon: 'manage_accounts', text: 'Roles', route: '/role' },
+        { icon: 'person', text: 'Usuarios', route: '/user' },
       ] as Array<{ icon: string; text: string; route: string }>,
       linkConfiguration: [
         { icon: 'store', text: 'Tiendas', route: '/store' },

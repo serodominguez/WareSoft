@@ -90,8 +90,8 @@ export default defineComponent({
       modal: false,
       selectedCategory: null as Category | null,
       action: 0,
-      selectedFilter: 'Nombre',
-      filters: ['Nombre', 'Descripción'],
+      selectedFilter: 'Categoría',
+      filters: ['Categoría', 'Descripción'],
       drawer: false,
       state: 'Activos',
       startDate: null,
@@ -101,10 +101,10 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Categoría', key: 'categorY_NAME' },
-        { title: 'Descripción', key: 'description' },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE' },
-        { title: 'Estado', key: 'statE_CATEGORY' },
+        { title: 'Categoría', key: 'categorY_NAME', sortable: false },
+        { title: 'Descripción', key: 'description', sortable: false },
+        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false },
+        { title: 'Estado', key: 'statE_CATEGORY', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -152,7 +152,7 @@ export default defineComponent({
     },
     async searchCategories() {
       let numberFilterValue: number | null = null;
-      if (this.selectedFilter === "Nombre") {
+      if (this.selectedFilter === "Categoría") {
         numberFilterValue = 1;
       } else if (this.selectedFilter === "Descripción") {
         numberFilterValue = 2;

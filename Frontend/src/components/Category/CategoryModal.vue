@@ -80,7 +80,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al eliminar la Categoría.');
+                    this.toast.error('Error al eliminar la categoría.');
                 }
             }
         },
@@ -91,7 +91,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al habilitar la Categoría.');
+                    this.toast.error('Error al habilitar la categoría.');
                 }
             }
         },
@@ -102,7 +102,7 @@ export default defineComponent({
                 this.close();
             } catch (error: any) {
                 if (error.response) {
-                    this.toast.error('Error al deshabilitar la Categoría.');
+                    this.toast.error('Error al deshabilitar la categoría.');
                 }
             }
         },

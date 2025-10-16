@@ -29,6 +29,7 @@ namespace Application.Extensions
             services.AddScoped<ICategoriesApplication, CategoriesApplication>();
             services.AddScoped<IRolesApplication, RolesApplication>();
             services.AddScoped<IStoresApplication, StoresApplication>();
+            services.AddScoped<IUsersApplication, UsersApplication>();
 
             return services;
         }

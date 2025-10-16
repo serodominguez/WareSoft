@@ -39,7 +39,7 @@ export async function fetchRolesService(
 
 export async function selectRoleService(): Promise<Role[]> {
   const response = await axios.get("api/Roles/Select");
-  return response.data;
+  return response.data.data;
 }
 
 export async function fetchRoleByIdService(id: number): Promise<Role> {

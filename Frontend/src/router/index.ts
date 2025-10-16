@@ -4,6 +4,7 @@ import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
+import UserView from '@/views/UserView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -34,10 +35,15 @@ const routes: Array<RouteRecordRaw> = [
     name: 'role',
     component: RoleView
   },
-    {
+  {
     path: '/store',
     name: 'store',
     component: StoreView
+  },
+  {
+    path: '/user',
+    name: 'user',
+    component: UserView
   },
 ]
 

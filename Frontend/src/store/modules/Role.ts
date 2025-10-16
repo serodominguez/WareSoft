@@ -52,6 +52,8 @@ const actions = {
     } = {}
   ) {
     commit("SET_LOADING", true);
+    commit("SET_ROLES", []);
+    commit("SET_TOTAL_ROLES", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,
@@ -97,6 +99,7 @@ const actions = {
 
   async selectRole({ commit }: any) {
     commit("SET_LOADING", true);
+    commit("SET_ROLES", []);
     try {
       const roles = await selectRoleService();
       commit("SET_ROLES", roles);

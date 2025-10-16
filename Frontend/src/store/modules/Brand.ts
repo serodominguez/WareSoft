@@ -37,8 +37,7 @@ const mutations = {
 };
 
 const actions = {
-  async fetchBrands(
-    { commit }: any,
+  async fetchBrands({ commit }: any,
     { 
       pageNumber = 1, 
       pageSize = 10, 
@@ -52,6 +51,8 @@ const actions = {
     } = {}
   ) {
     commit("SET_LOADING", true);
+    commit("SET_BRANDS", []);
+    commit("SET_TOTAL_BRANDS", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,
@@ -97,6 +98,7 @@ const actions = {
 
   async selectBrand({ commit }: any) {
     commit("SET_LOADING", true);
+    commit("SET_BRANDS", []);
     try {
       const brands = await selectBrandService();
       commit("SET_BRANDS", brands);

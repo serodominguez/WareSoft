@@ -89,8 +89,8 @@ export default defineComponent({
       modal: false,
       selectedRole: null as Role | null,
       action: 0,
-      selectedFilter: 'Nombre',
-      filters: ['Nombre'],
+      selectedFilter: 'Rol',
+      filters: ['Rol'],
       drawer: false,
       state: 'Activos',
       startDate: null,
@@ -100,9 +100,9 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Rol', key: 'rolE_NAME' },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE' },
-        { title: 'Estado', key: 'statE_ROLE' },
+        { title: 'Rol', key: 'rolE_NAME', sortable: false },
+        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false },
+        { title: 'Estado', key: 'statE_ROLE', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -149,7 +149,7 @@ export default defineComponent({
     },
     async searchRoles() {
       let numberFilterValue: number | null = null;
-      if (this.selectedFilter === "Nombre") {
+      if (this.selectedFilter === "Rol") {
         numberFilterValue = 1;
       }
 

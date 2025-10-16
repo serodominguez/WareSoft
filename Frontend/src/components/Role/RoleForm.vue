@@ -11,7 +11,7 @@
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localRole.rolE_NAME"
-                  :rules="[rules.required]" counter="25" :maxlength="25" @keyup="uppercase"
+                  :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25" @keyup="uppercase"
                   label="Nombre del Rol" required />
               </v-col>
             </v-row>
@@ -65,6 +65,7 @@ export default defineComponent({
       toast: useToast(),
       rules: {
         required: (value: string) => !!value || 'Este campo es requerido.',
+        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
       },
     };
   },
@@ -107,7 +108,7 @@ export default defineComponent({
           this.close();
         } catch (error: any) {
           if (error.response) {
-            this.toast.error('Error en generar el Rol.');
+            this.toast.error('Error en generar el rol.');
           }
         }
       }

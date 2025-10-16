@@ -6,7 +6,8 @@
         IBrandsRepository Brands { get; }
         ICategoriesRepository Categories { get; }
         IRolesRepository Roles { get; }
-        IStoresRepository Stores { get; }   
+        IStoresRepository Stores { get; } 
+        IUsersRepository Users { get; }
         void SaveChanges();
         Task SaveChangesAsync();
     }

@@ -52,6 +52,8 @@ const actions = {
     } = {}
   ) {
     commit("SET_LOADING", true);
+    commit("SET_CATEGORIES", []);
+    commit("SET_TOTAL_CATEGORIES", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,
@@ -97,6 +99,7 @@ const actions = {
 
   async selectCategory({ commit }: any) {
     commit("SET_LOADING", true);
+    commit("SET_CATEGORIES", []);
     try {
       const categories = await selectCategoryService();
       commit("SET_CATEGORIES", categories);
