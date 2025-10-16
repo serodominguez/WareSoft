@@ -10,22 +10,22 @@ namespace Infrastructure.Persistences.Repositories
     public class UsersRepository : GenericRepository<Users>, IUsersRepository
     {
         private readonly DbContextSystem _context;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UsersRepository(DbContextSystem context)
+        public UsersRepository(DbContextSystem context, IPasswordHasher passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<BaseEntityResponse<Users>> ListUsers(BaseFiltersRequest filters)
         {
             var response = new BaseEntityResponse<Users>();
-            var users = (from u in _context.Users
-                         where u.AUDIT_DELETE_USER == null && u.AUDIT_DELETE_DATE == null
-                         select u)
-                         .Include(u => u.Roles)
-                         .Include(u => u.Stores)
-                         .AsNoTracking()
-                         .AsQueryable();
+            var users = _context.Users
+                            .Where(u => u.AUDIT_DELETE_USER == null && u.AUDIT_DELETE_DATE == null)
+                            .Include(u => u.Roles)
+                            .Include(u => u.Stores)
+                            .AsNoTracking().AsQueryable();
 
             if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
             {
@@ -75,9 +75,25 @@ namespace Infrastructure.Persistences.Repositories
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PK_USER.Equals(userId));
             return user!;
         }
+
+        public async Task<Users?> AccountByUserName(string userName)
+        {
+            var account = await _context.Users
+                            .Where(u => u.AUDIT_DELETE_USER == null &&
+                                        u.AUDIT_DELETE_DATE == null &&
+                                        u.STATE == true &&
+                                        u.USER_NAME == userName)
+                            .Include(u => u.Roles)
+                            .Include(u => u.Stores)
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync();
+
+            return account;
+        }
+
         public async Task<bool> RegisterUser(Users user, string password)
         {
-            GeneratePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            _passwordHasher.GeneratePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
 
             user.PASSWORD_HASH = passwordHash;
             user.PASSWORD_SALT = passwordSalt;
@@ -90,6 +106,7 @@ namespace Infrastructure.Persistences.Repositories
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
+
         public async Task<bool> EditUser(Users user, bool updatePassword, string password)
         {
             user.AUDIT_UPDATE_USER = 1;
@@ -97,7 +114,7 @@ namespace Infrastructure.Persistences.Repositories
 
             if (updatePassword == true)
             {
-                GeneratePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+                _passwordHasher.GeneratePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
                 user.PASSWORD_HASH = passwordHash;
                 user.PASSWORD_SALT = passwordSalt;
                 _context.Update(user);
@@ -118,6 +135,7 @@ namespace Infrastructure.Persistences.Repositories
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
+
         public async Task<bool> EnableUser(int userId)
         {
             var user = await _context.Users.AsNoTracking().SingleOrDefaultAsync(x => x.PK_USER.Equals(userId));
@@ -156,15 +174,6 @@ namespace Infrastructure.Persistences.Repositories
 
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
-        }
-
-        private void GeneratePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
         }
     }
 }

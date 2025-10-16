@@ -8,6 +8,7 @@ namespace Infrastructure.Persistences.Interfaces
     {
         Task<BaseEntityResponse<Users>> ListUsers(BaseFiltersRequest filters);
         Task<Users> UserById(int userId);
+        Task<Users?> AccountByUserName(string userName);
         Task<bool> RegisterUser(Users user, string password);
         Task<bool> EditUser(Users user, bool updatePassword, string password);
         Task<bool> EnableUser(int userId);

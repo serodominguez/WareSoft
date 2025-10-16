@@ -604,6 +604,22 @@
   },
   {
     "ContainingType": "Api.Controllers.UsersController",
+    "Method": "GenerateToken",
+    "RelativePath": "api/Users/Generate/Token",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "Application.Dtos.Request.Users.TokenRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.UsersController",
     "Method": "RegisterUser",
     "RelativePath": "api/Users/Register",
     "HttpMethod": "POST",

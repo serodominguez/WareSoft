@@ -12,14 +12,20 @@ namespace Infrastructure.Persistences.Repositories
         public IStoresRepository Stores { get; private set; }
         public IUsersRepository Users { get; private set; }
 
-        public UnitOfWork(DbContextSystem context)
+        public UnitOfWork(
+            DbContextSystem context,
+            IBrandsRepository brands,
+            ICategoriesRepository categories,
+            IRolesRepository roles,
+            IStoresRepository stores,
+            IUsersRepository users)
         {
             _context = context;
-            Brands = new BrandsRepository(_context);
-            Categories = new CategoriesRepository(_context);
-            Roles = new RolesRepository(_context);
-            Stores = new StoresRepository(_context);
-            Users = new UsersRepository(_context);
+            Brands = brands;
+            Categories = categories;
+            Roles = roles;
+            Stores = stores;
+            Users = users;
         }
 
         public void Dispose()

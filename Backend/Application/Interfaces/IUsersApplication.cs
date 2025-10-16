@@ -10,6 +10,7 @@ namespace Application.Interfaces
     {
         Task<BaseResponse<BaseEntityResponse<UsersResponseDto>>> ListUsers(BaseFiltersRequest filters);
         Task<BaseResponse<UsersResponseDto>> UserById(int userId);
+        Task<BaseResponse<string>> GenerateToken(TokenRequestDto requestDto);
         Task<BaseResponse<bool>> RegisterUser(UsersRequestDto requestDto);
         Task<BaseResponse<bool>> EditUser(int userId, UsersRequestDto requestDto);
         Task<BaseResponse<bool>> EnableUser(int userId);

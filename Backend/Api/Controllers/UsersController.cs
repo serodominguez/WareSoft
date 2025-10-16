@@ -65,5 +65,12 @@ namespace Api.Controllers
             var response = await _usersApplication.RemoveUser(userId);
             return Ok(response);
         }
+
+        [HttpPost("Generate/Token")]
+        public async Task<IActionResult> GenerateToken([FromBody] TokenRequestDto requestDto)
+        {
+            var response = await _usersApplication.GenerateToken(requestDto);
+            return Ok(response);
+        }
     }
 }

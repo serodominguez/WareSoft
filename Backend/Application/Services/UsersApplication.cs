@@ -1,6 +1,5 @@
 ﻿using Application.Commons.Bases;
 using Application.Dtos.Request.Users;
-using Application.Dtos.Response.Stores;
 using Application.Dtos.Response.Users;
 using Application.Interfaces;
 using Application.Mappers;
@@ -15,11 +14,15 @@ namespace Application.Services
     public class UsersApplication : IUsersApplication
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly ITokenService _tokenService;
         private readonly IValidator<UsersRequestDto> _validator;
 
-        public UsersApplication(IUnitOfWork unitOfWork, IValidator<UsersRequestDto> validator)
+        public UsersApplication(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, ITokenService tokenService, IValidator<UsersRequestDto> validator)
         {
             _unitOfWork = unitOfWork;
+            _passwordHasher = passwordHasher;
+            _tokenService = tokenService;
             _validator = validator;
         }
 
@@ -47,6 +50,7 @@ namespace Application.Services
 
             return response;
         }
+
         public async Task<BaseResponse<UsersResponseDto>> UserById(int userId)
         {
             var response = new BaseResponse<UsersResponseDto>();
@@ -205,6 +209,34 @@ namespace Application.Services
             {
                 response.IsSuccess = false;
                 response.Message = ReplyMessage.MESSAGE_FAILED;
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<string>> GenerateToken(TokenRequestDto requestDto)
+        {
+            var response = new BaseResponse<string>();
+            var user = await _unitOfWork.Users.AccountByUserName(requestDto.UserName!);
+
+            if (user is not null)
+            {
+                if (!_passwordHasher.VerifyPasswordHash(requestDto.Password!, user.PASSWORD_HASH!, user.PASSWORD_SALT!))
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_INCORRECT_PASSWORD;
+                }
+                else
+                {
+                    response.IsSuccess = true;
+                    response.Data = _tokenService.GenerateToken(user);
+                    response.Message = ReplyMessage.MESSAGE_TOKEN;
+                }
+            }
+            else
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_INCORRECT_USER;
             }
 
             return response;
