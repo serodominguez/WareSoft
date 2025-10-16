@@ -53,7 +53,6 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_ROLES", []);
-    commit("SET_TOTAL_ROLES", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,

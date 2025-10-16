@@ -1,7 +1,5 @@
 <template>
-  <v-app>
-    <RoleList />
-  </v-app>
+  <RoleList />
 </template>
 
 <script lang="ts">

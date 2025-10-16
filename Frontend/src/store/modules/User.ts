@@ -52,7 +52,6 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_USERS", []);
-    commit("SET_TOTAL_USERS", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,

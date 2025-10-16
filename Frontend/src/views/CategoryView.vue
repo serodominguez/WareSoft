@@ -1,7 +1,5 @@
 <template>
-  <v-app>
-    <CategoryList />
-  </v-app>
+  <CategoryList />
 </template>
 
 <script lang="ts">

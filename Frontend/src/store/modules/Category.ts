@@ -53,7 +53,6 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_CATEGORIES", []);
-    commit("SET_TOTAL_CATEGORIES", 0);
     try {
       const requestBody: any = {
         numberPage: pageNumber,
