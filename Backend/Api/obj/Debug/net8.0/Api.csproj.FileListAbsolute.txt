@@ -318,3 +318,4 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.pdb
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.genruntimeconfig.cache
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\ref\Api.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.MvcApplicationPartsAssemblyInfo.cs
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

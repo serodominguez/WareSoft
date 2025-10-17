@@ -1,3 +1,4 @@
+using Api.Extensions;
 using Application.Extensions;
 using Infrastructure.Extensions;
 
@@ -10,11 +11,12 @@ var Cors = "Cors";
 
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
+builder.Services.AddAuthentication(Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger();
 
 builder.Services.AddCors(options =>
 {
@@ -39,6 +41,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

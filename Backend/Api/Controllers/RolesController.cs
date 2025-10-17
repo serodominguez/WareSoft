@@ -1,10 +1,12 @@
 ﻿using Application.Dtos.Request.Roles;
 using Application.Interfaces;
 using Infrastructure.Commons.Bases.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
 

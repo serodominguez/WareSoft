@@ -1,8 +1,13 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Api",
-    "version": "1.0"
+    "title": "Warehouse API",
+    "description": "Warehouse System",
+    "contact": {
+      "name": "IT SOLUTIONS",
+      "email": "sergio_sistemas@outlook.com"
+    },
+    "version": "v1"
   },
   "paths": {
     "/api/Brands": {
@@ -1258,6 +1263,18 @@
         },
         "additionalProperties": false
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT Bearer Token",
+        "scheme": "Bearer"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
 }
