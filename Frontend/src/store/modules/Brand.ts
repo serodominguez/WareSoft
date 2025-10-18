@@ -1,3 +1,5 @@
+import mainStore from "@/store";
+import { jwtDecode } from "jwt-decode";
 import { Brand, BrandState } from '@/models/brandModel';
 import {
   fetchBrandsService,
@@ -10,12 +12,33 @@ import {
   removeBrandService,
 } from '@/services/brandService';
 
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+};
+
+interface RootState {
+  token: string;
+  [key: string]: any;
+};
+
 const state: BrandState = {
   brands: [] as Brand[],
   selectedBrand: null as Brand | null,
   totalBrands: 0,
   loading: false,
   error: null as string | null,
+};
+
+const isExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  } catch {
+    return true;
+  }
 };
 
 const mutations = {
@@ -37,7 +60,7 @@ const mutations = {
 };
 
 const actions = {
-  async fetchBrands({ commit }: any,
+  async fetchBrands({ commit, rootState }: any,
     { 
       pageNumber = 1, 
       pageSize = 10, 
@@ -52,8 +75,13 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_BRANDS", []);
-    commit("SET_TOTAL_BRANDS", 0);
     try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
       const requestBody: any = {
         numberPage: pageNumber,
         numberRecordsPage: pageSize,
@@ -84,7 +112,8 @@ const actions = {
         requestBody.numberFilter,
         requestBody.stateFilter,
         requestBody.startDate,
-        requestBody.endDate
+        requestBody.endDate,
+        token
       );
 
       commit("SET_BRANDS", data.items);
@@ -96,11 +125,17 @@ const actions = {
     }
   },
 
-  async selectBrand({ commit }: any) {
+  async selectBrand({ commit, rootState }: any) {
     commit("SET_LOADING", true);
     commit("SET_BRANDS", []);
     try {
-      const brands = await selectBrandService();
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const brands = await selectBrandService( token);
       commit("SET_BRANDS", brands);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -109,10 +144,16 @@ const actions = {
     }
   },
 
-  async fetchBrandById({ commit }: any, id: number) {
+  async fetchBrandById({ commit, rootState }: any, id: number) {
     commit("SET_LOADING", true);
     try {
-      const brand = await fetchBrandByIdService(id);
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const brand = await fetchBrandByIdService(id, token);
       commit("SET_SELECTED_BRAND", brand);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -121,28 +162,77 @@ const actions = {
     }
   },
 
-  async registerBrand({ dispatch }: any, brand: Brand) {
-    await registerBrandService(brand);
-    dispatch("fetchBrands", {});
+  async registerBrand({ commit,dispatch, rootState }: any, brand: Brand) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await registerBrandService(brand, token);
+      dispatch("fetchBrands", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async editBrand({ dispatch }: any, { id, brand }: { id: number; brand: Brand }) {
-    await editBrandService(id, brand);
-    dispatch("fetchBrands", {});
+  async editBrand({ commit, dispatch, rootState }: any, { id, brand }: { id: number; brand: Brand }) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await editBrandService(id, brand, token);
+      dispatch("fetchBrands", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async enableBrand({ dispatch }: any, id: number) {
-    await enableBrandService(id);
-    dispatch("fetchBrands", {});
+  async enableBrand({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await enableBrandService(id, token);
+      dispatch("fetchBrands", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
-  async disableBrand({ dispatch }: any, id: number) {
-    await disableBrandService(id);
-    dispatch("fetchBrands", {});
+  async disableBrand({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await disableBrandService(id, token);
+      dispatch("fetchBrands", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async removeBrand({ dispatch }: any, id: number) {
-    await removeBrandService(id);
-    dispatch("fetchBrands", {});
+  async removeBrand({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+      await removeBrandService(id, token);
+      dispatch("fetchBrands", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 };
 

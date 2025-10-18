@@ -10,7 +10,8 @@ export async function fetchUsersService(
   numberFilter?: number | null,
   stateFilter: number = 1,
   startDate?: string | null,
-  endDate?: string | null
+  endDate?: string | null,
+  token?: string
 ): Promise<{ items: User[]; totalRecords: number }> {
   const requestBody: any = {
     numberPage: pageNumber,
@@ -32,31 +33,44 @@ export async function fetchUsersService(
   if (endDate) {
     requestBody.endDate = endDate;
   }
-  
-  const response = await axios.post('api/Users', requestBody);
+   
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.post('api/Users', requestBody, configuration);
   return response.data.data;
 }
 
-export async function fetchUserByIdService(id: number): Promise<User> {
-  const response = await axios.get(`api/Users/${id}`);
+export async function fetchUserByIdService(id: number, token: string): Promise<User> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.get(`api/Users/${id}`, configuration);
   return response.data;
 }
 
-export async function registerUserService(user: User): Promise<void> {
-  await axios.post("api/Users/Register", user);
+export async function registerUserService(user: User, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.post("api/Users/Register", user, configuration);
 }
 
-export async function editUserService(id: number, user: User): Promise<void> {
-  await axios.put(`api/Users/Edit/${id}`, user);
+export async function editUserService(id: number, user: User, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Users/Edit/${id}`, user, configuration);
 }
 
-export async function enableUserService(id: number): Promise<void> {
-  await axios.put(`api/Users/Enable/${id}`);
+export async function enableUserService(id: number, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Users/Enable/${id}`, {}, configuration);
 }
-export async function disableUserService(id: number): Promise<void> {
-  await axios.put(`api/Users/Disable/${id}`);
+export async function disableUserService(id: number, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Users/Disable/${id}`, {}, configuration);
 }
 
-export async function removeUserService(id: number): Promise<void> {
-  await axios.put(`api/Users/Remove/${id}`);
+export async function removeUserService(id: number, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Users/Remove/${id}`, {}, configuration);
 }

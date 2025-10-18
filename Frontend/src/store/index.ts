@@ -59,13 +59,13 @@ state: {
         } else {
           commit("SET_TOKEN", token);
           commit("SET_USER", jwtDecode<JwtPayload>(token));
-          router.push({ name: "dashboard" });
+          router.push({ name: "home" });
         }
       } else {
             router.push({ name: "login" });
       }
     },
-    logoff({ commit }) {
+    logout({ commit }) {
       commit("SET_TOKEN", null);
       commit("SET_USER", null);
       localStorage.removeItem("token");

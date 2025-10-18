@@ -1,3 +1,5 @@
+import mainStore from "@/store";
+import { jwtDecode } from "jwt-decode";
 import { Store, StoreState } from '@/models/storeModel';
 import {
   fetchStoresService,
@@ -10,12 +12,33 @@ import {
   removeStoreService,
 } from '@/services/storeService';
 
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+};
+
+interface RootState {
+  token: string;
+  [key: string]: any;
+};
+
 const state: StoreState = {
   stores: [] as Store[],
   selectedStore: null as Store | null,
   totalStores: 0,
   loading: false,
   error: null as string | null,
+};
+
+const isExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  } catch {
+    return true;
+  }
 };
 
 const mutations = {
@@ -38,28 +61,34 @@ const mutations = {
 
 const actions = {
   async fetchStores(
-    { commit }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "PK_STORE", 
-      textFilter = null, 
+    { commit, rootState }: any,
+    {
+      pageNumber = 1,
+      pageSize = 10,
+      order = "desc",
+      sort = "PK_STORE",
+      textFilter = null,
       numberFilter = null,
       stateFilter = 1,
       startDate = null,
-      endDate = null
+      endDate = null,
     } = {}
   ) {
     commit("SET_LOADING", true);
     commit("SET_STORES", []);
     try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
       const requestBody: any = {
         numberPage: pageNumber,
         numberRecordsPage: pageSize,
         order,
         sort,
-        stateFilter
+        stateFilter,
       };
 
       if (textFilter && numberFilter) {
@@ -70,7 +99,7 @@ const actions = {
       if (startDate) {
         requestBody.startDate = startDate;
       }
-    
+
       if (endDate) {
         requestBody.endDate = endDate;
       }
@@ -84,7 +113,8 @@ const actions = {
         requestBody.numberFilter,
         requestBody.stateFilter,
         requestBody.startDate,
-        requestBody.endDate
+        requestBody.endDate,
+        token
       );
 
       commit("SET_STORES", data.items);
@@ -96,11 +126,17 @@ const actions = {
     }
   },
 
-  async selectStore({ commit }: any) {
+  async selectStore({ commit, rootState }: any) {
     commit("SET_LOADING", true);
     commit("SET_STORES", []);
     try {
-      const stores = await selectStoreService();
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const stores = await selectStoreService(token);
       commit("SET_STORES", stores);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -109,11 +145,17 @@ const actions = {
     }
   },
 
-  async fetchStoreById({ commit }: any, id: number) {
+  async fetchStoreById({ commit, rootState }: any, id: number) {
     commit("SET_LOADING", true);
     try {
-      const store = await fetchStoreByIdService(id);
-      commit("SET_SELECTED_STORE", store);
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const storeData = await fetchStoreByIdService(id, token);
+      commit("SET_SELECTED_STORE", storeData);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -121,28 +163,77 @@ const actions = {
     }
   },
 
-  async registerStore({ dispatch }: any, store: Store) {
-    await registerStoreService(store);
-    dispatch("fetchStores", {});
+  async registerStore({ commit, dispatch, rootState }: any, store: Store) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await registerStoreService(store, token);
+      dispatch("fetchStores", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async editStore({ dispatch }: any, { id, store }: { id: number; store: Store }) {
-    await editStoreService(id, store);
-    dispatch("fetchStores", {});
+  async editStore({ commit, dispatch, rootState }: any, { id, store }: { id: number; store: Store }) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+      await editStoreService(id, store, token);
+      dispatch("fetchStores", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async enableStore({ dispatch }: any, id: number) {
-    await enableStoreService(id);
-    dispatch("fetchStores", {});
+  async enableStore({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await enableStoreService(id, token);
+      dispatch("fetchStores", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
-  async disableStore({ dispatch }: any, id: number) {
-    await disableStoreService(id);
-    dispatch("fetchStores", {});
+  async disableStore({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await disableStoreService(id, token);
+      dispatch("fetchStores", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async removeStore({ dispatch }: any, id: number) {
-    await removeStoreService(id);
-    dispatch("fetchStores", {});
+  async removeStore({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await removeStoreService(id, token);
+      dispatch("fetchStores", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 };
 

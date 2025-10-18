@@ -10,7 +10,8 @@ export async function fetchBrandsService(
   numberFilter?: number | null,
   stateFilter: number = 1,
   startDate?: string | null,
-  endDate?: string | null
+  endDate?: string | null,
+  token?: string
 ): Promise<{ items: Brand[]; totalRecords: number }> {
   const requestBody: any = {
     numberPage: pageNumber,
@@ -32,36 +33,51 @@ export async function fetchBrandsService(
   if (endDate) {
     requestBody.endDate = endDate;
   }
-  
-  const response = await axios.post('api/Brands', requestBody);
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.post('api/Brands', requestBody, configuration);
   return response.data.data;
 }
 
-export async function selectBrandService(): Promise<Brand[]> {
-  const response = await axios.get("api/Brands/Select");
+export async function selectBrandService(token: string): Promise<Brand[]> {
+  
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.get("api/Brands/Select", configuration);
   return response.data;
 }
 
-export async function fetchBrandByIdService(id: number): Promise<Brand> {
-  const response = await axios.get(`api/Brands/${id}`);
+export async function fetchBrandByIdService(id: number, token: string): Promise<Brand> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.get(`api/Brands/${id}`, configuration);
   return response.data;
 }
 
-export async function registerBrandService(brand: Brand): Promise<void> {
-  await axios.post("api/Brands/Register", brand);
+export async function registerBrandService(brand: Brand, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.post("api/Brands/Register", brand, configuration);
 }
 
-export async function editBrandService(id: number, brand: Brand): Promise<void> {
-  await axios.put(`api/Brands/Edit/${id}`, brand);
+export async function editBrandService(id: number, brand: Brand, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Brands/Edit/${id}`, brand, configuration);
 }
 
-export async function enableBrandService(id: number): Promise<void> {
-  await axios.put(`api/Brands/Enable/${id}`);
+export async function enableBrandService(id: number, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Brands/Enable/${id}`, {}, configuration);
 }
-export async function disableBrandService(id: number): Promise<void> {
-  await axios.put(`api/Brands/Disable/${id}`);
+export async function disableBrandService(id: number, token: string): Promise<void> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Brands/Disable/${id}`, {}, configuration);
 }
 
-export async function removeBrandService(id: number): Promise<void> {
-  await axios.put(`api/Brands/Remove/${id}`);
+export async function removeBrandService(id: number, token: string): Promise<void> {
+
+    const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  await axios.put(`api/Brands/Remove/${id}`, {}, configuration);
 }

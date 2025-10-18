@@ -1,3 +1,5 @@
+import mainStore from "@/store";
+import { jwtDecode } from "jwt-decode";
 import { Role, RoleState } from '@/models/roleModel';
 import {
   fetchRolesService,
@@ -10,12 +12,33 @@ import {
   removeRoleService,
 } from '@/services/roleService';
 
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+};
+
+interface RootState {
+  token: string;
+  [key: string]: any;
+};
+
 const state: RoleState = {
   roles: [] as Role[],
   selectedRole: null as Role | null,
   totalRoles: 0,
   loading: false,
   error: null as string | null,
+};
+
+const isExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  } catch {
+    return true;
+  }
 };
 
 const mutations = {
@@ -38,7 +61,7 @@ const mutations = {
 
 const actions = {
   async fetchRoles(
-    { commit }: any,
+    { commit, rootState }: any,
     { 
       pageNumber = 1, 
       pageSize = 10, 
@@ -54,6 +77,12 @@ const actions = {
     commit("SET_LOADING", true);
     commit("SET_ROLES", []);
     try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
       const requestBody: any = {
         numberPage: pageNumber,
         numberRecordsPage: pageSize,
@@ -84,7 +113,8 @@ const actions = {
         requestBody.numberFilter,
         requestBody.stateFilter,
         requestBody.startDate,
-        requestBody.endDate
+        requestBody.endDate,
+        token
       );
 
       commit("SET_ROLES", data.items);
@@ -96,11 +126,17 @@ const actions = {
     }
   },
 
-  async selectRole({ commit }: any) {
+  async selectRole({ commit, rootState }: any) {
     commit("SET_LOADING", true);
     commit("SET_ROLES", []);
     try {
-      const roles = await selectRoleService();
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const roles = await selectRoleService(token);
       commit("SET_ROLES", roles);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -109,10 +145,16 @@ const actions = {
     }
   },
 
-  async fetchRoleById({ commit }: any, id: number) {
+  async fetchRoleById({ commit, rootState }: any, id: number) {
     commit("SET_LOADING", true);
     try {
-      const role = await fetchRoleByIdService(id);
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const role = await fetchRoleByIdService(id, token);
       commit("SET_SELECTED_ROLE", role);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -121,28 +163,78 @@ const actions = {
     }
   },
 
-  async registerRole({ dispatch }: any, role: Role) {
-    await registerRoleService(role);
-    dispatch("fetchRoles", {});
+  async registerRole({ commit, dispatch, rootState }: any, role: Role) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await registerRoleService(role, token);
+      dispatch("fetchRoles", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async editRole({ dispatch }: any, { id, role }: { id: number; role: Role }) {
-    await editRoleService(id, role);
-    dispatch("fetchRoles", {});
+  async editRole({ commit, dispatch, rootState }: any, { id, role }: { id: number; role: Role }) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await editRoleService(id, role, token);
+      dispatch("fetchRoles", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async enableRole({ dispatch }: any, id: number) {
-    await enableRoleService(id);
-    dispatch("fetchRoles", {});
+  async enableRole({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await enableRoleService(id, token);
+      dispatch("fetchRoles", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
-  async disableRole({ dispatch }: any, id: number) {
-    await disableRoleService(id);
-    dispatch("fetchRoles", {});
+  async disableRole({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await disableRoleService(id, token);
+      dispatch("fetchRoles", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async removeRole({ dispatch }: any, id: number) {
-    await removeRoleService(id);
-    dispatch("fetchRoles", {});
+  async removeRole({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+      await removeRoleService(id, token);
+      dispatch("fetchRoles", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
+
   },
 };
 

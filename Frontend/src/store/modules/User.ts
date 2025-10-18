@@ -1,3 +1,5 @@
+import mainStore from "@/store";
+import { jwtDecode } from "jwt-decode";
 import { User, UserState } from '@/models/userModel';
 import {
   fetchUsersService,
@@ -9,12 +11,33 @@ import {
   removeUserService,
 } from '@/services/userService';
 
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+};
+
+interface RootState {
+  token: string;
+  [key: string]: any;
+};
+
 const state: UserState = {
   users: [] as User[],
   selectedUser: null as User | null,
   totalUsers: 0,
   loading: false,
   error: null as string | null,
+};
+
+const isExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  try {
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    const currentTime = Date.now() / 1000;
+    return decodedToken.exp < currentTime;
+  } catch {
+    return true;
+  }
 };
 
 const mutations = {
@@ -37,7 +60,7 @@ const mutations = {
 
 const actions = {
   async fetchUsers(
-    { commit }: any,
+    { commit, rootState }: any,
     { 
       pageNumber = 1, 
       pageSize = 10, 
@@ -53,6 +76,12 @@ const actions = {
     commit("SET_LOADING", true);
     commit("SET_USERS", []);
     try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
       const requestBody: any = {
         numberPage: pageNumber,
         numberRecordsPage: pageSize,
@@ -83,7 +112,8 @@ const actions = {
         requestBody.numberFilter,
         requestBody.stateFilter,
         requestBody.startDate,
-        requestBody.endDate
+        requestBody.endDate,
+        token
       );
 
       commit("SET_USERS", data.items);
@@ -95,10 +125,16 @@ const actions = {
     }
   },
 
-  async fetchUserById({ commit }: any, id: number) {
+  async fetchUserById({ commit, rootState }: any, id: number) {
     commit("SET_LOADING", true);
     try {
-      const user = await fetchUserByIdService(id);
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const user = await fetchUserByIdService(id, token);
       commit("SET_SELECTED_USER", user);
     } catch (error: any) {
       commit("SET_ERROR", error.message);
@@ -107,28 +143,78 @@ const actions = {
     }
   },
 
-  async registerUser({ dispatch }: any, user: User) {
-    await registerUserService(user);
-    dispatch("fetchUsers", {});
+  async registerUser({ commit, dispatch, rootState }: any, user: User) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await registerUserService(user, token);
+      dispatch("fetchUsers", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async editUser({ dispatch }: any, { id, user }: { id: number; user: User }) {
-    await editUserService(id, user);
-    dispatch("fetchUsers", {});
+  async editUser({ commit, dispatch, rootState }: any, { id, user }: { id: number; user: User }) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await editUserService(id, user, token);
+      dispatch("fetchUsers", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async enableUser({ dispatch }: any, id: number) {
-    await enableUserService(id);
-    dispatch("fetchUsers", {});
+  async enableUser({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await enableUserService(id, token);
+      dispatch("fetchUsers", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
-  async disableUser({ dispatch }: any, id: number) {
-    await disableUserService(id);
-    dispatch("fetchUsers", {});
+  async disableUser({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await disableUserService(id, token);
+      dispatch("fetchUsers", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 
-  async removeUser({ dispatch }: any, id: number) {
-    await removeUserService(id);
-    dispatch("fetchUsers", {});
+  async removeUser({ commit, dispatch, rootState }: any, id: number) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      await removeUserService(id, token);
+      dispatch("fetchUsers", {});
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    }
   },
 };
 
