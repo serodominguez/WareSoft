@@ -1,4 +1,6 @@
-﻿using Application.Interfaces;
+﻿using Application.Commons.Ordering;
+using Application.Interfaces;
+using Application.Security;
 using Application.Services;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,9 @@ namespace Application.Extensions
                         services.AddScoped(result.InterfaceType, result.ValidatorType);
                     });
             }
+
+            services.AddScoped<IOrderingQuery, OrderingQuery>();
+            services.AddScoped<ISecurity, SecurityApplication>();
 
             services.AddScoped<IBrandsApplication, BrandsApplication>();
             services.AddScoped<ICategoriesApplication, CategoriesApplication>();

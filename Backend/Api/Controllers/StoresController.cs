@@ -1,7 +1,6 @@
-﻿using Application.Dtos.Request.Stores;
+﻿using Application.Commons.Bases.Request;
+using Application.Dtos.Request.Stores;
 using Application.Interfaces;
-using Application.Services;
-using Infrastructure.Commons.Bases.Request;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

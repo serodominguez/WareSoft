@@ -1,18 +1,10 @@
 ﻿using Domain.Entities;
-using Infrastructure.Commons.Bases.Request;
-using Infrastructure.Commons.Bases.Response;
 
 namespace Infrastructure.Persistences.Interfaces
 {
-    public interface IUsersRepository
+    public interface IUsersRepository : IGenericRepository<Users>
     {
-        Task<BaseEntityResponse<Users>> ListUsers(BaseFiltersRequest filters);
-        Task<Users> UserById(int userId);
         Task<Users?> AccountByUserName(string userName);
-        Task<bool> RegisterUser(Users user, string password);
-        Task<bool> EditUser(Users user, bool updatePassword, string password);
-        Task<bool> EnableUser(int userId);
-        Task<bool> DisableUser(int userId);
-        Task<bool> RemoveUser(int userId);
+        Task<bool> EditUser(Users user, bool? updatePassword);
     }
 }

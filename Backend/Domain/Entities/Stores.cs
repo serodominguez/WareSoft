@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities
 {
-    public class Stores
+    public class Stores : BaseEntity
     {
         public int PK_STORE { get; set; }
         public string? STORE_NAME { get; set; }
@@ -10,13 +10,6 @@
         public string? CITY { get; set; }
         public string? EMAIL { get; set; }
         public string? TYPE { get; set; }
-        public int? AUDIT_CREATE_USER { get; set; }
-        public DateTime? AUDIT_CREATE_DATE { get; set; }
-        public int? AUDIT_UPDATE_USER { get; set; }
-        public DateTime? AUDIT_UPDATE_DATE { get; set; }
-        public int? AUDIT_DELETE_USER { get; set; }
-        public DateTime? AUDIT_DELETE_DATE { get; set; }
-        public bool STATE { get; set; }
         public virtual ICollection<Users> Users { get; set; } = new List<Users>();
         public virtual ICollection<Inventory> Inventory { get; set; } = new List<Inventory>();
         public virtual ICollection<GoodsIssue> GoodsIssue { get; set; } = new List<GoodsIssue>();

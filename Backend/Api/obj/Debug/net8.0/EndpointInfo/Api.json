@@ -1151,6 +1151,11 @@
       "CategoriesRequestDto": {
         "type": "object",
         "properties": {
+          "pK_CATEGORY": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "categorY_NAME": {
             "type": "string",
             "nullable": true

@@ -164,6 +164,7 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.GeneratedMSBu
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.AssemblyInfoInputs.cache
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.AssemblyInfo.cs
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.csproj.CoreCompileInputs.cache
+D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.MvcApplicationPartsAssemblyInfo.cs
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.MvcApplicationPartsAssemblyInfo.cache
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\appsettings.Development.json
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\appsettings.json
@@ -179,6 +180,7 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Storage.Blo
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Storage.Common.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\FluentValidation.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Humanizer.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
@@ -317,5 +319,3 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\refint\Api.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.pdb
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.genruntimeconfig.cache
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\ref\Api.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.MvcApplicationPartsAssemblyInfo.cs
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

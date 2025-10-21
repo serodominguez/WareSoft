@@ -1,12 +1,13 @@
-﻿using Application.Commons.Bases;
+﻿using Application.Commons.Bases.Request;
+using Application.Commons.Bases.Response;
+using Application.Commons.Ordering;
 using Application.Dtos.Request.Categories;
 using Application.Dtos.Response.Categories;
 using Application.Interfaces;
 using Application.Mappers;
 using FluentValidation;
-using Infrastructure.Commons.Bases.Request;
-using Infrastructure.Commons.Bases.Response;
 using Infrastructure.Persistences.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Utilities.Static;
 
 namespace Application.Services
@@ -15,33 +16,61 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<CategoriesRequestDto> _validator;
+        private readonly IOrderingQuery _orderingQuery;
 
-        public CategoriesApplication(IUnitOfWork unitOfWork, IValidator<CategoriesRequestDto> validator)
+        public CategoriesApplication(IUnitOfWork unitOfWork, IValidator<CategoriesRequestDto> validator, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
             _validator = validator;
+            _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<BaseEntityResponse<CategoriesResponseDto>>> ListCategories(BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<CategoriesResponseDto>>> ListCategories(BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<BaseEntityResponse<CategoriesResponseDto>>();
-            var categoriesEntity = await _unitOfWork.Categories.ListCategories(filters);
+            var response = new BaseResponse<IEnumerable<CategoriesResponseDto>>();
 
-            if (categoriesEntity is not null && categoriesEntity.Items?.Any() == true)
+            try
             {
-                var mappedItems = categoriesEntity.Items.Select(CategoriesMapp.CategoriesResponseDtoMapping).ToList();
-                response.Data = new BaseEntityResponse<CategoriesResponseDto>
+                var categories = _unitOfWork.Categories.GetAllQueryable();
+
+                if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
-                    TotalRecords = categoriesEntity.TotalRecords,
-                    Items = mappedItems
-                };
+                    switch (filters.NumberFilter)
+                    {
+                        case 1:
+                            categories = categories.Where(x => x.CATEGORY_NAME!.Contains(filters.TextFilter));
+                            break;
+                        case 2:
+                            categories = categories.Where(x => x.DESCRIPTION!.Contains(filters.TextFilter));
+                            break;
+                    }
+                }
+
+                if (filters.StateFilter is not null)
+                {
+                    var stateValue = Convert.ToBoolean(filters.StateFilter);
+                    categories = categories.Where(x => x.STATE == stateValue);
+                }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    var startDate = Convert.ToDateTime(filters.StartDate).Date;
+                    var endDate = Convert.ToDateTime(filters.EndDate).Date.AddDays(1);
+
+                    categories = categories.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
+                }
+
+                filters.Sort ??= "PK_CATEGORY";
+                var items = await _orderingQuery.Ordering(filters, categories, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
+                response.TotalRecords = await categories.CountAsync();
+                response.Data = items.Select(CategoriesMapp.CategoriesResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
-            else
-            {
+            catch (Exception ex) 
+            { 
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -50,18 +79,26 @@ namespace Application.Services
         public async Task<BaseResponse<IEnumerable<CategoriesSelectResponseDto>>> ListSelectCategories()
         {
             var response = new BaseResponse<IEnumerable<CategoriesSelectResponseDto>>();
-            var categories = await _unitOfWork.Categories.ListSelectCategories();
 
-            if (categories is not null && categories.Any())
+            try
             {
-                response.Data = categories.Select(CategoriesMapp.CategoriesSelectResponseDtoMapping);
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                var categories = await _unitOfWork.Categories.GetSelectAsync();
+                if (categories is not null && categories.Any())
+                {
+                    response.Data = categories.Select(CategoriesMapp.CategoriesSelectResponseDtoMapping);
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                }
             }
-            else
+            catch (Exception ex) 
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -70,18 +107,26 @@ namespace Application.Services
         public async Task<BaseResponse<CategoriesResponseDto>> CategoryById(int categoryId)
         {
             var response = new BaseResponse<CategoriesResponseDto>();
-            var category = await _unitOfWork.Categories.CategoryById(categoryId);
 
-            if (category is not null)
+            try
             {
-                response.Data = CategoriesMapp.CategoriesResponseDtoMapping(category);
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_QUERY;
+                var category = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (category is not null)
+                {
+                    response.Data = CategoriesMapp.CategoriesResponseDtoMapping(category);
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                }
             }
-            else
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -90,27 +135,34 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> RegisterCategory(CategoriesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
-            var validationResult = await _validator.ValidateAsync(requestDto);
+            try
+            {
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-            if (!validationResult.IsValid)
+                var category = CategoriesMapp.CategoriesMapping(requestDto);
+                response.Data = await _unitOfWork.Categories.RegisterAsync(category);
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_SAVE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_VALIDATE;
-                response.Errors = validationResult.Errors;
-                return response;
-            }
-            var category = CategoriesMapp.CategoriesMapping(requestDto);
-            response.Data = await _unitOfWork.Categories.RegisterCategory(category);
-
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_SAVE;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -119,53 +171,76 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> EditCategory(int categoryId, CategoriesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
-            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
+            try
+            {
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-            if (existingCategory is null)
+                var categories = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (categories is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                categories.CATEGORY_NAME = requestDto.CATEGORY_NAME; 
+                categories.DESCRIPTION = requestDto.DESCRIPTION;
+                response.Data = await _unitOfWork.Categories.EditAsync(categories);
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_UPDATE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                return response;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
-            var category = CategoriesMapp.CategoriesMapping(requestDto);
-            category.PK_CATEGORY = categoryId;
-            response.Data = await _unitOfWork.Categories.EditCategory(category);
-
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_UPDATE;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
-            }
-
             return response;
         }
+
         public async Task<BaseResponse<bool>> EnableCategory(int categoryId)
         {
             var response = new BaseResponse<bool>();
-            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
+            try
+            {
+                var existingCategory = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (existingCategory is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
 
-            if (existingCategory is null)
+                response.Data = await _unitOfWork.Categories.EnableAsync(categoryId);
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_ACTIVATE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                return response;
-            }
-            response.Data = await _unitOfWork.Categories.EnableCategory(categoryId);
-
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_ACTIVATE;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -173,25 +248,33 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> DisableCategory(int categoryId)
         {
             var response = new BaseResponse<bool>();
-            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
 
-            if (existingCategory is null)
+            try
+            {
+                var existingCategory = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (existingCategory is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                response.Data = await _unitOfWork.Categories.DisableAsync(categoryId);
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_INACTIVATE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                return response;
-            }
-            response.Data = await _unitOfWork.Categories.DisableCategory(categoryId);
-
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_INACTIVATE;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;
@@ -200,25 +283,33 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> RemoveCategory(int categoryId)
         {
             var response = new BaseResponse<bool>();
-            var existingCategory = await _unitOfWork.Categories.CategoryById(categoryId);
 
-            if (existingCategory is null)
+            try
+            {
+                var existingCategory = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (existingCategory is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    return response;
+                }
+
+                response.Data = await _unitOfWork.Categories.RemoveAsync(categoryId);
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_DELETE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
+            }
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
-                return response;
-            }
-            response.Data = await _unitOfWork.Categories.RemoveCategory(categoryId);
-
-            if (response.Data)
-            {
-                response.IsSuccess = true;
-                response.Message = ReplyMessage.MESSAGE_DELETE;
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
             }
 
             return response;

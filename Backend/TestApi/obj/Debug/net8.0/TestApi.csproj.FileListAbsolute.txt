@@ -559,10 +559,3 @@ D:\Projects\IT Solutions\WarSoft\Backend\TestApi\obj\Debug\net8.0\refint\TestApi
 D:\Projects\IT Solutions\WarSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.pdb
 D:\Projects\IT Solutions\WarSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.genruntimeconfig.cache
 D:\Projects\IT Solutions\WarSoft\Backend\TestApi\obj\Debug\net8.0\ref\TestApi.dll
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\bin\Debug\net8.0\.msCoverageSourceRootsMapping_TestApi
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.csproj.AssemblyReference.cache
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\MvcTestingAppManifest.json
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.GeneratedMSBuildEditorConfig.editorconfig
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.AssemblyInfoInputs.cache
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.AssemblyInfo.cs
-D:\Projects\IT Solutions\WareSoft\Backend\TestApi\obj\Debug\net8.0\TestApi.csproj.CoreCompileInputs.cache

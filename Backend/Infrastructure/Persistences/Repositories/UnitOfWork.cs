@@ -1,4 +1,5 @@
-﻿using Infrastructure.Persistences.Contexts;
+﻿using Domain.Entities;
+using Infrastructure.Persistences.Contexts;
 using Infrastructure.Persistences.Interfaces;
 
 namespace Infrastructure.Persistences.Repositories
@@ -6,27 +7,27 @@ namespace Infrastructure.Persistences.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly DbContextSystem _context;
-        public IBrandsRepository Brands { get; private set; }
-        public ICategoriesRepository Categories { get; private set; }
-        public IRolesRepository Roles { get; private set; }
-        public IStoresRepository Stores { get; private set; }
-        public IUsersRepository Users { get; private set; }
 
-        public UnitOfWork(
-            DbContextSystem context,
-            IBrandsRepository brands,
-            ICategoriesRepository categories,
-            IRolesRepository roles,
-            IStoresRepository stores,
-            IUsersRepository users)
+        public IGenericRepository<Brands> _brands = null!;
+
+        public IGenericRepository<Categories> _categories = null!;
+
+        public IGenericRepository<Roles> _roles = null!;
+
+        public IGenericRepository<Stores> _stores = null!;
+
+        public IUsersRepository _users = null!;
+
+        public UnitOfWork(DbContextSystem context)
         {
             _context = context;
-            Brands = brands;
-            Categories = categories;
-            Roles = roles;
-            Stores = stores;
-            Users = users;
         }
+
+        public IGenericRepository<Brands> Brands => _brands ?? new GenericRepository<Brands>(_context);
+        public IGenericRepository<Categories> Categories => _categories ?? new GenericRepository<Categories>(_context);
+        public IGenericRepository<Roles> Roles => _roles ?? new GenericRepository<Roles>(_context);
+        public IGenericRepository<Stores> Stores => _stores ?? new GenericRepository<Stores>(_context);
+        public IUsersRepository Users => _users ?? new UsersRepository(_context);
 
         public void Dispose()
         {

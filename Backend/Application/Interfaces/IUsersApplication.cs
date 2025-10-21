@@ -1,14 +1,13 @@
-﻿using Application.Commons.Bases;
+﻿using Application.Commons.Bases.Request;
+using Application.Commons.Bases.Response;
 using Application.Dtos.Request.Users;
 using Application.Dtos.Response.Users;
-using Infrastructure.Commons.Bases.Request;
-using Infrastructure.Commons.Bases.Response;
 
 namespace Application.Interfaces
 {
     public interface IUsersApplication
     {
-        Task<BaseResponse<BaseEntityResponse<UsersResponseDto>>> ListUsers(BaseFiltersRequest filters);
+        Task<BaseResponse<IEnumerable<UsersResponseDto>>> ListUsers(BaseFiltersRequest filters);
         Task<BaseResponse<UsersResponseDto>> UserById(int userId);
         Task<BaseResponse<string>> GenerateToken(TokenRequestDto requestDto);
         Task<BaseResponse<bool>> RegisterUser(UsersRequestDto requestDto);

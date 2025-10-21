@@ -15,7 +15,7 @@ namespace Application.Mappers
                 ADDRESS = dto.ADDRESS,
                 PHONE_NUMBER = dto.PHONE_NUMBER,
                 CITY = dto.CITY,
-                EMAIL = dto.EMAIL,
+                EMAIL = string.IsNullOrWhiteSpace(dto.EMAIL) ? null : dto.EMAIL,
                 TYPE = dto.TYPE
             };
         }

@@ -9,7 +9,7 @@
     "Parameters": [
       {
         "Name": "filters",
-        "Type": "Infrastructure.Commons.Bases.Request.BaseFiltersRequest",
+        "Type": "Application.Commons.Bases.Request.BaseFiltersRequest",
         "IsRequired": true
       }
     ],
@@ -141,7 +141,7 @@
     "Parameters": [
       {
         "Name": "filters",
-        "Type": "Infrastructure.Commons.Bases.Request.BaseFiltersRequest",
+        "Type": "Application.Commons.Bases.Request.BaseFiltersRequest",
         "IsRequired": true
       }
     ],
@@ -268,7 +268,7 @@
     "Parameters": [
       {
         "Name": "filters",
-        "Type": "Infrastructure.Commons.Bases.Request.BaseFiltersRequest",
+        "Type": "Application.Commons.Bases.Request.BaseFiltersRequest",
         "IsRequired": true
       }
     ],
@@ -400,7 +400,7 @@
     "Parameters": [
       {
         "Name": "filters",
-        "Type": "Infrastructure.Commons.Bases.Request.BaseFiltersRequest",
+        "Type": "Application.Commons.Bases.Request.BaseFiltersRequest",
         "IsRequired": true
       }
     ],
@@ -527,7 +527,7 @@
     "Parameters": [
       {
         "Name": "filters",
-        "Type": "Infrastructure.Commons.Bases.Request.BaseFiltersRequest",
+        "Type": "Application.Commons.Bases.Request.BaseFiltersRequest",
         "IsRequired": true
       }
     ],

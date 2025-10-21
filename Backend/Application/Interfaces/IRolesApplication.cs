@@ -1,14 +1,13 @@
-﻿using Application.Commons.Bases;
+﻿using Application.Commons.Bases.Request;
+using Application.Commons.Bases.Response;
 using Application.Dtos.Request.Roles;
 using Application.Dtos.Response.Roles;
-using Infrastructure.Commons.Bases.Request;
-using Infrastructure.Commons.Bases.Response;
 
 namespace Application.Interfaces
 {
     public interface IRolesApplication
     {
-        Task<BaseResponse<BaseEntityResponse<RolesResponseDto>>> ListRoles(BaseFiltersRequest filters);
+        Task<BaseResponse<IEnumerable<RolesResponseDto>>> ListRoles(BaseFiltersRequest filters);
         Task<BaseResponse<IEnumerable<RolesSelectResponseDto>>> ListSelectRoles();
         Task<BaseResponse<RolesResponseDto>> RoleById(int roleId);
         Task<BaseResponse<bool>> RegisterRole(RolesRequestDto requestDto);

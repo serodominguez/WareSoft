@@ -1,14 +1,13 @@
-﻿using Application.Commons.Bases;
+﻿using Application.Commons.Bases.Request;
+using Application.Commons.Bases.Response;
 using Application.Dtos.Request.Stores;
 using Application.Dtos.Response.Stores;
-using Infrastructure.Commons.Bases.Request;
-using Infrastructure.Commons.Bases.Response;
 
 namespace Application.Interfaces
 {
     public interface IStoresApplication
     {
-        Task<BaseResponse<BaseEntityResponse<StoresResponseDto>>> ListStores(BaseFiltersRequest filters);
+        Task<BaseResponse<IEnumerable<StoresResponseDto>>> ListStores(BaseFiltersRequest filters);
         Task<BaseResponse<IEnumerable<StoresSelectResponseDto>>> ListSelectStores();
         Task<BaseResponse<StoresResponseDto>> StoreById(int storeId);
         Task<BaseResponse<bool>> RegisterStore(StoresRequestDto requestDto);
