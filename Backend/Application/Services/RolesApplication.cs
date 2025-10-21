@@ -56,11 +56,11 @@ namespace Application.Services
 
                     roles = roles.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
                 }
+                response.TotalRecords = await roles.CountAsync();
 
                 filters.Sort ??= "PK_ROLE";
                 var items = await _orderingQuery.Ordering(filters, roles, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
-                response.TotalRecords = await roles.CountAsync();
                 response.Data = items.Select(RolesMapp.RolesResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
@@ -145,9 +145,9 @@ namespace Application.Services
                     response.Errors = validationResult.Errors;
                     return response;
                 }
+
                 var role = RolesMapp.RolesMapping(requestDto);
                 response.Data = await _unitOfWork.Roles.RegisterAsync(role);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -174,18 +174,26 @@ namespace Application.Services
 
             try
             {
-                var existingRole = await _unitOfWork.Roles.GetByIdAsync(roleId);
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-                if (existingRole is null)
+                var isValid = await _unitOfWork.Roles.GetByIdAsync(roleId);
+                if (isValid is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
+
                 var role = RolesMapp.RolesMapping(requestDto);
                 role.PK_ROLE = roleId;
                 response.Data = await _unitOfWork.Roles.EditAsync(role);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;

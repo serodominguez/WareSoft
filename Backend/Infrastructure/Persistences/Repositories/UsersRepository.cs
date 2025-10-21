@@ -14,6 +14,15 @@ namespace Infrastructure.Persistences.Repositories
             _context = context;
         }
 
+        public IQueryable<Users> ListUsers()
+        {
+            return _context.Users
+                .Where(u => u.AUDIT_DELETE_USER == null && u.AUDIT_DELETE_DATE == null)
+                .Include(u => u.Roles)
+                .Include(u => u.Stores)
+                .AsNoTracking();
+        }
+
         public async Task<Users?> AccountByUserName(string userName)
         {
             var account = await _context.Users

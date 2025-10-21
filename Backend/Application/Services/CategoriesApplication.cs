@@ -59,11 +59,11 @@ namespace Application.Services
 
                     categories = categories.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
                 }
+                response.TotalRecords = await categories.CountAsync();
 
                 filters.Sort ??= "PK_CATEGORY";
                 var items = await _orderingQuery.Ordering(filters, categories, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
-                response.TotalRecords = await categories.CountAsync();
                 response.Data = items.Select(CategoriesMapp.CategoriesResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
@@ -171,6 +171,7 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> EditCategory(int categoryId, CategoriesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
+
             try
             {
                 var validationResult = await _validator.ValidateAsync(requestDto);
@@ -182,17 +183,17 @@ namespace Application.Services
                     return response;
                 }
 
-                var categories = await _unitOfWork.Categories.GetByIdAsync(categoryId);
-                if (categories is null)
+                var isValid = await _unitOfWork.Categories.GetByIdAsync(categoryId);
+                if (isValid is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
 
-                categories.CATEGORY_NAME = requestDto.CATEGORY_NAME; 
-                categories.DESCRIPTION = requestDto.DESCRIPTION;
-                response.Data = await _unitOfWork.Categories.EditAsync(categories);
+                var category = CategoriesMapp.CategoriesMapping(requestDto);
+                category.PK_CATEGORY = categoryId;
+                response.Data = await _unitOfWork.Categories.EditAsync(category);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -215,6 +216,7 @@ namespace Application.Services
         public async Task<BaseResponse<bool>> EnableCategory(int categoryId)
         {
             var response = new BaseResponse<bool>();
+
             try
             {
                 var existingCategory = await _unitOfWork.Categories.GetByIdAsync(categoryId);

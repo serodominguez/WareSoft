@@ -27,9 +27,10 @@ namespace Application.Extensions
                     });
             }
 
-            services.AddScoped<IOrderingQuery, OrderingQuery>();
-            services.AddScoped<ISecurity, SecurityApplication>();
+            services.AddTransient<IOrderingQuery, OrderingQuery>();
+            services.AddTransient<ISecurity, SecurityApplication>();
 
+            services.AddScoped<IAuthorizationApplication, AuthorizationApplication>();
             services.AddScoped<IBrandsApplication, BrandsApplication>();
             services.AddScoped<ICategoriesApplication, CategoriesApplication>();
             services.AddScoped<IRolesApplication, RolesApplication>();

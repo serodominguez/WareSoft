@@ -32,7 +32,7 @@ namespace Application.Services
             var response = new BaseResponse<IEnumerable<UsersResponseDto>>();
             try
             {
-                var users = _unitOfWork.Users.GetAllQueryable();
+                var users = _unitOfWork.Users.ListUsers();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -66,13 +66,13 @@ namespace Application.Services
                 {
                     var startDate = Convert.ToDateTime(filters.StartDate).Date;
                     var endDate = Convert.ToDateTime(filters.EndDate).Date.AddDays(1);
-                    users = users.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE <= endDate);
+                    users = users.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
                 }
+                response.TotalRecords = await users.CountAsync();
 
-                if (filters.Sort is null) filters.Sort = "PK_USERS";
+                filters.Sort ??= "PK_USER";
                 var items = await _orderingQuery.Ordering(filters, users, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
-                response.TotalRecords = await users.CountAsync();
                 response.Data = items.Select(UsersMapp.UsersResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
@@ -121,7 +121,6 @@ namespace Application.Services
             try
             {
                 var validationResult = await _validator.ValidateAsync(requestDto);
-
                 if (!validationResult.IsValid)
                 {
                     response.IsSuccess = false;
@@ -134,7 +133,6 @@ namespace Application.Services
                 var user = UsersMapp.UsersMapping(requestDto);
                 user.PASSWORD_HASH = passwordHash;
                 user.PASSWORD_SALT = passwordSalt;
-
                 response.Data = await _unitOfWork.Users.RegisterAsync(user);
                 if (response.Data)
                 {
@@ -162,9 +160,17 @@ namespace Application.Services
 
             try
             {
-                var existingUser = await _unitOfWork.Users.GetByIdAsync(userId);
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-                if (existingUser is null)
+                var IsValid = await _unitOfWork.Users.GetByIdAsync(userId);
+                if (IsValid is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
@@ -172,6 +178,7 @@ namespace Application.Services
                 }
 
                 var user = UsersMapp.UsersMapping(requestDto);
+                user.PK_USER = userId;
                 if (requestDto.UPDATE_PASSWORD == true)
                 {
                     _security.GeneratePasswordHash(requestDto.PASSWORD!, out byte[] passwordHash, out byte[] passwordSalt);
@@ -180,7 +187,6 @@ namespace Application.Services
                 }
 
                 response.Data = await _unitOfWork.Users.EditUser(user, requestDto.UPDATE_PASSWORD);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -308,35 +314,5 @@ namespace Application.Services
 
             return response;
         }
-
-        public async Task<BaseResponse<string>> GenerateToken(TokenRequestDto requestDto)
-        {
-            var response = new BaseResponse<string>();
-            var user = await _unitOfWork.Users.AccountByUserName(requestDto.UserName!);
-
-            if (user is not null)
-            {
-                if (!_security.VerifyPasswordHash(requestDto.Password!, user.PASSWORD_HASH!, user.PASSWORD_SALT!))
-                {
-                    response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_INCORRECT_PASSWORD;
-                }
-                else
-                {
-                    response.IsSuccess = true;
-                    response.Data = _security.GenerateToken(user);
-                    response.Message = ReplyMessage.MESSAGE_TOKEN;
-                }
-            }
-            else
-            {
-                response.IsSuccess = false;
-                response.Message = ReplyMessage.MESSAGE_INCORRECT_USER;
-            }
-
-            return response;
-        }
-
-
     }
 }

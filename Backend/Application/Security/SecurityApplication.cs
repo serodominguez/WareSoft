@@ -17,6 +17,7 @@ namespace Application.Security
         {
             _configuration = configuration;
         }
+
         public void GeneratePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())

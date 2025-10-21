@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
 
@@ -18,7 +19,7 @@ namespace Api.Controllers
             _usersApplication = usersApplication;
         }
 
-        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> ListUsers([FromBody] BaseFiltersRequest filters)
         {
@@ -26,7 +27,6 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("{userId:int}")]
         public async Task<IActionResult> UserById(int userId)
         {
@@ -34,7 +34,6 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterUser([FromBody] UsersRequestDto requestDto)
         {
@@ -42,7 +41,6 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpPut("Edit/{userId:int}")]
         public async Task<IActionResult> EditUser(int userId, [FromBody] UsersRequestDto requestDto)
         {
@@ -50,7 +48,6 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpPut("Enable/{userId:int}")]
         public async Task<IActionResult> EnableUser(int userId)
         {
@@ -58,7 +55,6 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpPut("Disable/{userId:int}")]
         public async Task<IActionResult> DisableUser(int userId)
         {
@@ -66,18 +62,10 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpPut("Remove/{userId:int}")]
         public async Task<IActionResult> RemoveUser(int userId)
         {
             var response = await _usersApplication.RemoveUser(userId);
-            return Ok(response);
-        }
-
-        [HttpPost("Generate/Token")]
-        public async Task<IActionResult> GenerateToken([FromBody] TokenRequestDto requestDto)
-        {
-            var response = await _usersApplication.GenerateToken(requestDto);
             return Ok(response);
         }
     }

@@ -28,6 +28,7 @@ namespace Application.Services
         public async Task<BaseResponse<IEnumerable<BrandsResponseDto>>> ListBrands(BaseFiltersRequest filters)
         {
             var response = new BaseResponse<IEnumerable<BrandsResponseDto>>();
+
             try
             {
                 var brands = _unitOfWork.Brands.GetAllQueryable();
@@ -55,11 +56,11 @@ namespace Application.Services
 
                     brands = brands.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
                 }
+                response.TotalRecords = await brands.CountAsync();
 
                 filters.Sort ??= "PK_BRAND";
                 var items = await _orderingQuery.Ordering(filters, brands, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
-                response.TotalRecords = await brands.CountAsync();
                 response.Data = items.Select(BrandsMapp.BrandsResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
@@ -145,9 +146,9 @@ namespace Application.Services
                     response.Errors = validationResult.Errors;
                     return response;
                 }
+
                 var brand = BrandsMapp.BrandsMapping(requestDto);
                 response.Data = await _unitOfWork.Brands.RegisterAsync(brand);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -174,18 +175,26 @@ namespace Application.Services
 
             try
             {
-                var existingBrand = await _unitOfWork.Brands.GetByIdAsync(brandId);
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-                if (existingBrand is null)
+                var isValid = await _unitOfWork.Brands.GetByIdAsync(brandId);
+                if (isValid is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
+
                 var brand = BrandsMapp.BrandsMapping(requestDto);
                 brand.PK_BRAND = brandId;
                 response.Data = await _unitOfWork.Brands.EditAsync(brand);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;

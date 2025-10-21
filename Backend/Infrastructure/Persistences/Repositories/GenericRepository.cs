@@ -26,7 +26,7 @@ namespace Infrastructure.Persistences.Repositories
         public async Task<IEnumerable<T>> GetSelectAsync()
         {
             var getAll = await _entity
-                    .Where(x => x.STATE.Equals((int)StateTypes.ACTIVE) && x.AUDIT_DELETE_USER == null && x.AUDIT_DELETE_DATE == null).AsNoTracking().ToListAsync();
+                    .Where(x => Convert.ToInt32(x.STATE).Equals((int)StateTypes.ACTIVE) && x.AUDIT_DELETE_USER == null && x.AUDIT_DELETE_DATE == null).AsNoTracking().ToListAsync();
 
             return getAll;
         }
@@ -34,6 +34,11 @@ namespace Infrastructure.Persistences.Repositories
         public async Task<T> GetByIdAsync(int id)
         {
             var getById = await _entity.FindAsync(id);
+
+            if (getById != null)
+            {
+                _context.Entry(getById).State = EntityState.Detached;
+            }
 
             return getById!;
         }
@@ -57,9 +62,8 @@ namespace Infrastructure.Persistences.Repositories
 
             _context.Update(entity);
             _context.Entry(entity).Property(x => x.STATE).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_DELETE_USER).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_DELETE_DATE).IsModified = false;
-
+            _context.Entry(entity).Property(x => x.AUDIT_CREATE_USER).IsModified = false;
+            _context.Entry(entity).Property(x => x.AUDIT_CREATE_DATE).IsModified = false;
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
@@ -71,12 +75,9 @@ namespace Infrastructure.Persistences.Repositories
 
             entity!.AUDIT_UPDATE_USER = 1;
             entity.AUDIT_UPDATE_DATE = DateTime.Now;
+            entity.STATE = true;
 
             _context.Update(entity);
-            _context.Entry(entity).Property(x => x.STATE).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_CREATE_USER).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_CREATE_DATE).IsModified = false;
-
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
@@ -90,7 +91,6 @@ namespace Infrastructure.Persistences.Repositories
             entity.STATE = false;
 
             _context.Update(entity);
-
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
@@ -102,9 +102,7 @@ namespace Infrastructure.Persistences.Repositories
             entity!.AUDIT_DELETE_USER = 1;
             entity.AUDIT_DELETE_DATE = DateTime.Now;
             entity.STATE = false;
-
             _context.Update(entity);
-
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }

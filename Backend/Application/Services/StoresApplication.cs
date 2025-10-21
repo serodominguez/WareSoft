@@ -65,11 +65,11 @@ namespace Application.Services
 
                     stores = stores.Where(x => x.AUDIT_CREATE_DATE >= startDate && x.AUDIT_CREATE_DATE < endDate);
                 }
+                response.TotalRecords = await stores.CountAsync();
 
                 filters.Sort ??= "PK_STORE";
                 var items = await _orderingQuery.Ordering(filters, stores, !(bool)filters.Download!).ToListAsync();
                 response.IsSuccess = true;
-                response.TotalRecords = await stores.CountAsync();
                 response.Data = items.Select(StoresMapp.StoresResponseDtoMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
             }
@@ -156,9 +156,9 @@ namespace Application.Services
                     response.Errors = validationResult.Errors;
                     return response;
                 }
+
                 var store = StoresMapp.StoresMapping(requestDto);
                 response.Data = await _unitOfWork.Stores.RegisterAsync(store);
-
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -185,14 +185,23 @@ namespace Application.Services
 
             try
             {
-                var existingStore = await _unitOfWork.Stores.GetByIdAsync(storeId);
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
 
-                if (existingStore is null)
+                var isValid = await _unitOfWork.Stores.GetByIdAsync(storeId);
+                if (isValid is null)
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
+
                 var store = StoresMapp.StoresMapping(requestDto);
                 store.PK_STORE = storeId;
                 response.Data = await _unitOfWork.Stores.EditAsync(store);

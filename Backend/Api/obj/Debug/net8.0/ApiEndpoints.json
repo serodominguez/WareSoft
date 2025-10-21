@@ -1,5 +1,21 @@
 [
   {
+    "ContainingType": "Api.Controllers.AuthorizationController",
+    "Method": "GenerateToken",
+    "RelativePath": "api/Authorization/Generate/Token",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "Application.Dtos.Request.Users.TokenRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Api.Controllers.BrandsController",
     "Method": "ListBrands",
     "RelativePath": "api/Brands",
@@ -597,22 +613,6 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "Api.Controllers.UsersController",
-    "Method": "GenerateToken",
-    "RelativePath": "api/Users/Generate/Token",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "requestDto",
-        "Type": "Application.Dtos.Request.Users.TokenRequestDto",
         "IsRequired": true
       }
     ],
