@@ -1,15 +1,12 @@
-﻿using Application.Dtos.Request.Brands;
+﻿using Application.Commons.Bases.Request;
+using Application.Dtos.Request.Brands;
 using Application.Interfaces;
-using Application.Commons.Bases.Request;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
-    public class BrandsController : ControllerBase
+    public class BrandsController : BaseApiController
     {
         private readonly IBrandsApplication _brandsApplication;
 
@@ -25,6 +22,7 @@ namespace Api.Controllers
             return Ok(response);
         }
 
+        //[AllowAnonymous]
         [HttpGet("Select")]
         public async Task<IActionResult> ListSelectBrands()
         {
@@ -42,35 +40,35 @@ namespace Api.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterBrand([FromBody] BrandsRequestDto requestDto)
         {
-            var response = await _brandsApplication.RegisterBrand(requestDto);
+            var response = await _brandsApplication.RegisterBrand(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Edit/{brandId:int}")]
         public async Task<IActionResult> EditBrand(int brandId, [FromBody] BrandsRequestDto requestDto)
         {
-            var response = await _brandsApplication.EditBrand(brandId, requestDto);
+            var response = await _brandsApplication.EditBrand(AuthenticatedUserId, brandId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Enable/{brandId:int}")]
         public async Task<IActionResult> EnableBrand(int brandId)
         {
-            var response = await _brandsApplication.EnableBrand(brandId);
+            var response = await _brandsApplication.EnableBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
 
         [HttpPut("Disable/{brandId:int}")]
         public async Task<IActionResult> DisableBrand(int brandId)
         {
-            var response = await _brandsApplication.DisableBrand(brandId);
+            var response = await _brandsApplication.DisableBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
 
         [HttpPut("Remove/{brandId:int}")]
         public async Task<IActionResult> RemoveBrand(int brandId)
         {
-            var response = await _brandsApplication.RemoveBrand(brandId);
+            var response = await _brandsApplication.RemoveBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
     }

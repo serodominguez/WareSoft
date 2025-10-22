@@ -9,10 +9,10 @@ namespace Application.Interfaces
     {
         Task<BaseResponse<IEnumerable<UsersResponseDto>>> ListUsers(BaseFiltersRequest filters);
         Task<BaseResponse<UsersResponseDto>> UserById(int userId);
-        Task<BaseResponse<bool>> RegisterUser(UsersRequestDto requestDto);
-        Task<BaseResponse<bool>> EditUser(int userId, UsersRequestDto requestDto);
-        Task<BaseResponse<bool>> EnableUser(int userId);
-        Task<BaseResponse<bool>> DisableUser(int userId);
-        Task<BaseResponse<bool>> RemoveUser(int userId);
+        Task<BaseResponse<bool>> RegisterUser(int authenticatedUserId, UsersRequestDto requestDto);
+        Task<BaseResponse<bool>> EditUser(int authenticatedUserId, int userId, UsersRequestDto requestDto);
+        Task<BaseResponse<bool>> EnableUser(int authenticatedUserId, int userId);
+        Task<BaseResponse<bool>> DisableUser(int authenticatedUserId, int userId);
+        Task<BaseResponse<bool>> RemoveUser(int authenticatedUserId, int userId);
     }
 }

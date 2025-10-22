@@ -17,6 +17,7 @@ namespace Utilities.Static
         public const string MESSAGE_ACTIVATE = "El registro a sido activado.";
         public const string MESSAGE_INACTIVATE = "El registro a sido inactivado.";
         public const string MESSAGE_TOKEN = "Token generado correctamente.";
+        public const string MESSAGE_INVALID_TOKEN = "Token inválido.";
         public const string MESSAGE_VALIDATE = "Errores de validación.";
         public const string MESSAGE_FAILED = "Operación fallida.";
         public const string MESSAGE_EXCEPTION = "Hubo un error inesperado, comunicarse con el administrador.";

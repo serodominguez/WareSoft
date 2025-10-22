@@ -1,16 +1,12 @@
-﻿using Application.Dtos.Request.Roles;
+﻿using Application.Commons.Bases.Request;
+using Application.Dtos.Request.Roles;
 using Application.Interfaces;
-using Application.Commons.Bases.Request;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
-
-    public class RolesController : ControllerBase
+    public class RolesController : BaseApiController
     {
         private readonly IRolesApplication _rolesApplication;
 
@@ -43,35 +39,35 @@ namespace Api.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterRole([FromBody] RolesRequestDto requestDto)
         {
-            var response = await _rolesApplication.RegisterRole(requestDto);
+            var response = await _rolesApplication.RegisterRole(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Edit/{roleId:int}")]
         public async Task<IActionResult> EditRole(int roleId, [FromBody] RolesRequestDto requestDto)
         {
-            var response = await _rolesApplication.EditRole(roleId, requestDto);
+            var response = await _rolesApplication.EditRole(AuthenticatedUserId, roleId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Enable/{roleId:int}")]
         public async Task<IActionResult> EnableRole(int roleId)
         {
-            var response = await _rolesApplication.EnableRole(roleId);
+            var response = await _rolesApplication.EnableRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
 
         [HttpPut("Disable/{roleId:int}")]
         public async Task<IActionResult> DisableRole(int roleId)
         {
-            var response = await _rolesApplication.DisableRole(roleId);
+            var response = await _rolesApplication.DisableRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
 
         [HttpPut("Remove/{roleId:int}")]
         public async Task<IActionResult> RemoveRole(int roleId)
         {
-            var response = await _rolesApplication.RemoveRole(roleId);
+            var response = await _rolesApplication.RemoveRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
     }

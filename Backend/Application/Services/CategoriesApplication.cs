@@ -132,7 +132,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterCategory(CategoriesRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterCategory(int authenticatedUserId, CategoriesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
             try
@@ -147,7 +147,7 @@ namespace Application.Services
                 }
 
                 var category = CategoriesMapp.CategoriesMapping(requestDto);
-                response.Data = await _unitOfWork.Categories.RegisterAsync(category);
+                response.Data = await _unitOfWork.Categories.RegisterAsync(authenticatedUserId, category);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -168,7 +168,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditCategory(int categoryId, CategoriesRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditCategory(int authenticatedUserId, int categoryId, CategoriesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -193,7 +193,7 @@ namespace Application.Services
 
                 var category = CategoriesMapp.CategoriesMapping(requestDto);
                 category.PK_CATEGORY = categoryId;
-                response.Data = await _unitOfWork.Categories.EditAsync(category);
+                response.Data = await _unitOfWork.Categories.EditAsync(authenticatedUserId, category);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -213,7 +213,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EnableCategory(int categoryId)
+        public async Task<BaseResponse<bool>> EnableCategory(int authenticatedUserId, int categoryId)
         {
             var response = new BaseResponse<bool>();
 
@@ -227,7 +227,7 @@ namespace Application.Services
                     return response;
                 }
 
-                response.Data = await _unitOfWork.Categories.EnableAsync(categoryId);
+                response.Data = await _unitOfWork.Categories.EnableAsync(authenticatedUserId, categoryId);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -247,7 +247,7 @@ namespace Application.Services
 
             return response;
         }
-        public async Task<BaseResponse<bool>> DisableCategory(int categoryId)
+        public async Task<BaseResponse<bool>> DisableCategory(int authenticatedUserId, int categoryId)
         {
             var response = new BaseResponse<bool>();
 
@@ -261,7 +261,7 @@ namespace Application.Services
                     return response;
                 }
 
-                response.Data = await _unitOfWork.Categories.DisableAsync(categoryId);
+                response.Data = await _unitOfWork.Categories.DisableAsync(authenticatedUserId, categoryId);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -282,7 +282,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveCategory(int categoryId)
+        public async Task<BaseResponse<bool>> RemoveCategory(int authenticatedUserId, int categoryId)
         {
             var response = new BaseResponse<bool>();
 
@@ -296,7 +296,7 @@ namespace Application.Services
                     return response;
                 }
 
-                response.Data = await _unitOfWork.Categories.RemoveAsync(categoryId);
+                response.Data = await _unitOfWork.Categories.RemoveAsync(authenticatedUserId, categoryId);
                 if (response.Data)
                 {
                     response.IsSuccess = true;

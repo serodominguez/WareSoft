@@ -114,7 +114,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterUser(UsersRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterUser(int authenticatedUserId, UsersRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -133,7 +133,7 @@ namespace Application.Services
                 var user = UsersMapp.UsersMapping(requestDto);
                 user.PASSWORD_HASH = passwordHash;
                 user.PASSWORD_SALT = passwordSalt;
-                response.Data = await _unitOfWork.Users.RegisterAsync(user);
+                response.Data = await _unitOfWork.Users.RegisterAsync(authenticatedUserId, user);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -154,7 +154,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditUser(int userId, UsersRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditUser(int authenticatedUserId, int userId, UsersRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -186,7 +186,7 @@ namespace Application.Services
                     user.PASSWORD_SALT = passwordSalt;
                 }
 
-                response.Data = await _unitOfWork.Users.EditUser(user, requestDto.UPDATE_PASSWORD);
+                response.Data = await _unitOfWork.Users.EditUser(authenticatedUserId, user, requestDto.UPDATE_PASSWORD);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -207,7 +207,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EnableUser(int userId)
+        public async Task<BaseResponse<bool>> EnableUser(int authenticatedUserId, int userId)
         {
             var response = new BaseResponse<bool>();
 
@@ -221,7 +221,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Users.EnableAsync(userId);
+                response.Data = await _unitOfWork.Users.EnableAsync(authenticatedUserId, userId);
 
                 if (response.Data)
                 {
@@ -243,7 +243,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> DisableUser(int userId)
+        public async Task<BaseResponse<bool>> DisableUser(int authenticatedUserId, int userId)
         {
             var response = new BaseResponse<bool>();
 
@@ -257,7 +257,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Users.DisableAsync(userId);
+                response.Data = await _unitOfWork.Users.DisableAsync(authenticatedUserId, userId);
 
                 if (response.Data)
                 {
@@ -279,7 +279,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveUser(int userId)
+        public async Task<BaseResponse<bool>> RemoveUser(int authenticatedUserId, int userId)
         {
             var response = new BaseResponse<bool>();
 
@@ -293,7 +293,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Users.RemoveAsync(userId);
+                response.Data = await _unitOfWork.Users.RemoveAsync(authenticatedUserId, userId);
 
                 if (response.Data)
                 {

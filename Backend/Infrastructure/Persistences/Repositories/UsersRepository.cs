@@ -38,9 +38,9 @@ namespace Infrastructure.Persistences.Repositories
             return account;
         }
 
-        public async Task<bool> EditUser(Users user, bool? updatePassword)
+        public async Task<bool> EditUser(int authenticatedUserId, Users user, bool? updatePassword)
         {
-            user.AUDIT_UPDATE_USER = 1;
+            user.AUDIT_UPDATE_USER = authenticatedUserId;
             user.AUDIT_UPDATE_DATE = DateTime.Now;
 
             if (updatePassword == true)

@@ -131,7 +131,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterBrand(BrandsRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterBrand(int authenticatedUserId, BrandsRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -148,7 +148,7 @@ namespace Application.Services
                 }
 
                 var brand = BrandsMapp.BrandsMapping(requestDto);
-                response.Data = await _unitOfWork.Brands.RegisterAsync(brand);
+                response.Data = await _unitOfWork.Brands.RegisterAsync(authenticatedUserId, brand);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -169,7 +169,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditBrand(int brandId, BrandsRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditBrand(int authenticatedUserId, int brandId, BrandsRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -194,7 +194,7 @@ namespace Application.Services
 
                 var brand = BrandsMapp.BrandsMapping(requestDto);
                 brand.PK_BRAND = brandId;
-                response.Data = await _unitOfWork.Brands.EditAsync(brand);
+                response.Data = await _unitOfWork.Brands.EditAsync(authenticatedUserId, brand);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -215,7 +215,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EnableBrand(int brandId)
+        public async Task<BaseResponse<bool>> EnableBrand(int authenticatedUserId, int brandId)
         {
             var response = new BaseResponse<bool>();
 
@@ -229,7 +229,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Brands.EnableAsync(brandId);
+                response.Data = await _unitOfWork.Brands.EnableAsync(authenticatedUserId, brandId);
 
                 if (response.Data)
                 {
@@ -251,7 +251,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> DisableBrand(int brandId)
+        public async Task<BaseResponse<bool>> DisableBrand(int authenticatedUserId, int brandId)
         {
             var response = new BaseResponse<bool>();
 
@@ -265,7 +265,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Brands.DisableAsync(brandId);
+                response.Data = await _unitOfWork.Brands.DisableAsync(authenticatedUserId, brandId);
 
                 if (response.Data)
                 {
@@ -287,7 +287,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveBrand(int brandId)
+        public async Task<BaseResponse<bool>> RemoveBrand(int authenticatedUserId, int brandId)
         {
             var response = new BaseResponse<bool>();
 
@@ -301,7 +301,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Brands.RemoveAsync(brandId);
+                response.Data = await _unitOfWork.Brands.RemoveAsync(authenticatedUserId, brandId);
 
                 if (response.Data)
                 {

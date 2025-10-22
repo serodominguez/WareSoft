@@ -1,15 +1,12 @@
-﻿using Application.Dtos.Request.Categories;
+﻿using Application.Commons.Bases.Request;
+using Application.Dtos.Request.Categories;
 using Application.Interfaces;
-using Application.Commons.Bases.Request;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
-    public class CategoriesController : ControllerBase
+    public class CategoriesController : BaseApiController
     {
         private readonly ICategoriesApplication _categoriesApplication;
 
@@ -42,35 +39,40 @@ namespace Api.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterCategory([FromBody] CategoriesRequestDto requestDto)
         {
-            var response = await _categoriesApplication.RegisterCategory(requestDto);
+
+            var response = await _categoriesApplication.RegisterCategory(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Edit/{categoryId:int}")]
         public async Task<IActionResult> EditCategory(int categoryId, [FromBody] CategoriesRequestDto requestDto)
         {
-            var response = await _categoriesApplication.EditCategory(categoryId, requestDto);
+
+            var response = await _categoriesApplication.EditCategory(AuthenticatedUserId, categoryId, requestDto);
             return Ok(response);
         }
 
         [HttpPut("Enable/{categoryId:int}")]
         public async Task<IActionResult> EnableCategory(int categoryId)
         {
-            var response = await _categoriesApplication.EnableCategory(categoryId);
+
+            var response = await _categoriesApplication.EnableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 
         [HttpPut("Disable/{categoryId:int}")]
         public async Task<IActionResult> DisableCategory(int categoryId)
         {
-            var response = await _categoriesApplication.DisableCategory(categoryId);
+
+            var response = await _categoriesApplication.DisableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 
         [HttpPut("Remove/{categoryId:int}")]
         public async Task<IActionResult> RemoveCategory(int categoryId)
         {
-            var response = await _categoriesApplication.RemoveCategory(categoryId);
+
+            var response = await _categoriesApplication.RemoveCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 

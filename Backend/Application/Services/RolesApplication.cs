@@ -130,7 +130,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterRole(RolesRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterRole(int authenticatedUserId, RolesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -147,7 +147,7 @@ namespace Application.Services
                 }
 
                 var role = RolesMapp.RolesMapping(requestDto);
-                response.Data = await _unitOfWork.Roles.RegisterAsync(role);
+                response.Data = await _unitOfWork.Roles.RegisterAsync(authenticatedUserId, role);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -168,7 +168,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditRole(int roleId, RolesRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditRole(int authenticatedUserId, int roleId, RolesRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -193,7 +193,7 @@ namespace Application.Services
 
                 var role = RolesMapp.RolesMapping(requestDto);
                 role.PK_ROLE = roleId;
-                response.Data = await _unitOfWork.Roles.EditAsync(role);
+                response.Data = await _unitOfWork.Roles.EditAsync(authenticatedUserId, role);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -214,7 +214,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EnableRole(int roleId)
+        public async Task<BaseResponse<bool>> EnableRole(int authenticatedUserId, int roleId)
         {
             var response = new BaseResponse<bool>();
 
@@ -228,7 +228,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Roles.EnableAsync(roleId);
+                response.Data = await _unitOfWork.Roles.EnableAsync(authenticatedUserId, roleId);
 
                 if (response.Data)
                 {
@@ -250,7 +250,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> DisableRole(int roleId)
+        public async Task<BaseResponse<bool>> DisableRole(int authenticatedUserId, int roleId)
         {
             var response = new BaseResponse<bool>();
 
@@ -264,7 +264,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Roles.DisableAsync(roleId);
+                response.Data = await _unitOfWork.Roles.DisableAsync(authenticatedUserId, roleId);
 
                 if (response.Data)
                 {
@@ -286,7 +286,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveRole(int roleId)
+        public async Task<BaseResponse<bool>> RemoveRole(int authenticatedUserId, int roleId)
         {
             var response = new BaseResponse<bool>();
 
@@ -300,7 +300,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Roles.RemoveAsync(roleId);
+                response.Data = await _unitOfWork.Roles.RemoveAsync(authenticatedUserId, roleId);
 
                 if (response.Data)
                 {

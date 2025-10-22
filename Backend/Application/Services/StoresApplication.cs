@@ -141,7 +141,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RegisterStore(StoresRequestDto requestDto)
+        public async Task<BaseResponse<bool>> RegisterStore(int authenticatedUserId, StoresRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -158,7 +158,7 @@ namespace Application.Services
                 }
 
                 var store = StoresMapp.StoresMapping(requestDto);
-                response.Data = await _unitOfWork.Stores.RegisterAsync(store);
+                response.Data = await _unitOfWork.Stores.RegisterAsync(authenticatedUserId, store);
                 if (response.Data)
                 {
                     response.IsSuccess = true;
@@ -179,7 +179,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EditStore(int storeId, StoresRequestDto requestDto)
+        public async Task<BaseResponse<bool>> EditStore(int authenticatedUserId, int storeId, StoresRequestDto requestDto)
         {
             var response = new BaseResponse<bool>();
 
@@ -204,7 +204,7 @@ namespace Application.Services
 
                 var store = StoresMapp.StoresMapping(requestDto);
                 store.PK_STORE = storeId;
-                response.Data = await _unitOfWork.Stores.EditAsync(store);
+                response.Data = await _unitOfWork.Stores.EditAsync(authenticatedUserId, store);
 
                 if (response.Data)
                 {
@@ -226,7 +226,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> EnableStore(int storeId)
+        public async Task<BaseResponse<bool>> EnableStore(int authenticatedUserId, int storeId)
         {
             var response = new BaseResponse<bool>();
 
@@ -240,7 +240,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Stores.EnableAsync(storeId);
+                response.Data = await _unitOfWork.Stores.EnableAsync(authenticatedUserId, storeId);
 
                 if (response.Data)
                 {
@@ -262,7 +262,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> DisableStore(int storeId)
+        public async Task<BaseResponse<bool>> DisableStore(int authenticatedUserId, int storeId)
         {
             var response = new BaseResponse<bool>();
 
@@ -276,7 +276,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Stores.DisableAsync(storeId);
+                response.Data = await _unitOfWork.Stores.DisableAsync(authenticatedUserId, storeId);
 
                 if (response.Data)
                 {
@@ -298,7 +298,7 @@ namespace Application.Services
             return response;
         }
 
-        public async Task<BaseResponse<bool>> RemoveStore(int storeId)
+        public async Task<BaseResponse<bool>> RemoveStore(int authenticatedUserId, int storeId)
         {
             var response = new BaseResponse<bool>();
 
@@ -312,7 +312,7 @@ namespace Application.Services
                     response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
                     return response;
                 }
-                response.Data = await _unitOfWork.Stores.RemoveAsync(storeId);
+                response.Data = await _unitOfWork.Stores.RemoveAsync(authenticatedUserId, storeId);
 
                 if (response.Data)
                 {

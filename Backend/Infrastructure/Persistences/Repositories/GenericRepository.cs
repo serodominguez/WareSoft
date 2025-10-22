@@ -43,9 +43,9 @@ namespace Infrastructure.Persistences.Repositories
             return getById!;
         }
 
-        public async Task<bool> RegisterAsync(T entity)
+        public async Task<bool> RegisterAsync(int authenticatedUserId, T entity)
         {
-            entity.AUDIT_CREATE_USER = 1;
+            entity.AUDIT_CREATE_USER = authenticatedUserId;
             entity.AUDIT_CREATE_DATE = DateTime.Now;
             entity.STATE = true;
 
@@ -55,9 +55,9 @@ namespace Infrastructure.Persistences.Repositories
             return recordsAffected > 0;
         }
 
-        public async Task<bool> EditAsync(T entity)
+        public async Task<bool> EditAsync(int authenticatedUserId, T entity)
         {
-            entity.AUDIT_UPDATE_USER = 1;
+            entity.AUDIT_UPDATE_USER = authenticatedUserId;
             entity.AUDIT_UPDATE_DATE = DateTime.Now;
 
             _context.Update(entity);
@@ -68,12 +68,12 @@ namespace Infrastructure.Persistences.Repositories
             return recordsAffected > 0;
         }
 
-        public async Task<bool> EnableAsync(int id)
+        public async Task<bool> EnableAsync(int authenticatedUserId, int id)
         {
 
             T entity = await GetByIdAsync(id);
 
-            entity!.AUDIT_UPDATE_USER = 1;
+            entity!.AUDIT_UPDATE_USER = authenticatedUserId;
             entity.AUDIT_UPDATE_DATE = DateTime.Now;
             entity.STATE = true;
 
@@ -82,11 +82,11 @@ namespace Infrastructure.Persistences.Repositories
             return recordsAffected > 0;
         }
 
-        public async Task<bool> DisableAsync(int id)
+        public async Task<bool> DisableAsync(int authenticatedUserId, int id)
         {
             T entity = await GetByIdAsync(id);
 
-            entity!.AUDIT_UPDATE_USER = 1;
+            entity!.AUDIT_UPDATE_USER = authenticatedUserId;
             entity.AUDIT_UPDATE_DATE = DateTime.Now;
             entity.STATE = false;
 
@@ -95,11 +95,11 @@ namespace Infrastructure.Persistences.Repositories
             return recordsAffected > 0;
         }
 
-        public async Task<bool> RemoveAsync(int id)
+        public async Task<bool> RemoveAsync(int authenticatedUserId, int id)
         {
             T entity = await GetByIdAsync(id);
 
-            entity!.AUDIT_DELETE_USER = 1;
+            entity!.AUDIT_DELETE_USER = authenticatedUserId;
             entity.AUDIT_DELETE_DATE = DateTime.Now;
             entity.STATE = false;
             _context.Update(entity);

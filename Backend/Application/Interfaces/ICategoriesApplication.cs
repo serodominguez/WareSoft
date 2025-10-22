@@ -10,10 +10,10 @@ namespace Application.Interfaces
         Task<BaseResponse<IEnumerable<CategoriesResponseDto>>> ListCategories(BaseFiltersRequest filters);
         Task<BaseResponse<IEnumerable<CategoriesSelectResponseDto>>> ListSelectCategories();
         Task<BaseResponse<CategoriesResponseDto>> CategoryById(int categoryId);
-        Task<BaseResponse<bool>> RegisterCategory(CategoriesRequestDto requestDto);
-        Task<BaseResponse<bool>> EditCategory(int categoryId, CategoriesRequestDto requestDto);
-        Task<BaseResponse<bool>> EnableCategory(int categoryId);
-        Task<BaseResponse<bool>> DisableCategory(int categoryId);
-        Task<BaseResponse<bool>> RemoveCategory(int categoryId);
+        Task<BaseResponse<bool>> RegisterCategory(int authenticatedUserId, CategoriesRequestDto requestDto);
+        Task<BaseResponse<bool>> EditCategory(int authenticatedUserId, int categoryId, CategoriesRequestDto requestDto);
+        Task<BaseResponse<bool>> EnableCategory(int authenticatedUserId,int categoryId);
+        Task<BaseResponse<bool>> DisableCategory(int authenticatedUserId, int categoryId);
+        Task<BaseResponse<bool>> RemoveCategory(int authenticatedUserId, int categoryId);
     }
 }

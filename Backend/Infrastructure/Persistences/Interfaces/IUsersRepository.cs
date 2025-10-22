@@ -6,6 +6,6 @@ namespace Infrastructure.Persistences.Interfaces
     {
         IQueryable<Users> ListUsers();
         Task<Users?> AccountByUserName(string userName);
-        Task<bool> EditUser(Users user, bool? updatePassword);
+        Task<bool> EditUser(int authenticatedUserId, Users user, bool? updatePassword);
     }
 }
