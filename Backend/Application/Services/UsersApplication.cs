@@ -5,6 +5,7 @@ using Application.Dtos.Request.Users;
 using Application.Dtos.Response.Users;
 using Application.Interfaces;
 using Application.Mappers;
+using Application.Security;
 using FluentValidation;
 using Infrastructure.Persistences.Interfaces;
 using Microsoft.EntityFrameworkCore;

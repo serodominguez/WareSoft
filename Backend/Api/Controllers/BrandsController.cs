@@ -2,6 +2,7 @@
 using Application.Dtos.Request.Brands;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
 
 namespace Api.Controllers
 {
@@ -9,16 +10,26 @@ namespace Api.Controllers
     public class BrandsController : BaseApiController
     {
         private readonly IBrandsApplication _brandsApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public BrandsController(IBrandsApplication brandsApplication)
+        public BrandsController(IBrandsApplication brandsApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _brandsApplication = brandsApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ListBrands([FromBody] BaseFiltersRequest filters)
+        [HttpGet]
+        public async Task<IActionResult> ListBrands([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _brandsApplication.ListBrands(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsBrands();
+                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 

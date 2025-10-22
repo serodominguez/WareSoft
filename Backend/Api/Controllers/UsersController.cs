@@ -2,6 +2,7 @@
 using Application.Dtos.Request.Users;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
 
 namespace Api.Controllers
 {
@@ -9,17 +10,27 @@ namespace Api.Controllers
     public class UsersController : BaseApiController
     {
         private readonly IUsersApplication _usersApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public UsersController(IUsersApplication usersApplication)
+        public UsersController(IUsersApplication usersApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _usersApplication = usersApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> ListUsers([FromBody] BaseFiltersRequest filters)
+        [HttpGet]
+        public async Task<IActionResult> ListUsers([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _usersApplication.ListUsers(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsUsers();
+                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 

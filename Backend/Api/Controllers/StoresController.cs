@@ -2,6 +2,7 @@
 using Application.Dtos.Request.Stores;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
 
 namespace Api.Controllers
 {
@@ -9,16 +10,26 @@ namespace Api.Controllers
     public class StoresController : BaseApiController
     {
         private readonly IStoresApplication _storesApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public StoresController(IStoresApplication storesApplication)
+        public StoresController(IStoresApplication storesApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _storesApplication = storesApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ListStores([FromBody] BaseFiltersRequest filters)
+        [HttpGet]
+        public async Task<IActionResult> ListStores([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _storesApplication.ListStores(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsStores();
+                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 

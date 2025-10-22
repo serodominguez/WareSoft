@@ -31,7 +31,7 @@ namespace TestApi.Category
             var expected = ReplyMessage.MESSAGE_VALIDATE;
 
             //Act
-            var resutl = await context!.RegisterCategory(new CategoriesRequestDto()
+            var resutl = await context!.RegisterCategory(1, new CategoriesRequestDto()
             {
                 CATEGORY_NAME = name,
                 DESCRIPTION = description
@@ -54,7 +54,7 @@ namespace TestApi.Category
             var expected = ReplyMessage.MESSAGE_SAVE;
 
             //Act
-            var resutl = await context!.RegisterCategory(new CategoriesRequestDto()
+            var resutl = await context!.RegisterCategory(1, new CategoriesRequestDto()
             {
                 CATEGORY_NAME = name,
                 DESCRIPTION = description

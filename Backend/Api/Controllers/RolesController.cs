@@ -2,6 +2,7 @@
 using Application.Dtos.Request.Roles;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
 
 namespace Api.Controllers
 {
@@ -9,16 +10,26 @@ namespace Api.Controllers
     public class RolesController : BaseApiController
     {
         private readonly IRolesApplication _rolesApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public RolesController(IRolesApplication rolesApplication)
+        public RolesController(IRolesApplication rolesApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _rolesApplication = rolesApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ListRoles([FromBody] BaseFiltersRequest filters)
+        [HttpGet]
+        public async Task<IActionResult> ListRoles([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _rolesApplication.ListRoles(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsRoles();
+                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 

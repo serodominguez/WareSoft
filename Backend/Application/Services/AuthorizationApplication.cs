@@ -1,6 +1,7 @@
 ﻿using Application.Commons.Bases.Response;
 using Application.Dtos.Request.Users;
 using Application.Interfaces;
+using Application.Security;
 using Infrastructure.Persistences.Interfaces;
 using Utilities.Static;
 

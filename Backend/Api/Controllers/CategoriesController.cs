@@ -2,6 +2,7 @@
 using Application.Dtos.Request.Categories;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
 
 namespace Api.Controllers
 {
@@ -9,16 +10,26 @@ namespace Api.Controllers
     public class CategoriesController : BaseApiController
     {
         private readonly ICategoriesApplication _categoriesApplication;
+        private readonly IGenerateExcelApplication _generateExcelApplication;
 
-        public CategoriesController(ICategoriesApplication categoriesApplication)
+        public CategoriesController(ICategoriesApplication categoriesApplication, IGenerateExcelApplication generateExcelApplication)
         {
             _categoriesApplication = categoriesApplication;
+            _generateExcelApplication = generateExcelApplication;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ListCategories([FromBody] BaseFiltersRequest filters)
+        [HttpGet]
+        public async Task<IActionResult> ListCategories([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _categoriesApplication.ListCategories(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsCategories();
+                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
             return Ok(response);
         }
 

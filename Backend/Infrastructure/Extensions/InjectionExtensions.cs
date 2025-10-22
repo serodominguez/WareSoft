@@ -1,4 +1,5 @@
-﻿using Infrastructure.Persistences.Contexts;
+﻿using Infrastructure.FileExcel;
+using Infrastructure.Persistences.Contexts;
 using Infrastructure.Persistences.Interfaces;
 using Infrastructure.Persistences.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -17,9 +18,11 @@ namespace Infrastructure.Extensions
                     configuration.GetConnectionString("DbConnection"), b => b.MigrationsAssembly(assembly)), ServiceLifetime.Transient);
 
 
-            
-            services.AddTransient<IUsersRepository, UsersRepository>();
+            ;
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IGenerateExcel, GenerateExcel>();
+
+            services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             return services;

@@ -31,6 +31,7 @@ namespace Application.Extensions
             services.AddTransient<ISecurity, SecurityApplication>();
 
             services.AddScoped<IAuthorizationApplication, AuthorizationApplication>();
+            services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
             services.AddScoped<IBrandsApplication, BrandsApplication>();
             services.AddScoped<ICategoriesApplication, CategoriesApplication>();
             services.AddScoped<IRolesApplication, RolesApplication>();
