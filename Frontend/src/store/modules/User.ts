@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { User, UserState } from '@/models/userModel';
+import { User, UserState, BaseResponse } from '@/models/userModel';
 import {
   fetchUsersService,
   fetchUserByIdService,
@@ -103,25 +103,80 @@ const actions = {
         requestBody.endDate = endDate;
       }
 
-      const data = await fetchUsersService(
-        requestBody.numberPage,
-        requestBody.numberRecordsPage,
-        requestBody.order,
-        requestBody.sort,
-        requestBody.textFilter,
-        requestBody.numberFilter,
-        requestBody.stateFilter,
-        requestBody.startDate,
-        requestBody.endDate,
+      const result = await fetchUsersService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        false,
         token
       );
 
-      commit("SET_USERS", data.items);
-      commit("SET_TOTAL_USERS", data.totalRecords);
+      if (result.isSuccess) {
+        commit("SET_USERS", result.data);
+        commit("SET_TOTAL_USERS", result.totalRecords);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
       commit("SET_LOADING", false);
+    }
+  },
+
+async downloadUsersExcel(
+    { rootState }: any,
+    { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      order = "desc", 
+      sort = "PK_USER", 
+      textFilter = null, 
+      numberFilter = null,
+      stateFilter = 1,
+      startDate = null,
+      endDate = null
+    } = {}
+  ) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const blob = await fetchUsersService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        true,
+        token
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error al descargar Excel:', error);
+      throw error;
     }
   },
 
@@ -134,8 +189,12 @@ const actions = {
         return;
       }
 
-      const user = await fetchUserByIdService(id, token);
-      commit("SET_SELECTED_USER", user);
+      const result: BaseResponse = await fetchUserByIdService(id, token);
+      if (result.isSuccess) {
+        commit("SET_SELECTED_USER", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -151,8 +210,12 @@ const actions = {
         return;
       }
 
-      await registerUserService(user, token);
-      dispatch("fetchUsers", {});
+      const result: BaseResponse = await registerUserService(user, token);
+      if (result.isSuccess) {
+        dispatch("fetchUsers", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -166,8 +229,12 @@ const actions = {
         return;
       }
 
-      await editUserService(id, user, token);
-      dispatch("fetchUsers", {});
+      const result: BaseResponse = await editUserService(id, user, token);
+      if (result.isSuccess) {
+        dispatch("fetchUsers", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -181,8 +248,12 @@ const actions = {
         return;
       }
 
-      await enableUserService(id, token);
-      dispatch("fetchUsers", {});
+      const result: BaseResponse = await enableUserService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchUsers", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -195,8 +266,12 @@ const actions = {
         return;
       }
 
-      await disableUserService(id, token);
-      dispatch("fetchUsers", {});
+      const result: BaseResponse = await disableUserService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchUsers", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -210,8 +285,12 @@ const actions = {
         return;
       }
 
-      await removeUserService(id, token);
-      dispatch("fetchUsers", {});
+      const result: BaseResponse = await removeUserService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchUsers", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }

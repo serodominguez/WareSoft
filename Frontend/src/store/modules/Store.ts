@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Store, StoreState } from '@/models/storeModel';
+import { Store, StoreState, BaseResponse } from '@/models/storeModel';
 import {
   fetchStoresService,
   selectStoreService,
@@ -104,25 +104,80 @@ const actions = {
         requestBody.endDate = endDate;
       }
 
-      const data = await fetchStoresService(
-        requestBody.numberPage,
-        requestBody.numberRecordsPage,
-        requestBody.order,
-        requestBody.sort,
-        requestBody.textFilter,
-        requestBody.numberFilter,
-        requestBody.stateFilter,
-        requestBody.startDate,
-        requestBody.endDate,
+      const result = await fetchStoresService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        false,
         token
       );
 
-      commit("SET_STORES", data.items);
-      commit("SET_TOTAL_STORES", data.totalRecords);
+      if (result.isSuccess) {
+        commit("SET_STORES", result.data);
+        commit("SET_TOTAL_STORES", result.totalRecords);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
       commit("SET_LOADING", false);
+    }
+  },
+
+   async downloadStoresExcel(
+    { rootState }: any,
+    { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      order = "desc", 
+      sort = "PK_STORE", 
+      textFilter = null, 
+      numberFilter = null,
+      stateFilter = 1,
+      startDate = null,
+      endDate = null
+    } = {}
+  ) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const blob = await fetchStoresService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        true,
+        token
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Tiendas_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error al descargar Excel:', error);
+      throw error;
     }
   },
 
@@ -136,8 +191,12 @@ const actions = {
         return;
       }
 
-      const stores = await selectStoreService(token);
-      commit("SET_STORES", stores);
+      const result: BaseResponse = await selectStoreService(token);
+            if (result.isSuccess) {
+        commit("SET_STORES", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -154,8 +213,12 @@ const actions = {
         return;
       }
 
-      const storeData = await fetchStoreByIdService(id, token);
-      commit("SET_SELECTED_STORE", storeData);
+      const result: BaseResponse = await fetchStoreByIdService(id, token);
+      if (result.isSuccess) {
+        commit("SET_SELECTED_STORE", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -171,8 +234,12 @@ const actions = {
         return;
       }
 
-      await registerStoreService(store, token);
-      dispatch("fetchStores", {});
+      const result: BaseResponse = await registerStoreService(store, token);
+      if (result.isSuccess) {
+        dispatch("fetchStores", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -185,8 +252,12 @@ const actions = {
         await mainStore.dispatch("logout");
         return;
       }
-      await editStoreService(id, store, token);
-      dispatch("fetchStores", {});
+      const result: BaseResponse = await editStoreService(id, store, token);
+      if (result.isSuccess) {
+        dispatch("fetchStores", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -200,12 +271,17 @@ const actions = {
         return;
       }
 
-      await enableStoreService(id, token);
-      dispatch("fetchStores", {});
+      const result: BaseResponse = await enableStoreService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchStores", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
   },
+
   async disableStore({ commit, dispatch, rootState }: any, id: number) {
     try {
       const token = rootState.token;
@@ -214,8 +290,12 @@ const actions = {
         return;
       }
 
-      await disableStoreService(id, token);
-      dispatch("fetchStores", {});
+      const result: BaseResponse = await disableStoreService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchStores", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -229,8 +309,12 @@ const actions = {
         return;
       }
 
-      await removeStoreService(id, token);
-      dispatch("fetchStores", {});
+      const result: BaseResponse = await removeStoreService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchStores", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }

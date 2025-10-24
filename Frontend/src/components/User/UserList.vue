@@ -31,6 +31,7 @@
         <v-toolbar>
           <v-toolbar-title>Gestión de Usuarios</v-toolbar-title>
           <v-spacer></v-spacer>
+          <v-btn icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
           <v-btn icon="tune" @click="drawer = !drawer"></v-btn>
           <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
             <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
@@ -80,7 +81,8 @@ export default defineComponent({
       drawer: false,
       state: 'Activos',
       startDate: null,
-      endDate: null
+      endDate: null,
+      downloadingExcel: false,
     };
   },
   computed: {
@@ -197,6 +199,38 @@ export default defineComponent({
     editUser(user: any) {
       this.selectedUser = { ...user };
       this.form = true;
+    },
+    async downloadExcel() {
+      this.downloadingExcel = true;
+      try {
+      let numberFilterValue: number | null = null;
+      const filterMap: { [key: string]: number } = {
+        "Usuario": 1,
+        "Nombres": 2,
+        "Apellidos": 3,
+        "Tienda": 4,
+        "Rol": 5,
+      }
+
+        numberFilterValue = filterMap[this.selectedFilter];
+        const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
+        const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
+        const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
+
+        await this.store.dispatch("user/downloadUsersExcel", {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+      } catch (error) {
+        console.error('Error al descargar el archivo:', error);
+      } finally {
+        this.downloadingExcel = false;
+      }
     },
     formatDate(date: Date | null): string | null {
       if (!date) return null;

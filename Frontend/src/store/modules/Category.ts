@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Category, CategoryState } from '@/models/categoryModel';
+import { Category, CategoryState, BaseResponse } from '@/models/categoryModel';
 import {
   fetchCategoriesService,
   selectCategoryService,
@@ -83,46 +83,80 @@ const actions = {
         return;
       }
 
-      const requestBody: any = {
-        numberPage: pageNumber,
-        numberRecordsPage: pageSize,
+      const result = await fetchCategoriesService(
+        pageNumber,
+        pageSize,
         order,
         sort,
-        stateFilter
-      };
-
-      if (textFilter && numberFilter) {
-        requestBody.textFilter = textFilter;
-        requestBody.numberFilter = numberFilter;
-      }
-
-      if (startDate) {
-        requestBody.startDate = startDate;
-      }
-    
-      if (endDate) {
-        requestBody.endDate = endDate;
-      }
-
-      const data = await fetchCategoriesService(
-        requestBody.numberPage,
-        requestBody.numberRecordsPage,
-        requestBody.order,
-        requestBody.sort,
-        requestBody.textFilter,
-        requestBody.numberFilter,
-        requestBody.stateFilter,
-        requestBody.startDate,
-        requestBody.endDate,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        false,
         token
       );
 
-      commit("SET_CATEGORIES", data.items);
-      commit("SET_TOTAL_CATEGORIES", data.totalRecords);
+      if (result.isSuccess) {
+        commit("SET_CATEGORIES", result.data);
+        commit("SET_TOTAL_CATEGORIES", result.totalRecords);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
       commit("SET_LOADING", false);
+    }
+  },
+
+  async downloadCategoriesExcel(
+    { rootState }: any,
+    { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      order = "desc", 
+      sort = "PK_CATEGORY", 
+      textFilter = null, 
+      numberFilter = null,
+      stateFilter = 1,
+      startDate = null,
+      endDate = null
+    } = {}
+  ) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const blob = await fetchCategoriesService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        true,
+        token
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Categorias_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error al descargar Excel:', error);
+      throw error;
     }
   },
 
@@ -136,8 +170,12 @@ const actions = {
         return;
       }
 
-      const categories = await selectCategoryService(token);
-      commit("SET_CATEGORIES", categories);
+      const result: BaseResponse = await selectCategoryService(token);
+      if (result.isSuccess) {
+        commit("SET_CATEGORIES", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -154,8 +192,12 @@ const actions = {
         return;
       }
 
-      const category = await fetchCategoryByIdService(id, token);
-      commit("SET_SELECTED_CATEGORY", category);
+      const result: BaseResponse = await fetchCategoryByIdService(id, token);
+      if (result.isSuccess) {
+        commit("SET_SELECTED_CATEGORY", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -171,8 +213,12 @@ const actions = {
         return;
       }
 
-      await registerCategoryService(category, token);
-      dispatch("fetchCategories", {});
+      const result: BaseResponse = await registerCategoryService(category, token);
+      if (result.isSuccess) {
+        dispatch("fetchCategories", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -186,8 +232,12 @@ const actions = {
         return;
       }
 
-      await editCategoryService(id, category, token);
-      dispatch("fetchCategories", {});
+      const result: BaseResponse = await editCategoryService(id, category, token);
+      if (result.isSuccess) {
+        dispatch("fetchCategories", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -201,12 +251,17 @@ const actions = {
         return;
       }
 
-      await enableCategoryService(id, token);
-      dispatch("fetchCategories", {});
+      const result: BaseResponse = await enableCategoryService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchCategories", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
   },
+
   async disableCategory({ commit, dispatch, rootState }: any, id: number) {
     try {
       const token = rootState.token;
@@ -215,8 +270,12 @@ const actions = {
         return;
       }
 
-      await disableCategoryService(id, token);
-      dispatch("fetchCategories", {});
+       const result: BaseResponse = await disableCategoryService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchCategories", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -229,8 +288,12 @@ const actions = {
         await mainStore.dispatch("logout");
         return;
       }
-      await removeCategoryService(id, token);
-      dispatch("fetchCategories", {});
+      const result: BaseResponse = await removeCategoryService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchCategories", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }

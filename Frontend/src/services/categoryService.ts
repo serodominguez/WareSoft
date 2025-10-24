@@ -1,5 +1,33 @@
 import axios from 'axios';
-import { Category } from '@/models/categoryModel';
+import { Category, BaseResponse } from '@/models/categoryModel';
+
+export async function fetchCategoriesService(
+  pageNumber: number,
+  pageSize: number,
+  order: string,
+  sort: string,
+  textFilter: string | null | undefined,
+  numberFilter: number | null | undefined,
+  stateFilter: number,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  download: true,
+  token?: string
+): Promise<Blob>;
+
+export async function fetchCategoriesService(
+  pageNumber: number,
+  pageSize: number,
+  order: string,
+  sort: string,
+  textFilter: string | null | undefined,
+  numberFilter: number | null | undefined,
+  stateFilter: number,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  download?: false,
+  token?: string
+): Promise<BaseResponse>;
 
 export async function fetchCategoriesService(
   pageNumber = 1, 
@@ -11,73 +39,90 @@ export async function fetchCategoriesService(
   stateFilter: number = 1,
   startDate?: string | null,
   endDate?: string | null,
+  download: boolean = false,
   token?: string
-): Promise<{ items: Category[]; totalRecords: number }> {
-  const requestBody: any = {
-    numberPage: pageNumber,
-    numberRecordsPage: pageSize,
-    order,
-    sort,
-    stateFilter
+): Promise<BaseResponse | Blob> {
+  const params: any = {
+    NumberPage: pageNumber,
+    NumberRecordsPage: pageSize,
+    Order: order,
+    Sort: sort,
+    StateFilter: stateFilter,
+    Download: download
   };
 
   if (textFilter && numberFilter) {
-    requestBody.textFilter = textFilter;
-    requestBody.numberFilter = numberFilter;
+    params.TextFilter = textFilter;
+    params.NumberFilter = numberFilter;
   }
 
   if (startDate) {
-    requestBody.startDate = startDate;
+    params.StartDate = startDate;
   }
 
   if (endDate) {
-    requestBody.endDate = endDate;
+    params.EndDate = endDate;
   }
 
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post('api/Categories', requestBody, configuration);
-  return response.data.data;
-}
+  const configuration: any = {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    params: params
+  };
 
-export async function selectCategoryService(token: string): Promise<Category[]> {
+  if (download) {
+    configuration.responseType = 'blob';
+    const response = await axios.get('api/Categories', configuration);
+    return response.data;
+  }
 
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get("api/Categories/Select", configuration);
+  const response = await axios.get<BaseResponse>('api/Categories', configuration);
   return response.data;
 }
 
-export async function fetchCategoryByIdService(id: number, token: string): Promise<Category> {
+export async function selectCategoryService(token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get(`api/Categories/${id}`, configuration);
+  const response = await axios.get<BaseResponse>("api/Categories/Select", configuration);
   return response.data;
 }
 
-export async function registerCategoryService(category: Category, token: string): Promise<void> {
+export async function fetchCategoryByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.post("api/Categories/Register", category, configuration);
+  const response = await axios.get<BaseResponse>(`api/Categories/${id}`, configuration);
+  return response.data;
 }
 
-export async function editCategoryService(id: number, category: Category, token: string): Promise<void> {
+export async function registerCategoryService(category: Category, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Categories/Edit/${id}`, category, configuration);
+  const response = await axios.post<BaseResponse>("api/Categories/Register", category, configuration);
+  return response.data;
 }
 
-export async function enableCategoryService(id: number, token: string): Promise<void> {
+export async function editCategoryService(id: number, category: Category, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Categories/Enable/${id}`, {}, configuration);
-}
-export async function disableCategoryService(id: number, token: string): Promise<void> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Categories/Disable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Categories/Edit/${id}`, category, configuration);
+  return response.data;
 }
 
-export async function removeCategoryService(id: number, token: string): Promise<void> {
+export async function enableCategoryService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Categories/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Categories/Enable/${id}`, {}, configuration);
+  return response.data;;
+}
+export async function disableCategoryService(id: number, token: string): Promise<BaseResponse> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.put<BaseResponse>(`api/Categories/Disable/${id}`, {}, configuration);
+  return response.data;
+}
+
+export async function removeCategoryService(id: number, token: string): Promise<BaseResponse> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.put<BaseResponse>(`api/Categories/Remove/${id}`, {}, configuration);
+  return response.data;
 }

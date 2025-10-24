@@ -76,7 +76,7 @@ const login = () => {
     return;
   }
   
-  axios.post<ApiResponse>('api/Users/Generate/Token', {
+  axios.post<ApiResponse>('api/Authorization/Generate/Token', {
     userName: user.value,
     password: password.value,
   })

@@ -1,5 +1,33 @@
 import axios from 'axios';
-import { Store } from '@/models/storeModel';
+import { Store, BaseResponse } from '@/models/storeModel';
+
+export async function fetchStoresService(
+  pageNumber: number,
+  pageSize: number,
+  order: string,
+  sort: string,
+  textFilter: string | null | undefined,
+  numberFilter: number | null | undefined,
+  stateFilter: number,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  download: true,
+  token?: string
+): Promise<Blob>;
+
+export async function fetchStoresService(
+  pageNumber: number,
+  pageSize: number,
+  order: string,
+  sort: string,
+  textFilter: string | null | undefined,
+  numberFilter: number | null | undefined,
+  stateFilter: number,
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  download?: false,
+  token?: string
+): Promise<BaseResponse>;
 
 export async function fetchStoresService(
   pageNumber = 1, 
@@ -11,73 +39,90 @@ export async function fetchStoresService(
   stateFilter: number = 1,
   startDate?: string | null,
   endDate?: string | null,
+  download: boolean = false,
   token?: string
-): Promise<{ items: Store[]; totalRecords: number }> {
-  const requestBody: any = {
-    numberPage: pageNumber,
-    numberRecordsPage: pageSize,
-    order,
-    sort,
-    stateFilter
+): Promise<BaseResponse | Blob> {
+  const params: any = {
+    NumberPage: pageNumber,
+    NumberRecordsPage: pageSize,
+    Order: order,
+    Sort: sort,
+    StateFilter: stateFilter,
+    Download: download
   };
 
   if (textFilter && numberFilter) {
-    requestBody.textFilter = textFilter;
-    requestBody.numberFilter = numberFilter;
+    params.textFilter = textFilter;
+    params.numberFilter = numberFilter;
   }
 
   if (startDate) {
-    requestBody.startDate = startDate;
+    params.startDate = startDate;
   }
 
   if (endDate) {
-    requestBody.endDate = endDate;
+    params.endDate = endDate;
   }
 
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post('api/Stores', requestBody, configuration);
-  return response.data.data;
-}
+  const configuration: any = {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    params: params
+  };
 
-export async function selectStoreService(token: string): Promise<Store[]> {
+  if (download) {
+    configuration.responseType = 'blob';
+    const response = await axios.get('api/Stores', configuration);
+    return response.data;
+  }
 
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get("api/Stores/Select", configuration);
-  return response.data.data;
-}
-
-export async function fetchStoreByIdService(id: number, token: string): Promise<Store> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get(`api/Stores/${id}`, configuration);
+  const response = await axios.get<BaseResponse>('api/Stores', configuration);
   return response.data;
 }
 
-export async function registerStoreService(store: Store, token: string): Promise<void> {
+export async function selectStoreService(token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.post("api/Stores/Register", store, configuration);
+  const response = await axios.get<BaseResponse>("api/Stores/Select", configuration);
+  return response.data;
 }
 
-export async function editStoreService(id: number, store: Store, token: string): Promise<void> {
+export async function fetchStoreByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Stores/Edit/${id}`, store, configuration);
+  const response = await axios.get<BaseResponse>(`api/Stores/${id}`, configuration);
+  return response.data;
 }
 
-export async function enableStoreService(id: number, token: string): Promise<void> {
+export async function registerStoreService(store: Store, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Stores/Enable/${id}`, {}, configuration);
-}
-export async function disableStoreService(id: number, token: string): Promise<void> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Stores/Disable/${id}`, {}, configuration);
+  const response = await axios.post<BaseResponse>("api/Stores/Register", store, configuration);
+  return response.data;
 }
 
-export async function removeStoreService(id: number, token: string): Promise<void> {
+export async function editStoreService(id: number, store: Store, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  await axios.put(`api/Stores/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Stores/Edit/${id}`, store, configuration);
+  return response.data;
+}
+
+export async function enableStoreService(id: number, token: string): Promise<BaseResponse> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.put<BaseResponse>(`api/Stores/Enable/${id}`, {}, configuration);
+  return response.data;
+}
+export async function disableStoreService(id: number, token: string): Promise<BaseResponse> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.put<BaseResponse>(`api/Stores/Disable/${id}`, {}, configuration);
+  return response.data;
+}
+
+export async function removeStoreService(id: number, token: string): Promise<BaseResponse> {
+
+  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await axios.put<BaseResponse>(`api/Stores/Remove/${id}`, {}, configuration);
+  return response.data;
 }

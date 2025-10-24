@@ -166,6 +166,7 @@ export default defineComponent({
               this.localUser.password = this.localUser.passworD_HASH;
             } else {
               this.localUser.updatE_PASSWORD = false;
+              this.localUser.password = this.localUser.passworD_HASH;
             }
             await this.$store.dispatch('user/editUser', {
               id: this.localUser.pK_USER,

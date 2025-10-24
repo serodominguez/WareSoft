@@ -26,6 +26,7 @@
         <v-toolbar>
           <v-toolbar-title>Gestión de Roles</v-toolbar-title>
           <v-spacer></v-spacer>
+          <v-btn icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
           <v-btn icon="tune" @click="drawer = !drawer"></v-btn>
           <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
             <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
@@ -75,14 +76,15 @@ export default defineComponent({
       drawer: false,
       state: 'Activos',
       startDate: null,
-      endDate: null
+      endDate: null,
+      downloadingExcel: false,
     };
   },
   computed: {
     headers() {
       return [
         { title: 'Rol', key: 'rolE_NAME', sortable: false },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false },
+        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
         { title: 'Estado', key: 'statE_ROLE', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
@@ -130,10 +132,11 @@ export default defineComponent({
     },
     async searchRoles() {
       let numberFilterValue: number | null = null;
-      if (this.selectedFilter === "Rol") {
-        numberFilterValue = 1;
+      const filterMap: { [key: string]: number } = {
+        "Rol": 1,
       }
-
+        
+      numberFilterValue = filterMap[this.selectedFilter];
       const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
       const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
       const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
@@ -171,6 +174,34 @@ export default defineComponent({
     editRole(role: any) {
       this.selectedRole = { ...role };
       this.form = true;
+    },    
+    async downloadExcel() {
+      this.downloadingExcel = true;
+      try {
+      let numberFilterValue: number | null = null;
+      const filterMap: { [key: string]: number } = {
+        "Rol": 1,
+      }
+        
+        numberFilterValue = filterMap[this.selectedFilter];
+        const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
+        const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
+        const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
+
+        await this.store.dispatch("role/downloadRolesExcel", {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+      } catch (error) {
+        console.error('Error al descargar el archivo:', error);
+      } finally {
+        this.downloadingExcel = false;
+      }
     },
     formatDate(date: Date | null): string | null {
       if (!date) return null;

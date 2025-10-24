@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Role, RoleState } from '@/models/roleModel';
+import { Role, RoleState, BaseResponse } from '@/models/roleModel';
 import {
   fetchRolesService,
   selectRoleService,
@@ -83,46 +83,80 @@ const actions = {
         return;
       }
 
-      const requestBody: any = {
-        numberPage: pageNumber,
-        numberRecordsPage: pageSize,
+      const result = await fetchRolesService(
+        pageNumber,
+        pageSize,
         order,
         sort,
-        stateFilter
-      };
-
-      if (textFilter && numberFilter) {
-        requestBody.textFilter = textFilter;
-        requestBody.numberFilter = numberFilter;
-      }
-
-      if (startDate) {
-        requestBody.startDate = startDate;
-      }
-    
-      if (endDate) {
-        requestBody.endDate = endDate;
-      }
-
-      const data = await fetchRolesService(
-        requestBody.numberPage,
-        requestBody.numberRecordsPage,
-        requestBody.order,
-        requestBody.sort,
-        requestBody.textFilter,
-        requestBody.numberFilter,
-        requestBody.stateFilter,
-        requestBody.startDate,
-        requestBody.endDate,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        false,
         token
       );
 
-      commit("SET_ROLES", data.items);
-      commit("SET_TOTAL_ROLES", data.totalRecords);
+      if (result.isSuccess) {
+        commit("SET_ROLES", result.data);
+        commit("SET_TOTAL_ROLES", result.totalRecords);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
       commit("SET_LOADING", false);
+    }
+  },
+
+  async downloadRolesExcel(
+    { rootState }: any,
+    { 
+      pageNumber = 1, 
+      pageSize = 10, 
+      order = "desc", 
+      sort = "PK_ROLE", 
+      textFilter = null, 
+      numberFilter = null,
+      stateFilter = 1,
+      startDate = null,
+      endDate = null
+    } = {}
+  ) {
+    try {
+      const token = rootState.token;
+      if (isExpired(token)) {
+        await mainStore.dispatch("logout");
+        return;
+      }
+
+      const blob = await fetchRolesService(
+        pageNumber,
+        pageSize,
+        order,
+        sort,
+        textFilter,
+        numberFilter,
+        stateFilter,
+        startDate,
+        endDate,
+        true,
+        token
+      );
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Roles_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error al descargar Excel:', error);
+      throw error;
     }
   },
 
@@ -136,8 +170,12 @@ const actions = {
         return;
       }
 
-      const roles = await selectRoleService(token);
-      commit("SET_ROLES", roles);
+      const result: BaseResponse = await selectRoleService(token);
+      if (result.isSuccess) {
+        commit("SET_ROLES", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -154,8 +192,12 @@ const actions = {
         return;
       }
 
-      const role = await fetchRoleByIdService(id, token);
-      commit("SET_SELECTED_ROLE", role);
+      const result: BaseResponse = await fetchRoleByIdService(id, token);
+      if (result.isSuccess) {
+        commit("SET_SELECTED_ROLE", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     } finally {
@@ -171,8 +213,12 @@ const actions = {
         return;
       }
 
-      await registerRoleService(role, token);
-      dispatch("fetchRoles", {});
+      const result: BaseResponse = await registerRoleService(role, token);
+      if (result.isSuccess) {
+        dispatch("fetchRoles", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -186,8 +232,12 @@ const actions = {
         return;
       }
 
-      await editRoleService(id, role, token);
-      dispatch("fetchRoles", {});
+      const result: BaseResponse = await editRoleService(id, role, token);
+      if (result.isSuccess) {
+        dispatch("fetchRoles", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -201,8 +251,12 @@ const actions = {
         return;
       }
 
-      await enableRoleService(id, token);
-      dispatch("fetchRoles", {});
+      const result: BaseResponse = await enableRoleService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchRoles", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -215,8 +269,12 @@ const actions = {
         return;
       }
 
-      await disableRoleService(id, token);
-      dispatch("fetchRoles", {});
+      const result: BaseResponse = await disableRoleService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchRoles", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
@@ -229,8 +287,12 @@ const actions = {
         await mainStore.dispatch("logout");
         return;
       }
-      await removeRoleService(id, token);
-      dispatch("fetchRoles", {});
+      const result: BaseResponse = await removeRoleService(id, token);
+      if (result.isSuccess) {
+        dispatch("fetchRoles", {});
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
     }
