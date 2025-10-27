@@ -1,6 +1,7 @@
 ﻿using Application.Commons.Bases.Request;
 using Application.Dtos.Request.Roles;
 using Application.Interfaces;
+using Application.Security;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Static;
 
@@ -19,6 +20,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
+        [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> ListRoles([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _rolesApplication.ListRoles(filters);
@@ -34,6 +36,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("Select")]
+        [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> ListSelectRoles()
         {
             var response = await _rolesApplication.ListSelectRoles();
@@ -48,6 +51,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("Register")]
+        [RequirePermission("Roles", "Crear")]
         public async Task<IActionResult> RegisterRole([FromBody] RolesRequestDto requestDto)
         {
             var response = await _rolesApplication.RegisterRole(AuthenticatedUserId, requestDto);
@@ -55,6 +59,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Edit/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> EditRole(int roleId, [FromBody] RolesRequestDto requestDto)
         {
             var response = await _rolesApplication.EditRole(AuthenticatedUserId, roleId, requestDto);
@@ -62,6 +67,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Enable/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> EnableRole(int roleId)
         {
             var response = await _rolesApplication.EnableRole(AuthenticatedUserId, roleId);
@@ -69,6 +75,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Disable/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> DisableRole(int roleId)
         {
             var response = await _rolesApplication.DisableRole(AuthenticatedUserId, roleId);
@@ -76,6 +83,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Remove/{roleId:int}")]
+        [RequirePermission("Roles", "Eliminar")]
         public async Task<IActionResult> RemoveRole(int roleId)
         {
             var response = await _rolesApplication.RemoveRole(AuthenticatedUserId, roleId);

@@ -170,6 +170,11 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Core.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Identity.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Storage.Blobs.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Azure.Storage.Common.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ClosedXML.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ClosedXML.Parser.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ExcelNumberFormat.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\FluentValidation.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Humanizer.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
@@ -204,6 +209,8 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.OpenApi
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Mono.TextTemplating.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\RBush.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\SixLabors.Fonts.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -218,6 +225,7 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.Configurat
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.Drawing.Common.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.IO.Hashing.dll
+D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.IO.Packaging.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.Linq.Dynamic.Core.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.Memory.Data.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.Runtime.Caching.dll
@@ -319,11 +327,3 @@ D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\refint\Api.dll
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.pdb
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\Api.genruntimeconfig.cache
 D:\Projects\IT Solutions\WareSoft\Backend\Api\obj\Debug\net8.0\ref\Api.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ClosedXML.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ClosedXML.Parser.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\ExcelNumberFormat.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\RBush.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\SixLabors.Fonts.dll
-D:\Projects\IT Solutions\WareSoft\Backend\Api\bin\Debug\net8.0\System.IO.Packaging.dll

@@ -1,9 +1,10 @@
 ﻿namespace Domain.Entities
 {
-    public class Roles : BaseEntity
+    public partial class Roles : BaseEntity
     {
         public int PK_ROLE { get; set; }
         public string? ROLE_NAME { get; set; }
+        public virtual ICollection<Permissions> Permissions { get; set; } = new List<Permissions>();
         public virtual ICollection<Users> Users { get; set; } = new List<Users>();
     }
 }

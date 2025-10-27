@@ -1,0 +1,58 @@
+﻿using Application.Commons.Bases.Response;
+using Application.Interfaces;
+using Application.Security;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Security.Claims;
+using Utilities.Static;
+
+namespace Api.Filters
+{
+    public class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
+    {
+        private readonly IPermissionsApplication _permissionsApplication;
+
+        public PermissionAuthorizationFilter(IPermissionsApplication permissionsApplication)
+        {
+            _permissionsApplication = permissionsApplication;
+        }
+
+        public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+        {
+            var endpoint = context.HttpContext.GetEndpoint();
+            var permissionAttribute = endpoint?.Metadata.GetMetadata<RequirePermissionAttribute>();
+
+            if (permissionAttribute == null)
+                return;
+
+            var userIdClaim = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                context.Result = new JsonResult(new BaseResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = ReplyMessage.MESSAGE_UNAUTHORIZED
+                })
+                {
+                    StatusCode = StatusCodes.Status401Unauthorized
+                };
+
+                return;
+            }
+
+            var hasPermission = await _permissionsApplication.UserPermissionAsync(userId, permissionAttribute.Module, permissionAttribute.Action);
+
+            if (!hasPermission)
+            {
+                context.Result = new JsonResult(new BaseResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = ReplyMessage.MESSAGE_FORBIDDEN
+                })
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
+            }
+        }
+    }
+}

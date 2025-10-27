@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Utilities.Static
+﻿namespace Utilities.Static
 {
     public class ReplyMessage
     {
@@ -23,5 +17,7 @@ namespace Utilities.Static
         public const string MESSAGE_EXCEPTION = "Hubo un error inesperado, comunicarse con el administrador.";
         public const string MESSAGE_INCORRECT_USER = "El usuario es incorrecto.";
         public const string MESSAGE_INCORRECT_PASSWORD = "La contraseña es incorrecta.";
+        public const string MESSAGE_UNAUTHORIZED = "No estás autenticado. Por favor inicia sesión.";
+        public const string MESSAGE_FORBIDDEN = "No tienes permisos para acceder a este recurso.";
     }
 }

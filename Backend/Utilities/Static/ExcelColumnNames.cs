@@ -68,11 +68,11 @@
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("TIENDA", "ROLE_NAME"),
+                ("TIENDA", "STORE_NAME"),
                 ("ENCARGADO", "MANAGER"),
                 ("DIRECCIÓN", "ADDRESS"),
                 ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_ROLE")
+                ("ESTADO", "STATE_STORE")
             };
 
             return columnsProperties;
@@ -86,12 +86,12 @@
             {
                 ("USUARIO", "USER_NAME"),
                 ("NOMBRES", "NAMES"),
-                ("APELLIDOS", "LAST_NAME"),
+                ("APELLIDOS", "LAST_NAMES"),
                 ("TELÉFONO", "PHONE_NUMBER"),
                 ("ROL", "ROLE_NAME"),
                 ("TIENDA", "STORE_NAME"),
                 ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_ROLE")
+                ("ESTADO", "STATE_USER")
             };
 
             return columnsProperties;

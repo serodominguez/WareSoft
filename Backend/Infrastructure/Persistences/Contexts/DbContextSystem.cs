@@ -9,6 +9,7 @@ namespace Infrastructure.Persistences.Contexts
     {
         public DbContextSystem(DbContextOptions<DbContextSystem> options) : base(options) { }
 
+        public virtual DbSet<Actions> Actions { get; set; }
         public virtual DbSet<Brands> Brands { get; set; } 
         public virtual DbSet<Categories> Categories { get; set; }
         public virtual DbSet<Consumers> Consumers { get; set; }
@@ -19,8 +20,10 @@ namespace Infrastructure.Persistences.Contexts
         public virtual DbSet<InboundTransfer> InboundTransfer { get; set; }
         public virtual DbSet<InboundTransferDetails> InboundTransferDetails { get; set; }
         public virtual DbSet<Inventory> Inventory { get; set; }
+        public virtual DbSet<Modules> Modules { get; set; }
         public virtual DbSet<OutboundTransfer> OutboundTransfer { get; set; }
         public virtual DbSet<OutboundTransferDetails> OutboundTransferDetails { get; set; }
+        public virtual DbSet<Permissions> Permissions { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
         public virtual DbSet<Stores> Stores { get; set; }

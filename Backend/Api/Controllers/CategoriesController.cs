@@ -1,6 +1,7 @@
 ﻿using Application.Commons.Bases.Request;
 using Application.Dtos.Request.Categories;
 using Application.Interfaces;
+using Application.Security;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Static;
 
@@ -19,6 +20,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
+        [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> ListCategories([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _categoriesApplication.ListCategories(filters);
@@ -34,6 +36,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("Select")]
+        [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> ListSelectCategories()
         {
             var response = await _categoriesApplication.ListSelectCategories();
@@ -41,6 +44,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{categoryId:int}")]
+        [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> CategoryById(int categoryId)
         {
             var response = await _categoriesApplication.CategoryById(categoryId);
@@ -48,6 +52,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("Register")]
+        [RequirePermission("Categorías", "Crear")]
         public async Task<IActionResult> RegisterCategory([FromBody] CategoriesRequestDto requestDto)
         {
 
@@ -56,6 +61,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Edit/{categoryId:int}")]
+        [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> EditCategory(int categoryId, [FromBody] CategoriesRequestDto requestDto)
         {
 
@@ -64,6 +70,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Enable/{categoryId:int}")]
+        [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> EnableCategory(int categoryId)
         {
 
@@ -72,6 +79,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Disable/{categoryId:int}")]
+        [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> DisableCategory(int categoryId)
         {
 
@@ -80,6 +88,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Remove/{categoryId:int}")]
+        [RequirePermission("Categorías", "Eliminar")]
         public async Task<IActionResult> RemoveCategory(int categoryId)
         {
 

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities
 {
-    public class Stores : BaseEntity
+    public partial class Stores : BaseEntity
     {
         public int PK_STORE { get; set; }
         public string? STORE_NAME { get; set; }

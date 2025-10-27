@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Api.Filters;
 using Application.Extensions;
 using Infrastructure.Extensions;
 
@@ -12,8 +13,13 @@ var Cors = "Cors";
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<PermissionAuthorizationFilter>();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<PermissionAuthorizationFilter>();
+});
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();

@@ -1,6 +1,7 @@
 ﻿using Application.Commons.Bases.Request;
 using Application.Dtos.Request.Stores;
 using Application.Interfaces;
+using Application.Security;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Static;
 
@@ -19,6 +20,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
+        [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> ListStores([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _storesApplication.ListStores(filters);
@@ -34,6 +36,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("Select")]
+        [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> ListSelectStores()
         {
             var response = await _storesApplication.ListSelectStores();
@@ -41,6 +44,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{storeId:int}")]
+        [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> StoreById(int storeId)
         {
             var response = await _storesApplication.StoreById(storeId);
@@ -48,6 +52,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("Register")]
+        [RequirePermission("Tiendas", "Crear")]
         public async Task<IActionResult> RegisterStore([FromBody] StoresRequestDto requestDto)
         {
             var response = await _storesApplication.RegisterStore(AuthenticatedUserId, requestDto);
@@ -55,6 +60,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Edit/{storeId:int}")]
+        [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> EditStore(int storeId, [FromBody] StoresRequestDto requestDto)
         {
             var response = await _storesApplication.EditStore(AuthenticatedUserId, storeId, requestDto);
@@ -62,6 +68,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Enable/{storeId:int}")]
+        [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> EnableStore(int storeId)
         {
             var response = await _storesApplication.EnableStore(AuthenticatedUserId, storeId);
@@ -69,6 +76,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Disable/{storeId:int}")]
+        [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> DisableStore(int storeId)
         {
             var response = await _storesApplication.DisableStore(AuthenticatedUserId, storeId);
@@ -76,6 +84,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Remove/{storeId:int}")]
+        [RequirePermission("Tiendas", "Eliminar")]
         public async Task<IActionResult> RemoveStore(int storeId)
         {
             var response = await _storesApplication.RemoveStore(AuthenticatedUserId, storeId);

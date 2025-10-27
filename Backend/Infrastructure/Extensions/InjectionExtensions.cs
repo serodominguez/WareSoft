@@ -22,8 +22,9 @@ namespace Infrastructure.Extensions
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IGenerateExcel, GenerateExcel>();
 
-            services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IPermissionsRepository, PermissionsRepository>();
+            services.AddScoped<IUsersRepository, UsersRepository>();
 
             return services;
         }
