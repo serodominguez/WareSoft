@@ -1,86 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|d:\\projects\\it solutions\\waresoft\\waresoft\\backend\\infrastructure\\persistences\\repositories\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\persistences\\repositories\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9EFFD90C-C7EF-4E1D-AB7F-A80AFB4CD68F}|Api\\Api.csproj|d:\\projects\\it solutions\\waresoft\\waresoft\\backend\\api\\controllers\\storescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9EFFD90C-C7EF-4E1D-AB7F-A80AFB4CD68F}|Api\\Api.csproj|solutionrelative:api\\controllers\\storescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F3E2C670-DE72-400A-9885-F36402DA96E3}|Application\\Application.csproj|d:\\projects\\it solutions\\waresoft\\waresoft\\backend\\application\\services\\storesapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F3E2C670-DE72-400A-9885-F36402DA96E3}|Application\\Application.csproj|solutionrelative:application\\services\\storesapplication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|d:\\projects\\it solutions\\waresoft\\waresoft\\backend\\infrastructure\\persistences\\repositories\\storesrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A15371D6-7475-46D7-AAEA-82AD4E2B30DA}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\persistences\\repositories\\storesrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "WorkspaceRootPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\",
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "UsersRepository.cs",
-              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\UsersRepository.cs",
-              "RelativeDocumentMoniker": "Infrastructure\\Persistences\\Repositories\\UsersRepository.cs",
-              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\UsersRepository.cs",
-              "RelativeToolTip": "Infrastructure\\Persistences\\Repositories\\UsersRepository.cs",
-              "ViewState": "AgIAADUAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-15T22:30:04.224Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "StoresApplication.cs",
-              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Application\\Services\\StoresApplication.cs",
-              "RelativeDocumentMoniker": "Application\\Services\\StoresApplication.cs",
-              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Application\\Services\\StoresApplication.cs",
-              "RelativeToolTip": "Application\\Services\\StoresApplication.cs",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAiwOAAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-09T21:34:06.985Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "StoresController.cs",
-              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Api\\Controllers\\StoresController.cs",
-              "RelativeDocumentMoniker": "Api\\Controllers\\StoresController.cs",
-              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Api\\Controllers\\StoresController.cs",
-              "RelativeToolTip": "Api\\Controllers\\StoresController.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAswEcAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-09T21:33:41.809Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "StoresRepository.cs",
-              "DocumentMoniker": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\StoresRepository.cs",
-              "RelativeDocumentMoniker": "Infrastructure\\Persistences\\Repositories\\StoresRepository.cs",
-              "ToolTip": "D:\\Projects\\IT Solutions\\WareSoft\\WareSoft\\Backend\\Infrastructure\\Persistences\\Repositories\\StoresRepository.cs",
-              "RelativeToolTip": "Infrastructure\\Persistences\\Repositories\\StoresRepository.cs",
-              "ViewState": "AgIAAFYAAAAAAAAAAADwv2gAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-09T21:33:27.253Z"
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }

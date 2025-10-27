@@ -375,6 +375,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Api.Controllers.PermissionsController",
+    "Method": "GetUserPermissions",
+    "RelativePath": "api/Permissions/User/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Api.Controllers.RolesController",
     "Method": "ListRoles",
     "RelativePath": "api/Roles",

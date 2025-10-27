@@ -9,7 +9,7 @@ namespace Infrastructure.Persistences.Contexts.Configurations
         public void Configure(EntityTypeBuilder<Permissions> builder)
         {
             builder.ToTable("Permissions")
-                .HasKey(a => a.PK_PERMISSIONS);
+                .HasKey(a => a.PK_PERMISSION);
 
             builder.HasOne(r => r.Roles)
                 .WithMany(p => p.Permissions)
