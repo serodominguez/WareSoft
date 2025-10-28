@@ -13,15 +13,15 @@
           <td>{{ (item as Store).audiT_CREATE_DATE }}</td>
           <td>{{ (item as Store).statE_STORE }}</td>
           <td>
-            <v-btn v-if="(item as Store).statE_STORE == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Store).statE_STORE == 'ACTIVO'" color="indigo" icon="edit" variant="text"
               @click="editStore(item)" size="small"></v-btn>
-            <template v-if="(item as Store).statE_STORE == 'INACTIVO'">
+            <template v-if="canEdit && (item as Store).statE_STORE == 'INACTIVO'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="(item as Store).statE_STORE == 'ACTIVO'">
+            <template v-if="canEdit &&  (item as Store).statE_STORE == 'ACTIVO'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
-            <v-btn color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
+            <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
           </td>
         </tr>
       </template>
@@ -29,15 +29,15 @@
         <v-toolbar>
           <v-toolbar-title>Gestión de Tiendas</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
+          <v-btn v-if="canRead" icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
           <v-btn icon="tune" @click="drawer = !drawer"></v-btn>
           <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
-            <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
+            <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
               single-line v-model="search" @click:append-inner="searchStores()"
               @keyup.enter="searchStores()"></v-text-field>
           </v-col>
           <v-card-actions>
-            <v-btn @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
+            <v-btn v-if="canCreate" @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
           </v-card-actions>
         </v-toolbar>
       </template>
@@ -53,7 +53,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { Store } from '@/models/storeModel';
+import { Store } from '@/interfaces/storeInterface';
 import StoreForm from './StoreForm.vue';
 import StoreModal from './StoreModal.vue';
 import StoreFilters from './StoreFilters.vue';
@@ -109,6 +109,18 @@ export default defineComponent({
     },
     stateFilter(): number {
       return this.state === 'Activos' ? 1 : 0;
+    },
+    canCreate(): boolean {
+      return this.$store.getters.hasPermission('tiendas', 'crear');
+    },
+    canRead(): boolean {
+      return this.$store.getters.hasPermission('tiendas', 'leer');
+    },
+    canEdit(): boolean {
+      return this.$store.getters.hasPermission('tiendas', 'editar');
+    },
+    canDelete(): boolean {
+      return this.$store.getters.hasPermission('tiendas', 'eliminar');
     }
   },
   methods: {

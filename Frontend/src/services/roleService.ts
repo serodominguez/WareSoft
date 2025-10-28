@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Role, BaseResponse } from '@/models/roleModel';
+import { Role, BaseResponse } from '@/interfaces/roleInterface';
 
 export async function fetchRolesService(
   pageNumber: number,

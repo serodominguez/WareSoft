@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Category, CategoryState, BaseResponse } from '@/models/categoryModel';
+import { Category, CategoryState, BaseResponse } from '@/interfaces/categoryInterface';
 import {
   fetchCategoriesService,
   selectCategoryService,

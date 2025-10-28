@@ -29,7 +29,7 @@
 <script lang="ts">
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
-import { Store } from '@/models/storeModel';
+import { Store } from '@/interfaces/storeInterface';
 
 export default defineComponent({
     props: {

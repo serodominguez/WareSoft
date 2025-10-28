@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Brand, BaseResponse } from '@/models/brandModel';
+import { Brand, BaseResponse } from '@/interfaces/brandInterface';
 
 export async function fetchBrandsService(
   pageNumber: number,

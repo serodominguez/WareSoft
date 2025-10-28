@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Category, BaseResponse } from '@/models/categoryModel';
+import { Category, BaseResponse } from '@/interfaces/categoryInterface';
 
 export async function fetchCategoriesService(
   pageNumber: number,

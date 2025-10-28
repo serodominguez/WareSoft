@@ -15,15 +15,15 @@
           <td>{{ (item as User).audiT_CREATE_DATE }}</td>
           <td>{{ (item as User).statE_USER }}</td>
           <td>
-            <v-btn v-if="(item as User).statE_USER == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as User).statE_USER == 'ACTIVO'" color="indigo" icon="edit" variant="text"
               @click="editUser(item)" size="small"></v-btn>
-            <template v-if="(item as User).statE_USER == 'INACTIVO'">
+            <template v-if="canEdit && (item as User).statE_USER == 'INACTIVO'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="(item as User).statE_USER == 'ACTIVO'">
+            <template v-if="canEdit && (item as User).statE_USER == 'ACTIVO'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
-            <v-btn color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
+            <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
           </td>
         </tr>
       </template>
@@ -31,15 +31,15 @@
         <v-toolbar>
           <v-toolbar-title>Gestión de Usuarios</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
+          <v-btn v-if="canRead" icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
           <v-btn icon="tune" @click="drawer = !drawer"></v-btn>
           <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
-            <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
+            <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
               single-line v-model="search" @click:append-inner="searchUsers()"
               @keyup.enter="searchUsers()"></v-text-field>
           </v-col>
           <v-card-actions>
-            <v-btn @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
+            <v-btn v-if="canCreate" @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
           </v-card-actions>
         </v-toolbar>
       </template>
@@ -55,7 +55,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { User } from '@/models/userModel';
+import { User } from '@/interfaces/userInterface';
 import UserForm from './UserForm.vue';
 import UserModal from './UserModal.vue';
 import UserFilters from './UserFilters.vue';
@@ -113,6 +113,18 @@ export default defineComponent({
     },
     stateFilter(): number {
       return this.state === 'Activos' ? 1 : 0;
+    },
+    canCreate(): boolean {
+      return this.$store.getters.hasPermission('usuarios', 'crear');
+    },
+    canRead(): boolean {
+      return this.$store.getters.hasPermission('usuarios', 'leer');
+    },
+    canEdit(): boolean {
+      return this.$store.getters.hasPermission('usuarios', 'editar');
+    },
+    canDelete(): boolean {
+      return this.$store.getters.hasPermission('usuarios', 'eliminar');
     }
   },
   methods: {

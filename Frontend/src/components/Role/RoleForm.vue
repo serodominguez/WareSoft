@@ -31,7 +31,7 @@
 import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
-import { Role } from '@/models/roleModel';
+import { Role } from '@/interfaces/roleInterface';
 
 interface FormRef {
   validate: () => boolean;

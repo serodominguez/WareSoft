@@ -10,15 +10,15 @@
           <td>{{ (item as Brand).audiT_CREATE_DATE }}</td>
           <td>{{ (item as Brand).statE_BRAND }}</td>
           <td>
-            <v-btn v-if="(item as Brand).statE_BRAND == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Brand).statE_BRAND == 'ACTIVO'" color="indigo" icon="edit" variant="text"
               @click="editBrand(item)" size="small"></v-btn>
-            <template v-if="(item as Brand).statE_BRAND == 'INACTIVO'">
-              <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
+            <template v-if="canEdit && (item as Brand).statE_BRAND == 'INACTIVO'">
+              <v-btn  color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="(item as Brand).statE_BRAND == 'ACTIVO'">
+            <template v-if="canEdit && (item as Brand).statE_BRAND == 'ACTIVO'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
-            <v-btn color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
+            <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
           </td>
         </tr>
       </template>
@@ -26,15 +26,15 @@
         <v-toolbar>
           <v-toolbar-title>Gestión de Marcas</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
+          <v-btn v-if="canRead" icon="download" @click="downloadExcel" :loading="downloadingExcel"></v-btn>
           <v-btn icon="tune" @click="drawer = !drawer"></v-btn>
           <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
-            <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
+            <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo" hide-details
               single-line v-model="search" @click:append-inner="searchBrands()"
               @keyup.enter="searchBrands()"></v-text-field>
           </v-col>
           <v-card-actions>
-            <v-btn @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
+            <v-btn v-if="canCreate" @click="openForm" color="indigo" size="large"> Nuevo </v-btn>
           </v-card-actions>
         </v-toolbar>
       </template>
@@ -50,7 +50,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { Brand } from '@/models/brandModel';
+import { Brand } from '@/interfaces/brandInterface';
 import BrandForm from './BrandForm.vue';
 import BrandModal from './BrandModal.vue';
 import BrandFilters from './BrandFilters.vue';
@@ -103,6 +103,18 @@ export default defineComponent({
     },
     stateFilter(): number {
       return this.state === 'Activos' ? 1 : 0;
+    },
+    canCreate(): boolean {
+      return this.$store.getters.hasPermission('marcas', 'crear');
+    },
+    canRead(): boolean {
+      return this.$store.getters.hasPermission('marcas', 'leer');
+    },
+    canEdit(): boolean {
+      return this.$store.getters.hasPermission('marcas', 'editar');
+    },
+    canDelete(): boolean {
+      return this.$store.getters.hasPermission('marcas', 'eliminar');
     }
   },
   methods: {

@@ -63,7 +63,7 @@
 import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
-import { User } from '@/models/userModel';
+import { User } from '@/interfaces/userInterface';
 
 interface FormRef {
   validate: () => boolean;

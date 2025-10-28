@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { User, UserState, BaseResponse } from '@/models/userModel';
+import { User, UserState, BaseResponse } from '@/interfaces/userInterface';
 import {
   fetchUsersService,
   fetchUserByIdService,

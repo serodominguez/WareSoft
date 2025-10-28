@@ -64,6 +64,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { normalize } from '@/helpers/utils';
 
 interface Link {
   icon: string;
@@ -131,14 +132,6 @@ export default defineComponent({
     }
   },
   methods: {
-    // Normalizar texto: quitar tildes y convertir a minúsculas
-    normalize(text: string): string {
-      return text
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-    },
-    
     hasModuleAccess(module: string): boolean {
       const currentUser = this.$store.state.currentUser;
       
@@ -146,11 +139,11 @@ export default defineComponent({
         return false;
       }
       
-      const normalizedModule = this.normalize(module);
+      const normalizedModule = normalize(module);
       
       return currentUser.permissions.some(
         (p: { module: string; action: string }) => 
-          this.normalize(p.module) === normalizedModule
+          normalize(p.module) === normalizedModule
       );
     }
   }

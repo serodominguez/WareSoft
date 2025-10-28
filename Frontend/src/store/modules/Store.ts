@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Store, StoreState, BaseResponse } from '@/models/storeModel';
+import { Store, StoreState, BaseResponse } from '@/interfaces/storeInterface';
 import {
   fetchStoresService,
   selectStoreService,

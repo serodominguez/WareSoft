@@ -31,7 +31,7 @@
 import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
-import { Brand } from '@/models/brandModel';
+import { Brand } from '@/interfaces/brandInterface';
 
 interface FormRef {
   validate: () => boolean;

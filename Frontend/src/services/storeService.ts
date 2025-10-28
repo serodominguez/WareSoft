@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Store, BaseResponse } from '@/models/storeModel';
+import { Store, BaseResponse } from '@/interfaces/storeInterface';
 
 export async function fetchStoresService(
   pageNumber: number,

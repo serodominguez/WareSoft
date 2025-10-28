@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Role, RoleState, BaseResponse } from '@/models/roleModel';
+import { Role, RoleState, BaseResponse } from '@/interfaces/roleInterface';
 import {
   fetchRolesService,
   selectRoleService,

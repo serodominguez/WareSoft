@@ -1,7 +1,8 @@
+import axios from 'axios'
+import router from '@/router/index'
 import { createStore } from 'vuex'
 import { jwtDecode } from 'jwt-decode'
-import router from '@/router/index'
-import axios from 'axios'
+import { normalize } from '@/helpers/utils'
 import BrandMoule from '@/store/modules/Brand'
 import CategoryModule from '@/store/modules/Category'
 import RoleModule from '@/store/modules/Role'
@@ -14,9 +15,6 @@ interface Permission {
 }
 
 interface JwtPayload {
-  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
-  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': string;
-  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
   pk_user: string;
   user_name: string;
   role: string;
@@ -58,9 +56,13 @@ const store = createStore({
     hasPermission: (state) => (module: string, action: string): boolean => {
       if (!state.currentUser || !state.currentUser.permissions) return false;
       
+      const normalizedModule = normalize(module);
+      const normalizedAction = normalize(action);
+
       return state.currentUser.permissions.some(
-        p => p.module.toLowerCase() === module.toLowerCase() && 
-             p.action.toLowerCase() === action.toLowerCase()
+        (p: Permission) =>
+          normalize(p.module) === normalizedModule &&
+          normalize(p.action) === normalizedAction
       );
     },
   },

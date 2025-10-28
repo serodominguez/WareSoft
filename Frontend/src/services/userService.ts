@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User, BaseResponse } from '@/models/userModel';
+import { User, BaseResponse } from '@/interfaces/userInterface';
 
 export async function fetchUsersService(
   pageNumber: number,

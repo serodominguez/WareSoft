@@ -29,7 +29,7 @@
 <script lang="ts">
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
-import { Role } from '@/models/roleModel';
+import { Role } from '@/interfaces/roleInterface';
 
 export default defineComponent({
     props: {
