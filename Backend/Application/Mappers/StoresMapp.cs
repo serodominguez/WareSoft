@@ -24,7 +24,7 @@ namespace Application.Mappers
         {
             return new StoresResponseDto
             {
-                PK_STORE = entity.PK_STORE,
+                PK_STORE = entity.PK_ENTITY,
                 STORE_NAME = entity.STORE_NAME,
                 MANAGER = entity.MANAGER,
                 ADDRESS = entity.ADDRESS,
@@ -42,7 +42,7 @@ namespace Application.Mappers
         {
             return new StoresSelectResponseDto
             {
-                PK_STORE = entity.PK_STORE,
+                PK_STORE = entity.PK_ENTITY,
                 STORE_NAME = entity.STORE_NAME
             };
         }

@@ -19,7 +19,7 @@ namespace Application.Mappers
         {
             return new CategoriesResponseDto
             {
-                PK_CATEGORY = entity.PK_CATEGORY,
+                PK_CATEGORY = entity.PK_ENTITY,
                 CATEGORY_NAME = entity.CATEGORY_NAME,
                 DESCRIPTION = entity.DESCRIPTION,
                 AUDIT_CREATE_DATE = entity.AUDIT_CREATE_DATE.HasValue ? entity.AUDIT_CREATE_DATE.Value.ToString("dd/MM/yyyy HH:mm") : null,
@@ -32,7 +32,7 @@ namespace Application.Mappers
         {
             return new CategoriesSelectResponseDto
             {
-                PK_CATEGORY = entity.PK_CATEGORY,
+                PK_CATEGORY = entity.PK_ENTITY,
                 CATEGORY_NAME = entity.CATEGORY_NAME
             };
         }

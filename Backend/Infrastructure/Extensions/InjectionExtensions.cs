@@ -23,7 +23,10 @@ namespace Infrastructure.Extensions
             services.AddTransient<IGenerateExcel, GenerateExcel>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IActionsRepository, ActionsRepository>();
+            services.AddScoped<IModulesRepository, ModulesRepository>();
             services.AddScoped<IPermissionsRepository, PermissionsRepository>();
+            services.AddScoped<IRolesRepository, RolesRepository>();
             services.AddScoped<IUsersRepository, UsersRepository>();
 
             return services;

@@ -8,8 +8,12 @@ namespace Infrastructure.Persistences.Contexts.Configurations
     {
         public void Configure(EntityTypeBuilder<Permissions> builder)
         {
-            builder.ToTable("Permissions")
-                .HasKey(a => a.PK_PERMISSION);
+            builder.ToTable("Permissions");
+
+            builder.HasKey(e => e.PK_ENTITY);
+
+            builder.Property(e => e.PK_ENTITY)
+                .HasColumnName("PK_PERMISSION");
 
             builder.HasOne(r => r.Roles)
                 .WithMany(p => p.Permissions)
@@ -23,6 +27,16 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .WithMany(p => p.Permissions)
                 .HasForeignKey(a => a.PK_ACTION);
 
+
+            builder.HasIndex(p => new { p.PK_ROLE, p.PK_MODULE, p.PK_ACTION })
+                .IsUnique()
+                .HasDatabaseName("IX_Permissions_Role_Module_Action");
+
+            builder.HasIndex(p => p.PK_ROLE)
+                .HasDatabaseName("IX_Permissions_Role");
+
+            builder.HasIndex(p => p.STATE)
+                .HasDatabaseName("IX_Permissions_State");
         }
     }
 }

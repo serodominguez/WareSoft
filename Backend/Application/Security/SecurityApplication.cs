@@ -24,11 +24,11 @@ namespace Application.Security
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.PK_USER.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.PK_ENTITY.ToString()),
                 new Claim(ClaimTypes.Name, user.USER_NAME!),
                 new Claim(ClaimTypes.Role, user.Roles!.ROLE_NAME!),
 
-                new Claim("pk_user",user.PK_USER.ToString()),
+                new Claim("pk_user",user.PK_ENTITY.ToString()),
                 new Claim("user_name", user.USER_NAME!),
                 new Claim("role", user.Roles.ROLE_NAME!),
                 new Claim("store_name", user.Stores!.STORE_NAME!),

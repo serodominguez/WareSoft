@@ -4,6 +4,8 @@ import HomeView from '../views/HomeView.vue'
 import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import LoginView from '@/views/LoginView.vue';
+import ModuleView from '@/views/ModuleView.vue';
+import PermissionView from '@/views/PermissionView.vue';
 import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
 import UserView from '@/views/UserView.vue'
@@ -28,7 +30,7 @@ const routes: Array<RouteRecordRaw> = [
       administrator: true,
     }
   },
-    {
+  {
     path: '/brand',
     name: 'brand',
     component: BrandView,
@@ -48,6 +50,22 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: {
+      free: true 
+    }
+  },
+  {
+    path: '/module',
+    name: 'module',
+    component: ModuleView,
+    meta: {
+      administrator: true,
+    }
+  },
+  {
+    path: '/permission',
+    name: 'permission',
+    component: PermissionView,
     meta: {
       free: true 
     }

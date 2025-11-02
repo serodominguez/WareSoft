@@ -7,12 +7,11 @@ namespace Infrastructure.Persistences.Interfaces
     {
         IQueryable<T> GetAllQueryable();
         Task<IEnumerable<T>> GetSelectAsync();
-        Task<T> GetByIdAsync(int id);
-        Task<bool> RegisterAsync(int userId, T entity);
-        Task<bool> EditAsync(int userId, T entity);
-        Task<bool> EnableAsync(int userId, int id);
-        Task<bool> DisableAsync(int userId, int id);
-        Task<bool> RemoveAsync(int userId, int id);
+        Task<T?> GetByIdAsync(int id);
+        Task<bool> RegisterAsync(T entity);
+        Task<bool> EditAsync(T entity);
+        Task<bool> UpdateAsync(T entity);
+        Task<bool> RemoveAsync(T entity);
         IQueryable<T> GetEntityQuery(Expression<Func<T, bool>>? filter = null);
 
     }

@@ -2,7 +2,6 @@
 {
     public partial class Users : BaseEntity
     {
-        public int PK_USER { get; set; }
         public string? USER_NAME { get; set; }
         public byte[]? PASSWORD_HASH { get; set; }
         public byte[]? PASSWORD_SALT { get; set; }

@@ -14,22 +14,17 @@ namespace Infrastructure.Persistences.Repositories
             _context = context;
         }
 
-        public IQueryable<Users> ListUsers()
+        public IQueryable<Users> GetUsersQueryable()
         {
             return _context.Users
-                .Where(u => u.AUDIT_DELETE_USER == null && u.AUDIT_DELETE_DATE == null)
                 .Include(u => u.Roles)
                 .Include(u => u.Stores)
                 .AsNoTracking();
         }
 
-        public async Task<Users?> AccountByUserName(string userName)
+        public async Task<Users?> AccountByUserNameAsync(string userName)
         {
             var account = await _context.Users
-                            .Where(u => u.AUDIT_DELETE_USER == null &&
-                                        u.AUDIT_DELETE_DATE == null &&
-                                        u.STATE == true &&
-                                        u.USER_NAME == userName)
                             .Include(u => u.Roles)
                             .Include(u => u.Stores)
                             .AsNoTracking()
@@ -38,7 +33,7 @@ namespace Infrastructure.Persistences.Repositories
             return account;
         }
 
-        public async Task<bool> EditUser(int authenticatedUserId, Users user, bool? updatePassword)
+        public async Task<bool> EditUserAsync(int authenticatedUserId, Users user, bool? updatePassword)
         {
             user.AUDIT_UPDATE_USER = authenticatedUserId;
             user.AUDIT_UPDATE_DATE = DateTime.Now;

@@ -18,7 +18,7 @@ namespace Application.Mappers
         {
             return new BrandsResponseDto
             {
-                PK_BRAND = entity.PK_BRAND,
+                PK_BRAND = entity.PK_ENTITY,
                 BRAND_NAME = entity.BRAND_NAME,
                 AUDIT_CREATE_DATE = entity.AUDIT_CREATE_DATE.HasValue ? entity.AUDIT_CREATE_DATE.Value.ToString("dd/MM/yyyy HH:mm") : null,
                 STATE = entity.STATE,
@@ -30,7 +30,7 @@ namespace Application.Mappers
         {
             return new BrandsSelectResponseDto
             {
-                PK_BRAND = entity.PK_BRAND,
+                PK_BRAND = entity.PK_ENTITY,
                 BRAND_NAME = entity.BRAND_NAME
             };
         }

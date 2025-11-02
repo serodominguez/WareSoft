@@ -10,25 +10,25 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class RolesController : BaseApiController
     {
-        private readonly IRolesApplication _rolesApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly IRolesService _rolesService;
+        private readonly IGenerateExcelService _generateExcelService;
 
-        public RolesController(IRolesApplication rolesApplication, IGenerateExcelApplication generateExcelApplication)
+        public RolesController(IRolesService rolesService, IGenerateExcelService generateExcelService)
         {
-            _rolesApplication = rolesApplication;
-            _generateExcelApplication = generateExcelApplication;
+            _rolesService = rolesService;
+            _generateExcelService = generateExcelService;
         }
 
         [HttpGet]
         [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> ListRoles([FromQuery] BaseFiltersRequest filters)
         {
-            var response = await _rolesApplication.ListRoles(filters);
+            var response = await _rolesService.ListRoles(filters);
 
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsRoles();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
@@ -39,14 +39,15 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> ListSelectRoles()
         {
-            var response = await _rolesApplication.ListSelectRoles();
+            var response = await _rolesService.ListSelectRoles();
             return Ok(response);
         }
 
         [HttpGet("{categoryId:int}")]
+        [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> RoleById(int roleId)
         {
-            var response = await _rolesApplication.RoleById(roleId);
+            var response = await _rolesService.RoleById(roleId);
             return Ok(response);
         }
 
@@ -54,7 +55,7 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Crear")]
         public async Task<IActionResult> RegisterRole([FromBody] RolesRequestDto requestDto)
         {
-            var response = await _rolesApplication.RegisterRole(AuthenticatedUserId, requestDto);
+            var response = await _rolesService.RegisterRole(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
@@ -62,7 +63,7 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> EditRole(int roleId, [FromBody] RolesRequestDto requestDto)
         {
-            var response = await _rolesApplication.EditRole(AuthenticatedUserId, roleId, requestDto);
+            var response = await _rolesService.EditRole(AuthenticatedUserId, roleId, requestDto);
             return Ok(response);
         }
 
@@ -70,7 +71,7 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> EnableRole(int roleId)
         {
-            var response = await _rolesApplication.EnableRole(AuthenticatedUserId, roleId);
+            var response = await _rolesService.EnableRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
 
@@ -78,7 +79,7 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Editar")]
         public async Task<IActionResult> DisableRole(int roleId)
         {
-            var response = await _rolesApplication.DisableRole(AuthenticatedUserId, roleId);
+            var response = await _rolesService.DisableRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
 
@@ -86,7 +87,7 @@ namespace Api.Controllers
         [RequirePermission("Roles", "Eliminar")]
         public async Task<IActionResult> RemoveRole(int roleId)
         {
-            var response = await _rolesApplication.RemoveRole(AuthenticatedUserId, roleId);
+            var response = await _rolesService.RemoveRole(AuthenticatedUserId, roleId);
             return Ok(response);
         }
     }

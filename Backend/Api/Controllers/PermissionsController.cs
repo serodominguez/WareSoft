@@ -6,17 +6,17 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class PermissionsController : BaseApiController
     {
-        private readonly IPermissionsApplication _permissionsApplication;
+        private readonly IPermissionsService _permissionsService;
 
-        public PermissionsController(IPermissionsApplication permissionsApplication)
+        public PermissionsController(IPermissionsService permissionsService)
         {
-            _permissionsApplication = permissionsApplication;
+            _permissionsService = permissionsService;
         }
 
         [HttpGet("User/{userId:int}")]
-        public async Task<IActionResult> GetUserPermissions(int userId)
+        public async Task<IActionResult> UserPermissions(int userId)
         {
-            var response = await _permissionsApplication.GetUserPermissionsAsync(userId);
+            var response = await _permissionsService.ListUserPermissions(userId);
             return Ok(response);
         }
     }

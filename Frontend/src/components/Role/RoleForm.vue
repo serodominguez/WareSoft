@@ -11,7 +11,7 @@
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localRole.rolE_NAME"
-                  :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25" @keyup="uppercase"
+                  :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase"
                   label="Nombre del Rol" required />
               </v-col>
             </v-row>

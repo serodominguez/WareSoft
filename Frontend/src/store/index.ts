@@ -3,11 +3,13 @@ import router from '@/router/index'
 import { createStore } from 'vuex'
 import { jwtDecode } from 'jwt-decode'
 import { normalize } from '@/helpers/utils'
-import BrandMoule from '@/store/modules/Brand'
-import CategoryModule from '@/store/modules/Category'
-import RoleModule from '@/store/modules/Role'
-import StoreModule from '@/store/modules/Store'
-import UserModule from '@/store/modules/User'
+import Brand from '@/store/modules/Brand'
+import Category from '@/store/modules/Category'
+import Module from '@/store/modules/Module'
+import Permission from '@/store/modules/Permission'
+import Role from '@/store/modules/Role'
+import Store from '@/store/modules/Store'
+import User from '@/store/modules/User'
 
 interface Permission {
   module: string;
@@ -186,11 +188,13 @@ const store = createStore({
   },
 
   modules: {
-    brand: BrandMoule,
-    category: CategoryModule,
-    role: RoleModule,
-    store: StoreModule,
-    user: UserModule
+    brand: Brand,
+    category: Category,
+    role: Role,
+    module: Module,
+    permission: Permission,
+    store: Store,
+    user: User
   },
 });
 

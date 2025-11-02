@@ -8,17 +8,17 @@ namespace Api.Controllers
     [ApiController]
     public class AuthorizationController : ControllerBase
     {
-        private readonly IAuthorizationApplication _authorizationApplication;
+        private readonly IAuthorizationService _authorizationService;
 
-        public AuthorizationController(IAuthorizationApplication authorizationApplication)
+        public AuthorizationController(IAuthorizationService authorizationService)
         {
-            _authorizationApplication = authorizationApplication;
+            _authorizationService = authorizationService;
         }
 
         [HttpPost("Generate/Token")]
         public async Task<IActionResult> GenerateToken([FromBody] TokenRequestDto requestDto)
         {
-            var response = await _authorizationApplication.GenerateToken(requestDto);
+            var response = await _authorizationService.GenerateToken(requestDto);
             return Ok(response);
         }
     }

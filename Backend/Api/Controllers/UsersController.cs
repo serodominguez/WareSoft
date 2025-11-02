@@ -10,13 +10,13 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class UsersController : BaseApiController
     {
-        private readonly IUsersApplication _usersApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly IUsersService _usersService;
+        private readonly IGenerateExcelService _generateExcelService;
 
-        public UsersController(IUsersApplication usersApplication, IGenerateExcelApplication generateExcelApplication)
+        public UsersController(IUsersService usersService, IGenerateExcelService generateExcelService)
         {
-            _usersApplication = usersApplication;
-            _generateExcelApplication = generateExcelApplication;
+            _usersService = usersService;
+            _generateExcelService = generateExcelService;
         }
 
 
@@ -24,12 +24,12 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Listar")]
         public async Task<IActionResult> ListUsers([FromQuery] BaseFiltersRequest filters)
         {
-            var response = await _usersApplication.ListUsers(filters);
+            var response = await _usersService.ListUsers(filters);
 
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsUsers();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
@@ -40,7 +40,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Listar")]
         public async Task<IActionResult> UserById(int userId)
         {
-            var response = await _usersApplication.UserById(userId);
+            var response = await _usersService.UserById(userId);
             return Ok(response);
         }
 
@@ -48,7 +48,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Crear")]
         public async Task<IActionResult> RegisterUser([FromBody] UsersRequestDto requestDto)
         {
-            var response = await _usersApplication.RegisterUser(AuthenticatedUserId, requestDto);
+            var response = await _usersService.RegisterUser(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
@@ -56,7 +56,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Editar")]
         public async Task<IActionResult> EditUser(int userId, [FromBody] UsersRequestDto requestDto)
         {
-            var response = await _usersApplication.EditUser(AuthenticatedUserId, userId, requestDto);
+            var response = await _usersService.EditUser(AuthenticatedUserId, userId, requestDto);
             return Ok(response);
         }
 
@@ -64,7 +64,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Editar")]
         public async Task<IActionResult> EnableUser(int userId)
         {
-            var response = await _usersApplication.EnableUser(AuthenticatedUserId, userId);
+            var response = await _usersService.EnableUser(AuthenticatedUserId, userId);
             return Ok(response);
         }
 
@@ -72,7 +72,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Editar")]
         public async Task<IActionResult> DisableUser(int userId)
         {
-            var response = await _usersApplication.DisableUser(AuthenticatedUserId, userId);
+            var response = await _usersService.DisableUser(AuthenticatedUserId, userId);
             return Ok(response);
         }
 
@@ -80,7 +80,7 @@ namespace Api.Controllers
         [RequirePermission("Usuarios", "Eliminar")]
         public async Task<IActionResult> RemoveUser(int userId)
         {
-            var response = await _usersApplication.RemoveUser(AuthenticatedUserId, userId);
+            var response = await _usersService.RemoveUser(AuthenticatedUserId, userId);
             return Ok(response);
         }
     }

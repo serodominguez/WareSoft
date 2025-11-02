@@ -21,5 +21,7 @@
         public const string MESSAGE_FORBIDDEN = "No tienes permisos para acceder a este recurso.";
         public const string MESSAGE_USER_NOT_FOUND = "Usuario no encontrado.";
         public const string MESSAGE_USER_WITHOUT_PERMISSIONS = "El usuario no tiene permisos asignados.";
+        public const string MESSAGE_ROLE_NOT_FOUND = "Rol no encontrado.";
+        public const string MESSAGE_ROLE_WITHOUT_PERMISSIONS = "El rol no tiene permisos asignados.";
     }
 }

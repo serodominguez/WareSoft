@@ -2,7 +2,6 @@
 {
     public partial class Stores : BaseEntity
     {
-        public int PK_STORE { get; set; }
         public string? STORE_NAME { get; set; }
         public string? MANAGER { get; set; }
         public string? ADDRESS { get; set; }

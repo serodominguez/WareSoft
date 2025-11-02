@@ -33,7 +33,7 @@ export async function fetchRolesService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ROLE", 
+  sort = "PK_ENTITY", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,

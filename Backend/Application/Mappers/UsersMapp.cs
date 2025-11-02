@@ -24,7 +24,7 @@ namespace Application.Mappers
         {
             return new UsersResponseDto
             {
-                PK_USER = entity.PK_USER,
+                PK_USER = entity.PK_ENTITY,
                 USER_NAME = entity.USER_NAME,
                 PASSWORD_HASH = entity.PASSWORD_HASH,
                 NAMES = entity.NAMES,

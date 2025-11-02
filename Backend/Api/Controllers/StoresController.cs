@@ -10,25 +10,25 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class StoresController : BaseApiController
     {
-        private readonly IStoresApplication _storesApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly IStoresService _storesService;
+        private readonly IGenerateExcelService _generateExcelService;
 
-        public StoresController(IStoresApplication storesApplication, IGenerateExcelApplication generateExcelApplication)
+        public StoresController(IStoresService storesService, IGenerateExcelService generateExcelService)
         {
-            _storesApplication = storesApplication;
-            _generateExcelApplication = generateExcelApplication;
+            _storesService = storesService;
+            _generateExcelService = generateExcelService;
         }
 
         [HttpGet]
         [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> ListStores([FromQuery] BaseFiltersRequest filters)
         {
-            var response = await _storesApplication.ListStores(filters);
+            var response = await _storesService.ListStores(filters);
 
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsStores();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
@@ -39,7 +39,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> ListSelectStores()
         {
-            var response = await _storesApplication.ListSelectStores();
+            var response = await _storesService.ListSelectStores();
             return Ok(response);
         }
 
@@ -47,7 +47,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Leer")]
         public async Task<IActionResult> StoreById(int storeId)
         {
-            var response = await _storesApplication.StoreById(storeId);
+            var response = await _storesService.StoreById(storeId);
             return Ok(response);
         }
 
@@ -55,7 +55,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Crear")]
         public async Task<IActionResult> RegisterStore([FromBody] StoresRequestDto requestDto)
         {
-            var response = await _storesApplication.RegisterStore(AuthenticatedUserId, requestDto);
+            var response = await _storesService.RegisterStore(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
@@ -63,7 +63,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> EditStore(int storeId, [FromBody] StoresRequestDto requestDto)
         {
-            var response = await _storesApplication.EditStore(AuthenticatedUserId, storeId, requestDto);
+            var response = await _storesService.EditStore(AuthenticatedUserId, storeId, requestDto);
             return Ok(response);
         }
 
@@ -71,7 +71,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> EnableStore(int storeId)
         {
-            var response = await _storesApplication.EnableStore(AuthenticatedUserId, storeId);
+            var response = await _storesService.EnableStore(AuthenticatedUserId, storeId);
             return Ok(response);
         }
 
@@ -79,7 +79,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Editar")]
         public async Task<IActionResult> DisableStore(int storeId)
         {
-            var response = await _storesApplication.DisableStore(AuthenticatedUserId, storeId);
+            var response = await _storesService.DisableStore(AuthenticatedUserId, storeId);
             return Ok(response);
         }
 
@@ -87,7 +87,7 @@ namespace Api.Controllers
         [RequirePermission("Tiendas", "Eliminar")]
         public async Task<IActionResult> RemoveStore(int storeId)
         {
-            var response = await _storesApplication.RemoveStore(AuthenticatedUserId, storeId);
+            var response = await _storesService.RemoveStore(AuthenticatedUserId, storeId);
             return Ok(response);
         }
     }

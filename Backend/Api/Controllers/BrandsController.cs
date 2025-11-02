@@ -10,44 +10,43 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class BrandsController : BaseApiController
     {
-        private readonly IBrandsApplication _brandsApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly IBrandsService _brandsService;
+        private readonly IGenerateExcelService _generateExcelService;
 
-        public BrandsController(IBrandsApplication brandsApplication, IGenerateExcelApplication generateExcelApplication)
+        public BrandsController(IBrandsService brandsService, IGenerateExcelService generateExcelService)
         {
-            _brandsApplication = brandsApplication;
-            _generateExcelApplication = generateExcelApplication;
+            _brandsService = brandsService;
+            _generateExcelService = generateExcelService;
         }
 
         [HttpGet]
         [RequirePermission("Marcas", "Leer")]
         public async Task<IActionResult> ListBrands([FromQuery] BaseFiltersRequest filters)
         {
-            var response = await _brandsApplication.ListBrands(filters);
+            var response = await _brandsService.ListBrands(filters);
 
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsBrands();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
             return Ok(response);
         }
 
-        //[AllowAnonymous]
         [HttpGet("Select")]
         [RequirePermission("Marcas", "Leer")]
         public async Task<IActionResult> ListSelectBrands()
         {
-            var response = await _brandsApplication.ListSelectBrands();
+            var response = await _brandsService.ListSelectBrands();
             return Ok(response);
         }
 
         [HttpGet("{categoryId:int}")]
         public async Task<IActionResult> BrandById(int brandId)
         {
-            var response = await _brandsApplication.BrandById(brandId);
+            var response = await _brandsService.BrandById(brandId);
             return Ok(response);
         }
 
@@ -55,7 +54,7 @@ namespace Api.Controllers
         [RequirePermission("Marcas", "Crear")]
         public async Task<IActionResult> RegisterBrand([FromBody] BrandsRequestDto requestDto)
         {
-            var response = await _brandsApplication.RegisterBrand(AuthenticatedUserId, requestDto);
+            var response = await _brandsService.RegisterBrand(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
@@ -63,7 +62,7 @@ namespace Api.Controllers
         [RequirePermission("Marcas", "Editar")]
         public async Task<IActionResult> EditBrand(int brandId, [FromBody] BrandsRequestDto requestDto)
         {
-            var response = await _brandsApplication.EditBrand(AuthenticatedUserId, brandId, requestDto);
+            var response = await _brandsService.EditBrand(AuthenticatedUserId, brandId, requestDto);
             return Ok(response);
         }
 
@@ -71,7 +70,7 @@ namespace Api.Controllers
         [RequirePermission("Marcas", "Editar")]
         public async Task<IActionResult> EnableBrand(int brandId)
         {
-            var response = await _brandsApplication.EnableBrand(AuthenticatedUserId, brandId);
+            var response = await _brandsService.EnableBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
 
@@ -79,7 +78,7 @@ namespace Api.Controllers
         [RequirePermission("Marcas", "Editar")]
         public async Task<IActionResult> DisableBrand(int brandId)
         {
-            var response = await _brandsApplication.DisableBrand(AuthenticatedUserId, brandId);
+            var response = await _brandsService.DisableBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
 
@@ -87,7 +86,7 @@ namespace Api.Controllers
         [RequirePermission("Marcas", "Eliminar")]
         public async Task<IActionResult> RemoveBrand(int brandId)
         {
-            var response = await _brandsApplication.RemoveBrand(AuthenticatedUserId, brandId);
+            var response = await _brandsService.RemoveBrand(AuthenticatedUserId, brandId);
             return Ok(response);
         }
     }

@@ -17,11 +17,19 @@ import 'vue-toastification/dist/index.css';
 // Configuración de Axios
 axios.defaults.baseURL='https://localhost:7228/'
 
-// Interceptor para agregar token a todas las peticiones
-const token = localStorage.getItem('token')
-if (token) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-}
+// Interceptor para agregar token dinámicamente a cada petición
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 // Interceptor para manejar errores de autorización
 axios.interceptors.response.use(

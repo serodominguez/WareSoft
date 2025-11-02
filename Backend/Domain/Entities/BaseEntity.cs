@@ -2,6 +2,7 @@
 {
     public class BaseEntity
     {
+        public int PK_ENTITY { get; set; }
         public int? AUDIT_CREATE_USER { get; set; }
         public DateTime? AUDIT_CREATE_DATE { get; set; }
         public int? AUDIT_UPDATE_USER { get; set; }

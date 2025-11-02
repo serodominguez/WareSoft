@@ -8,9 +8,9 @@ namespace Application.Validators
         public StoresValidator() 
         {
             RuleFor(x => x.STORE_NAME)
-                .NotNull().WithMessage("El campo nombre no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo nombre no puede estar vacio!")
-                .MaximumLength(50).WithMessage("El campo nombre no puede tener más de 50 caracteres!");
+                .NotNull().WithMessage("El campo nombre de tienda no puede ser nulo!")
+                .NotEmpty().WithMessage("El campo nombre de tienda no puede estar vacio!")
+                .MaximumLength(50).WithMessage("El campo nombre de tienda no puede tener más de 50 caracteres!");
 
             RuleFor(x => x.MANAGER)
                 .NotNull().WithMessage("El campo encargado no puede ser nulo!")

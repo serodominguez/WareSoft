@@ -33,7 +33,7 @@ export async function fetchStoresService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_STORE", 
+  sort = "PK_ENTITY", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,

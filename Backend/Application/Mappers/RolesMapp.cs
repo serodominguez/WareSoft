@@ -18,7 +18,7 @@ namespace Application.Mappers
         {
             return new RolesResponseDto
             {
-                PK_ROLE = entity.PK_ROLE,
+                PK_ROLE = entity.PK_ENTITY,
                 ROLE_NAME = entity.ROLE_NAME,
                 AUDIT_CREATE_DATE = entity.AUDIT_CREATE_DATE.HasValue ? entity.AUDIT_CREATE_DATE.Value.ToString("dd/MM/yyyy HH:mm") : null,
                 STATE = entity.STATE,
@@ -30,7 +30,7 @@ namespace Application.Mappers
         {
             return new RolesSelectResponseDto
             {
-                PK_ROLE = entity.PK_ROLE,
+                PK_ROLE = entity.PK_ENTITY,
                 ROLE_NAME = entity.ROLE_NAME
             };
         }

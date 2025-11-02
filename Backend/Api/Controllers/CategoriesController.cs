@@ -10,25 +10,25 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class CategoriesController : BaseApiController
     {
-        private readonly ICategoriesApplication _categoriesApplication;
-        private readonly IGenerateExcelApplication _generateExcelApplication;
+        private readonly ICategoriesService _categoriesService;
+        private readonly IGenerateExcelService _generateExcelService;
 
-        public CategoriesController(ICategoriesApplication categoriesApplication, IGenerateExcelApplication generateExcelApplication)
+        public CategoriesController(ICategoriesService categoriesService, IGenerateExcelService generateExcelService)
         {
-            _categoriesApplication = categoriesApplication;
-            _generateExcelApplication = generateExcelApplication;
+            _categoriesService = categoriesService;
+            _generateExcelService = generateExcelService;
         }
 
         [HttpGet]
         [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> ListCategories([FromQuery] BaseFiltersRequest filters)
         {
-            var response = await _categoriesApplication.ListCategories(filters);
+            var response = await _categoriesService.ListCategories(filters);
 
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsCategories();
-                var fileBytes = _generateExcelApplication.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
@@ -39,7 +39,7 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> ListSelectCategories()
         {
-            var response = await _categoriesApplication.ListSelectCategories();
+            var response = await _categoriesService.ListSelectCategories();
             return Ok(response);
         }
 
@@ -47,7 +47,7 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Leer")]
         public async Task<IActionResult> CategoryById(int categoryId)
         {
-            var response = await _categoriesApplication.CategoryById(categoryId);
+            var response = await _categoriesService.CategoryById(categoryId);
             return Ok(response);
         }
 
@@ -56,7 +56,7 @@ namespace Api.Controllers
         public async Task<IActionResult> RegisterCategory([FromBody] CategoriesRequestDto requestDto)
         {
 
-            var response = await _categoriesApplication.RegisterCategory(AuthenticatedUserId, requestDto);
+            var response = await _categoriesService.RegisterCategory(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
 
@@ -65,7 +65,7 @@ namespace Api.Controllers
         public async Task<IActionResult> EditCategory(int categoryId, [FromBody] CategoriesRequestDto requestDto)
         {
 
-            var response = await _categoriesApplication.EditCategory(AuthenticatedUserId, categoryId, requestDto);
+            var response = await _categoriesService.EditCategory(AuthenticatedUserId, categoryId, requestDto);
             return Ok(response);
         }
 
@@ -74,7 +74,7 @@ namespace Api.Controllers
         public async Task<IActionResult> EnableCategory(int categoryId)
         {
 
-            var response = await _categoriesApplication.EnableCategory(AuthenticatedUserId, categoryId);
+            var response = await _categoriesService.EnableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 
@@ -83,7 +83,7 @@ namespace Api.Controllers
         public async Task<IActionResult> DisableCategory(int categoryId)
         {
 
-            var response = await _categoriesApplication.DisableCategory(AuthenticatedUserId, categoryId);
+            var response = await _categoriesService.DisableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 
@@ -92,7 +92,7 @@ namespace Api.Controllers
         public async Task<IActionResult> RemoveCategory(int categoryId)
         {
 
-            var response = await _categoriesApplication.RemoveCategory(AuthenticatedUserId, categoryId);
+            var response = await _categoriesService.RemoveCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
 

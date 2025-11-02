@@ -23,7 +23,7 @@ namespace TestApi.Category
         public async Task RegisterCategory_WhenSendingNullValuesOrEmpty_ValidationErrors()
         {
             using var scope = _scopeFactory?.CreateScope();
-            var context = scope?.ServiceProvider.GetService<ICategoriesApplication>();
+            var context = scope?.ServiceProvider.GetService<ICategoriesService>();
 
             //Arrange
             var name = "";
@@ -46,7 +46,7 @@ namespace TestApi.Category
         public async Task RegisterCategory_WhenSendingCorrectValues_RegisteredSuccesfully()
         {
             using var scope = _scopeFactory?.CreateScope();
-            var context = scope?.ServiceProvider.GetService<ICategoriesApplication>();
+            var context = scope?.ServiceProvider.GetService<ICategoriesService>();
 
             //Arrange
             var name = "Test";

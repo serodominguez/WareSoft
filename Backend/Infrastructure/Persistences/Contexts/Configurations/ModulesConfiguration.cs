@@ -8,8 +8,13 @@ namespace Infrastructure.Persistences.Contexts.Configurations
     {
         public void Configure(EntityTypeBuilder<Modules> builder)
         {
-            builder.ToTable("Modules")
-                .HasKey(m => m.PK_MODULE);
+            builder.ToTable("Modules");
+
+            builder.HasKey(e => e.PK_ENTITY);
+
+            builder.Property(e => e.PK_ENTITY)
+                .HasColumnName("PK_MODULE");
+
             builder.Property(m => m.MODULE_NAME)
                 .HasMaxLength(25);
         }

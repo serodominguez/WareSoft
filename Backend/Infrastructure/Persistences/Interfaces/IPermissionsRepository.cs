@@ -2,9 +2,10 @@
 
 namespace Infrastructure.Persistences.Interfaces
 {
-    public interface IPermissionsRepository
+    public interface IPermissionsRepository : IGenericRepository<Permissions>
     {
-        Task<bool> PermissionAsync(int roleId, string moduleName, string actionName);
-        Task<IEnumerable<Permissions>> GetRolePermissionsAsync(int roleId);
+        Task<bool> GetPermissionsAsync(int roleId, string moduleName, string actionName);
+        Task<IEnumerable<Permissions>> PermissionsByRoleAsync(int roleId);
+        Task<bool> RegisterPermissionsAsync(List<Permissions> permissions);
     }
 }

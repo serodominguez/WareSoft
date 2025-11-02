@@ -10,9 +10,9 @@ namespace Api.Filters
 {
     public class PermissionAuthorizationFilter : IAsyncAuthorizationFilter
     {
-        private readonly IPermissionsApplication _permissionsApplication;
+        private readonly IPermissionsService _permissionsApplication;
 
-        public PermissionAuthorizationFilter(IPermissionsApplication permissionsApplication)
+        public PermissionAuthorizationFilter(IPermissionsService permissionsApplication)
         {
             _permissionsApplication = permissionsApplication;
         }
@@ -40,7 +40,7 @@ namespace Api.Filters
                 return;
             }
 
-            var hasPermission = await _permissionsApplication.UserPermissionAsync(userId, permissionAttribute.Module, permissionAttribute.Action);
+            var hasPermission = await _permissionsApplication.UserPermissions(userId, permissionAttribute.Module, permissionAttribute.Action);
 
             if (!hasPermission)
             {

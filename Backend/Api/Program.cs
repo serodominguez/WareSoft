@@ -13,7 +13,7 @@ var Cors = "Cors";
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);
-builder.Services.AddMemoryCache();
+//builder.Services.AddMemoryCache();
 builder.Services.AddScoped<PermissionAuthorizationFilter>();
 builder.Services.AddControllers(options =>
 {

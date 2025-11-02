@@ -17,11 +17,6 @@ interface DecodedToken {
   [key: string]: any;
 };
 
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
 const state: BrandState = {
   brands: [] as Brand[],
   selectedBrand: null as Brand | null,
@@ -65,7 +60,7 @@ const actions = {
       pageNumber = 1, 
       pageSize = 10, 
       order = "desc", 
-      sort = "PK_BRAND", 
+      sort = "PK_ENTITY", 
       textFilter = null, 
       numberFilter = null,
       stateFilter = 1,
@@ -92,8 +87,7 @@ const actions = {
         stateFilter,
         startDate,
         endDate,
-        false,
-        token
+        false
       );
 
       if (result.isSuccess) {
@@ -109,13 +103,13 @@ const actions = {
     }
   },
 
- async downloadBrandsExcel(
+  async downloadBrandsExcel(
     { rootState }: any,
     { 
       pageNumber = 1, 
       pageSize = 10, 
       order = "desc", 
-      sort = "PK_BRAND", 
+      sort = "PK_ENTITY", 
       textFilter = null, 
       numberFilter = null,
       stateFilter = 1,
@@ -140,8 +134,7 @@ const actions = {
         stateFilter,
         startDate,
         endDate,
-        true,
-        token
+        true
       );
 
       const url = window.URL.createObjectURL(blob);
@@ -169,7 +162,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await selectBrandService( token);
+      const result: BaseResponse = await selectBrandService();
       if (result.isSuccess) {
         commit("SET_BRANDS", result.data);
       } else {
@@ -191,7 +184,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await fetchBrandByIdService(id, token);
+      const result: BaseResponse = await fetchBrandByIdService(id);
       if (result.isSuccess) {
         commit("SET_SELECTED_BRAND", result.data);
       } else {
@@ -204,7 +197,7 @@ const actions = {
     }
   },
 
-  async registerBrand({ commit,dispatch, rootState }: any, brand: Brand) {
+  async registerBrand({ commit, dispatch, rootState }: any, brand: Brand) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -212,7 +205,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await registerBrandService(brand, token);
+      const result: BaseResponse = await registerBrandService(brand);
       if (result.isSuccess) {
         dispatch("fetchBrands", {});
       } else {
@@ -231,7 +224,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await editBrandService(id, brand, token);
+      const result: BaseResponse = await editBrandService(id, brand);
       if (result.isSuccess) {
         dispatch("fetchBrands", {});
       } else {
@@ -250,7 +243,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await enableBrandService(id, token);
+      const result: BaseResponse = await enableBrandService(id);
       if (result.isSuccess) {
         dispatch("fetchBrands", {});
       } else {
@@ -269,7 +262,7 @@ const actions = {
         return;
       }
 
-      const result: BaseResponse = await disableBrandService(id, token);
+      const result: BaseResponse = await disableBrandService(id);
       if (result.isSuccess) {
         dispatch("fetchBrands", {});
       } else {
@@ -287,7 +280,7 @@ const actions = {
         await mainStore.dispatch("logout");
         return;
       }
-      const result: BaseResponse = await removeBrandService(id, token);
+      const result: BaseResponse = await removeBrandService(id);
       if (result.isSuccess) {
         dispatch("fetchBrands", {});
       } else {

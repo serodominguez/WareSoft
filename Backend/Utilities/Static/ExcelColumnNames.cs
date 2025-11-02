@@ -49,6 +49,20 @@
         }
         #endregion
 
+        #region ColumnsModules
+        public static List<(string ColumnName, string PropertyName)> GetColumnsModules()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("MÓDULO", "MODULE_NAME"),
+                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
+                ("ESTADO", "STATE_MODULE")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
         #region ColumnsRoles
         public static List<(string ColumnName, string PropertyName)> GetColumnsRoles()
         {

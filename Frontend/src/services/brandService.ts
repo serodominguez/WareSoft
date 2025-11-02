@@ -11,8 +11,7 @@ export async function fetchBrandsService(
   stateFilter: number,
   startDate: string | null | undefined,
   endDate: string | null | undefined,
-  download: true,
-  token?: string
+  download: true
 ): Promise<Blob>;
 
 export async function fetchBrandsService(
@@ -25,22 +24,20 @@ export async function fetchBrandsService(
   stateFilter: number,
   startDate: string | null | undefined,
   endDate: string | null | undefined,
-  download?: false,
-  token?: string
+  download?: false
 ): Promise<BaseResponse>;
 
 export async function fetchBrandsService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_BRAND", 
+  sort = "PK_ENTITY", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
   startDate?: string | null,
   endDate?: string | null,
-   download: boolean = false,
-  token?: string
+  download: boolean = false
 ): Promise<BaseResponse | Blob> {
   const params: any = {
     NumberPage: pageNumber,
@@ -64,10 +61,7 @@ export async function fetchBrandsService(
     params.endDate = endDate;
   }
 
-    const configuration: any = {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    params: params
-  };
+  const configuration: any = { params };
 
   if (download) {
     configuration.responseType = 'blob';
@@ -79,50 +73,37 @@ export async function fetchBrandsService(
   return response.data;
 }
 
-export async function selectBrandService(token: string): Promise<BaseResponse> {
-  
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>("api/Brands/Select", configuration);
+export async function selectBrandService(): Promise<BaseResponse> {
+  const response = await axios.get<BaseResponse>("api/Brands/Select");
   return response.data;
 }
 
-export async function fetchBrandByIdService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>(`api/Brands/${id}`, configuration);
+export async function fetchBrandByIdService(id: number): Promise<BaseResponse> {
+  const response = await axios.get<BaseResponse>(`api/Brands/${id}`);
   return response.data;
 }
 
-export async function registerBrandService(brand: Brand, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post<BaseResponse>("api/Brands/Register", brand, configuration);
+export async function registerBrandService(brand: Brand): Promise<BaseResponse> {
+  const response = await axios.post<BaseResponse>("api/Brands/Register", brand);
   return response.data;
 }
 
-export async function editBrandService(id: number, brand: Brand, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Brands/Edit/${id}`, brand, configuration);
+export async function editBrandService(id: number, brand: Brand): Promise<BaseResponse> {
+  const response = await axios.put<BaseResponse>(`api/Brands/Edit/${id}`, brand);
   return response.data;
 }
 
-export async function enableBrandService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Brands/Enable/${id}`, {}, configuration);
-  return response.data;
-}
-export async function disableBrandService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Brands/Disable/${id}`, {}, configuration);
+export async function enableBrandService(id: number): Promise<BaseResponse> {
+  const response = await axios.put<BaseResponse>(`api/Brands/Enable/${id}`, {});
   return response.data;
 }
 
-export async function removeBrandService(id: number, token: string): Promise<BaseResponse> {
+export async function disableBrandService(id: number): Promise<BaseResponse> {
+  const response = await axios.put<BaseResponse>(`api/Brands/Disable/${id}`, {});
+  return response.data;
+}
 
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Brands/Remove/${id}`, {}, configuration);
+export async function removeBrandService(id: number): Promise<BaseResponse> {
+  const response = await axios.put<BaseResponse>(`api/Brands/Remove/${id}`, {});
   return response.data;
 }

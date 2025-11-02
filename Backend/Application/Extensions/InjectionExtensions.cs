@@ -30,14 +30,15 @@ namespace Application.Extensions
             services.AddTransient<IOrderingQuery, OrderingQuery>();
             services.AddTransient<ISecurity, SecurityApplication>();
 
-            services.AddScoped<IAuthorizationApplication, AuthorizationApplication>();
-            services.AddScoped<IGenerateExcelApplication, GenerateExcelApplication>();
-            services.AddScoped<IBrandsApplication, BrandsApplication>();
-            services.AddScoped<ICategoriesApplication, CategoriesApplication>();
-            services.AddScoped<IPermissionsApplication, PermissionsApplication>();
-            services.AddScoped<IRolesApplication, RolesApplication>();
-            services.AddScoped<IStoresApplication, StoresApplication>();
-            services.AddScoped<IUsersApplication, UsersApplication>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<IGenerateExcelService, GenerateExcelService>();
+            services.AddScoped<IBrandsService, BrandsService>();
+            services.AddScoped<ICategoriesService, CategoriesService>();
+            services.AddScoped<IModulesService, ModulesService>();
+            services.AddScoped<IPermissionsService, PermissionsService>();
+            services.AddScoped<IRolesService, RolesService>();
+            services.AddScoped<IStoresService, StoresService>();
+            services.AddScoped<IUsersService, UsersService>();
 
             return services;
         }

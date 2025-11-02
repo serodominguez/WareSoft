@@ -1,66 +1,73 @@
 ﻿using Domain.Entities;
 using Infrastructure.Persistences.Contexts;
 using Infrastructure.Persistences.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistences.Repositories
 {
-    public class PermissionsRepository : IPermissionsRepository
+    public class PermissionsRepository : GenericRepository<Permissions>, IPermissionsRepository
     {
         private readonly DbContextSystem _context;
-        private readonly IMemoryCache _cache;
+        private readonly DbSet<Permissions> _entity;
+        //private readonly IMemoryCache _cache;
 
-        public PermissionsRepository(DbContextSystem context, IMemoryCache cache)
+        public PermissionsRepository(DbContextSystem context) : base(context)
         {
             _context = context;
-            _cache = cache;
+            _entity = _context.Set<Permissions>();
         }
 
-        public async Task<bool> PermissionAsync(int roleId, string moduleName, string actionName)
-        {
-            var cacheKey = $"permission_{roleId}_{moduleName}_{actionName}";
+        public async Task<bool> GetPermissionsAsync(int roleId, string moduleName, string actionName)
+        {            
+            //Consulta con cache
 
-            if (_cache.TryGetValue(cacheKey, out bool cachedResult))
-                return cachedResult;
+            //var cacheKey = $"permission_{roleId}_{moduleName}_{actionName}";
 
-            var hasPermission = await _context.Permissions
-                .Include(p => p.Modules)
-                .Include(p => p.Actions)
-                .AnyAsync(p =>
-                    p.PK_ROLE == roleId &&
-                    p.Modules!.MODULE_NAME == moduleName &&
-                    p.Actions!.ACTION_NAME == actionName &&
-                    p.STATE &&
-                    p.Modules.STATE &&
-                    p.Actions.STATE
-                );
+            //if (_cache.TryGetValue(cacheKey, out bool cachedResult))
+            //    return cachedResult;
 
-            _cache.Set(cacheKey, hasPermission, TimeSpan.FromMinutes(30));
-            return hasPermission;
-
-            //Consulta a la base de datos sin cache
-
-            //return await _context.Permissions
+            //var hasPermission = await _context.Permissions
             //    .Include(p => p.Modules)
             //    .Include(p => p.Actions)
             //    .AnyAsync(p =>
             //        p.PK_ROLE == roleId &&
-            //        p.Modules.MODULE_NAME == moduleName &&
-            //        p.Actions.ACTION_NAME == actionName &&
+            //        p.Modules!.MODULE_NAME == moduleName &&
+            //        p.Actions!.ACTION_NAME == actionName &&
             //        p.STATE &&
             //        p.Modules.STATE &&
             //        p.Actions.STATE
             //    );
+
+            //_cache.Set(cacheKey, hasPermission, TimeSpan.FromMinutes(30));
+            //return hasPermission;
+
+            return await _context.Permissions
+                    .Include(p => p.Modules)
+                    .Include(p => p.Actions)
+                    .AnyAsync(p =>
+                                p.PK_ROLE == roleId &&
+                                p.Modules!.MODULE_NAME == moduleName &&
+                                p.Actions!.ACTION_NAME == actionName &&
+                                p.STATE &&
+                                p.Modules.STATE &&
+                                p.Actions.STATE
+                );
         }
 
-        public async Task<IEnumerable<Permissions>> GetRolePermissionsAsync(int roleId)
+        public async Task<IEnumerable<Permissions>> PermissionsByRoleAsync(int roleId)
         {
             return await _context.Permissions
                 .Include(p => p.Modules)
                 .Include(p => p.Actions)
                 .Where(p => p.PK_ROLE == roleId && p.STATE)
                 .ToListAsync();
+        }
+
+        public async Task<bool> RegisterPermissionsAsync(List<Permissions> permissions)
+        {
+            await _context.Permissions.AddRangeAsync(permissions);
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
         }
     }
 }

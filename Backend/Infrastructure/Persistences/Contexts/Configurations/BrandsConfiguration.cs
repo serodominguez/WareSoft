@@ -8,8 +8,13 @@ namespace Infrastructure.Persistences.Contexts.Configurations
     {
         public void Configure(EntityTypeBuilder<Brands> builder)
         {
-            builder.ToTable("Brands")
-                .HasKey(b => b.PK_BRAND);
+            builder.ToTable("Brands");
+
+            builder.HasKey(e => e.PK_ENTITY);
+
+            builder.Property(e => e.PK_ENTITY)
+                .HasColumnName("PK_BRAND");
+
             builder.Property(b => b.BRAND_NAME)
                 .HasMaxLength(25);
         }
