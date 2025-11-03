@@ -104,7 +104,7 @@ namespace Application.Services
                 else
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                 }
             }
             catch (Exception ex)
@@ -180,7 +180,7 @@ namespace Application.Services
                 if (IsValid is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -226,7 +226,7 @@ namespace Application.Services
                 if (user is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -267,7 +267,7 @@ namespace Application.Services
                 if (user is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -308,7 +308,7 @@ namespace Application.Services
                 if (user is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 

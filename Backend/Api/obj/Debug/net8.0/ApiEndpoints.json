@@ -559,6 +559,22 @@
   },
   {
     "ContainingType": "Api.Controllers.PermissionsController",
+    "Method": "UpdatePermissions",
+    "RelativePath": "api/Permissions/UpdatePermissions",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "permissionsDto",
+        "Type": "System.Collections.Generic.List\u00601[[Application.Dtos.Request.Permissions.PermissionsRequestDto, Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.PermissionsController",
     "Method": "UserPermissions",
     "RelativePath": "api/Permissions/User/{userId}",
     "HttpMethod": "GET",

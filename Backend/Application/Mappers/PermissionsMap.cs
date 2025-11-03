@@ -1,10 +1,20 @@
-﻿using Application.Dtos.Response.Permissions;
+﻿using Application.Dtos.Request.Permissions;
+using Application.Dtos.Response.Permissions;
 using Domain.Entities;
 
 namespace Application.Mappers
 {
     public static class PermissionsMap
     {
+        public static Permissions PermissionsMapping(PermissionsRequestDto dto)
+        {
+            return new Permissions
+            {
+                PK_ENTITY = dto.PK_PERMISSION,
+                STATE = dto.STATE
+            };
+        }
+
         public static PermissionsByUserResponseDto PermissionsByUserResponseDtoMapping(Permissions entity)
         {
             return new PermissionsByUserResponseDto

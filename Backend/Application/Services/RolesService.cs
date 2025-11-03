@@ -97,7 +97,7 @@ namespace Application.Services
                 else
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                 }
             }
             catch (Exception ex)
@@ -124,7 +124,7 @@ namespace Application.Services
                 else
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                 }
             }
             catch (Exception ex)
@@ -216,7 +216,7 @@ namespace Application.Services
                 if (isValid is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -258,7 +258,7 @@ namespace Application.Services
                 if (role is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -299,7 +299,7 @@ namespace Application.Services
                 if (role is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 
@@ -340,7 +340,7 @@ namespace Application.Services
                 if (role is null)
                 {
                     response.IsSuccess = false;
-                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
                     return response;
                 }
 

@@ -18,7 +18,7 @@ namespace Infrastructure.Persistences.Repositories
         }
 
         public async Task<bool> GetPermissionsAsync(int roleId, string moduleName, string actionName)
-        {            
+        {
             //Consulta con cache
 
             //var cacheKey = $"permission_{roleId}_{moduleName}_{actionName}";
@@ -62,10 +62,32 @@ namespace Infrastructure.Persistences.Repositories
                 .Where(p => p.PK_ROLE == roleId)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Permissions>> GetByIdsAsync(List<int> permissionIds)
+        {
+            return await _context.Permissions
+                 .Where(p => permissionIds.Contains(p.PK_ENTITY))
+                 .ToListAsync();
+        }
 
         public async Task<bool> RegisterPermissionsAsync(List<Permissions> permissions)
         {
             await _context.Permissions.AddRangeAsync(permissions);
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
+        }
+
+        public async Task<bool> UpdatePermissionsRangeAsync(List<Permissions> permissions)
+        {
+            foreach (var permission in permissions)
+            {
+                _context.Update(permission);
+                _context.Entry(permission).Property(x => x.PK_ROLE).IsModified = false;
+                _context.Entry(permission).Property(x => x.PK_MODULE).IsModified = false;
+                _context.Entry(permission).Property(x => x.PK_ACTION).IsModified = false;
+                _context.Entry(permission).Property(x => x.AUDIT_CREATE_USER).IsModified = false;
+                _context.Entry(permission).Property(x => x.AUDIT_CREATE_DATE).IsModified = false;
+            }
+
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }

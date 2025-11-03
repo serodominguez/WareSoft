@@ -6,6 +6,8 @@ namespace Infrastructure.Persistences.Interfaces
     {
         Task<bool> GetPermissionsAsync(int roleId, string moduleName, string actionName);
         Task<IEnumerable<Permissions>> PermissionsByRoleAsync(int roleId);
+        Task<IEnumerable<Permissions>> GetByIdsAsync(List<int> permissionIds);
         Task<bool> RegisterPermissionsAsync(List<Permissions> permissions);
+        Task<bool> UpdatePermissionsRangeAsync(List<Permissions> permissions);
     }
 }

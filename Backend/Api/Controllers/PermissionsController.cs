@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Dtos.Request.Permissions;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,21 @@ namespace Api.Controllers
         {
             var response = await _permissionsService.PermissionsByRole(roleId);
             return Ok(response);
+        }
+
+        [HttpPut("UpdatePermissions")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdatePermissions([FromBody] List<PermissionsRequestDto> permissionsDto)
+        {
+
+            var response = await _permissionsService.UpdatePermissions(AuthenticatedUserId, permissionsDto);
+
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+
+            return BadRequest(response);
         }
     }
 }
