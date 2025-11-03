@@ -1,9 +1,11 @@
 export interface Permission {
+  pK_PERMISSION : number;
   pK_ROLE: number;
   pK_MODULE: number;
+  modulE_NAME: string;
   pK_ACTION: number;
-  module: string;
-  action: string;
+  actioN_NAME: string;
+  state: boolean;
 }
 
 export interface PermissionResponse {

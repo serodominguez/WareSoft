@@ -56,9 +56,9 @@ const permissionModule: Module<PermissionState, any> = {
     
     permissionsByModule: (state): PermissionsByModule[] => {
       const grouped = state.permissions.reduce((acc, perm) => {
-        if (!acc[perm.module]) {
-          acc[perm.module] = {
-            module: perm.module,
+        if (!acc[perm.modulE_NAME]) {
+          acc[perm.modulE_NAME] = {
+            module: perm.modulE_NAME,
             permissions: {
               crear: false,
               leer: false,
@@ -68,8 +68,8 @@ const permissionModule: Module<PermissionState, any> = {
           };
         }
         
-        const actionKey = perm.action.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
-        acc[perm.module].permissions[actionKey] = true;
+        const actionKey = perm.actioN_NAME.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
+        acc[perm.modulE_NAME].permissions[actionKey] = perm.state;
         
         return acc;
       }, {} as Record<string, PermissionsByModule>);

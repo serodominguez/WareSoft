@@ -28,9 +28,9 @@ namespace Application.Services
             return await _permissionsRepository.GetPermissionsAsync(user.PK_ROLE, moduleName, actionName);
         }
 
-        public async Task<BaseResponse<IEnumerable<PermissionsResponseDto>>> ListUserPermissions(int userId)
+        public async Task<BaseResponse<IEnumerable<PermissionsByUserResponseDto>>> ListUserPermissions(int userId)
         {
-            var response = new BaseResponse<IEnumerable<PermissionsResponseDto>>();
+            var response = new BaseResponse<IEnumerable<PermissionsByUserResponseDto>>();
             try
             {
                 var user = await _unitOfWork.Users.GetByIdAsync(userId);
@@ -47,7 +47,45 @@ namespace Application.Services
                 {
                     response.Data = permissions
                                 .Where(p => p.STATE && p.Modules!.STATE && p.Actions!.STATE)
-                                .Select(PermissionsMap.PermissionsResponseDtoMapping);
+                                .Select(PermissionsMap.PermissionsByUserResponseDtoMapping);
+
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_USER_WITHOUT_PERMISSIONS;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<BaseResponse<IEnumerable<PermissionsByRoleResponseDto>>> PermissionsByRole(int roleId)
+        {
+            var response = new BaseResponse<IEnumerable<PermissionsByRoleResponseDto>>();
+            try
+            {
+                var role = await _unitOfWork.Users.GetByIdAsync(roleId);
+                if (role == null || !role.STATE)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_USER_NOT_FOUND;
+                    return response;
+                }
+
+                var permissions = await _permissionsRepository.PermissionsByRoleAsync(roleId);
+
+                if (permissions != null && permissions.Any())
+                {
+                    response.Data = permissions
+                                .Where(p => p.Modules!.STATE && p.Actions!.STATE)
+                                .Select(PermissionsMap.PermissionsByRoleResponseDtoMapping);
 
                     response.IsSuccess = true;
                     response.Message = ReplyMessage.MESSAGE_QUERY;

@@ -59,7 +59,7 @@ namespace Infrastructure.Persistences.Repositories
             return await _context.Permissions
                 .Include(p => p.Modules)
                 .Include(p => p.Actions)
-                .Where(p => p.PK_ROLE == roleId && p.STATE)
+                .Where(p => p.PK_ROLE == roleId)
                 .ToListAsync();
         }
 

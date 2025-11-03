@@ -878,6 +878,29 @@
         }
       }
     },
+    "/api/Permissions/Role/{roleId}": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "parameters": [
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Roles": {
       "get": {
         "tags": [
