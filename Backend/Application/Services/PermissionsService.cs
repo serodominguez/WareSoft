@@ -141,7 +141,7 @@ namespace Application.Services
             var response = new BaseResponse<IEnumerable<PermissionsByRoleResponseDto>>();
             try
             {
-                var role = await _unitOfWork.Users.GetByIdAsync(roleId);
+                var role = await _unitOfWork.Roles.GetByIdAsync(roleId);
                 if (role == null || !role.STATE)
                 {
                     response.IsSuccess = false;

@@ -60,12 +60,14 @@ namespace Infrastructure.Persistences.Repositories
                 .Include(p => p.Modules)
                 .Include(p => p.Actions)
                 .Where(p => p.PK_ROLE == roleId)
+                .AsNoTracking()
                 .ToListAsync();
         }
         public async Task<IEnumerable<Permissions>> GetByIdsAsync(List<int> permissionIds)
         {
             return await _context.Permissions
                  .Where(p => permissionIds.Contains(p.PK_ENTITY))
+                 .AsNoTracking()
                  .ToListAsync();
         }
 

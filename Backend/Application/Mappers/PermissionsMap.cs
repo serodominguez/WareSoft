@@ -28,7 +28,7 @@ namespace Application.Mappers
         {
             return new PermissionsByRoleResponseDto
             {
-                PK_PERMISSION = entity.PK_ACTION,
+                PK_PERMISSION = entity.PK_ENTITY,
                 PK_ROLE = entity.PK_ROLE,
                 PK_MODULE = entity.PK_MODULE,
                 MODULE_NAME = entity.Modules?.MODULE_NAME,

@@ -31,7 +31,7 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [HttpPut("UpdatePermissions")]
+        [HttpPut("Update")]
         [AllowAnonymous]
         public async Task<IActionResult> UpdatePermissions([FromBody] List<PermissionsRequestDto> permissionsDto)
         {

@@ -560,7 +560,7 @@
   {
     "ContainingType": "Api.Controllers.PermissionsController",
     "Method": "UpdatePermissions",
-    "RelativePath": "api/Permissions/UpdatePermissions",
+    "RelativePath": "api/Permissions/Update",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,

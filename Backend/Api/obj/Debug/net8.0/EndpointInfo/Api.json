@@ -901,7 +901,7 @@
         }
       }
     },
-    "/api/Permissions/UpdatePermissions": {
+    "/api/Permissions/Update": {
       "put": {
         "tags": [
           "Permissions"
