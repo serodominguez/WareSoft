@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localUser.pK_USER ? 'Editar Usuario' : 'Agregar Usuario' }}</span>
+        <span>{{ localUser.idUser ? 'Editar Usuario' : 'Agregar Usuario' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,40 +10,40 @@
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.useR_NAME"
+                <v-text-field color="primary" variant="underlined" v-model="localUser.userName"
                   :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase" label="Usuario"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.passworD_HASH" type="password"
+                <v-text-field color="primary" variant="underlined" v-model="localUser.passwordHash" type="password"
                   :rules="[rules.required]" label="Contraseña" clearable required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localUser.names"
-                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" @keyup="uppercase" label="Nombres"
+                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" label="Nombres"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.lasT_NAMES"
-                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" @keyup="uppercase" label="Apellidos"
+                <v-text-field color="primary" variant="underlined" v-model="localUser.lastNames"
+                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" label="Apellidos"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.identificatioN_NUMBER" counter="8"
-                  :maxlength="8" @keyup="uppercase" label="Carnet" />
+                <v-text-field color="primary" variant="underlined" v-model="localUser.identificationNumber" counter="8"
+                  :maxlength="8" label="Carnet" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.phonE_NUMBER" counter="8"
+                <v-text-field color="primary" variant="underlined" v-model="localUser.phoneNumber" counter="8"
                   :rules="[rules.onlyNumbers]" :maxlength="8" label="Teléfono" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="localUser.pK_ROLE"
-                  item-title="rolE_NAME" item-value="pK_ROLE" :rules="[rules.required]"
+                <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="localUser.idRole"
+                  item-title="roleName" item-value="idRole" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Rol" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="primary" variant="underlined" :items="stores" v-model="localUser.pK_STORE"
-                  item-title="storE_NAME" item-value="pK_STORE" :rules="[rules.required]"
+                <v-autocomplete color="primary" variant="underlined" :items="stores" v-model="localUser.idStore"
+                  item-title="storeName" item-value="idStore" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Tienda" required />
               </v-col>
             </v-row>
@@ -84,19 +84,19 @@ export default defineComponent({
     user: {
       type: Object as PropType<User | null>,
       default: () => ({
-        pK_USER: null,
-        useR_NAME: '',
+        idUser: null,
+        userName: '',
         password: '',
-        passworD_HASH: '',
+        passwordHash: '',
         names: '',
-        lasT_NAMES: '',
-        identificatioN_NUMBER: '',
-        phonE_NUMBER: null,
-        pK_ROLE: null,
-        pK_STORE: null,
-        audiT_CREATE_DATE: '',
-        statE_USER: '',
-        updatE_PASSWORD: false
+        lastNames: '',
+        identificationNumber: '',
+        phoneNumber: null,
+        idRole: null,
+        idStore: null,
+        auditCreateDate: '',
+        statusUser: '',
+        updatePassword: false
       }),
     },
   },
@@ -138,8 +138,8 @@ export default defineComponent({
     user: {
       handler(newUser: User) {
         this.localUser = { ...newUser };
-        if (newUser.pK_USER) {
-          this.oldPassword = newUser.passworD_HASH;
+        if (newUser.idUser) {
+          this.oldPassword = newUser.passwordHash;
         } else {
           this.oldPassword = '';
         }
@@ -149,9 +149,7 @@ export default defineComponent({
   },
   methods: {
     uppercase() {
-      this.localUser.useR_NAME = this.localUser.useR_NAME.toUpperCase();
-      this.localUser.names = this.localUser.names.toUpperCase();
-      this.localUser.lasT_NAMES = this.localUser.lasT_NAMES.toUpperCase();
+      this.localUser.userName = this.localUser.userName.toUpperCase();
     },
     close() {
       this.isOpen = false;
@@ -160,21 +158,21 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localUser.pK_USER) {
-            if(this.localUser.passworD_HASH !== this.oldPassword){
-              this.localUser.updatE_PASSWORD = true;
-              this.localUser.password = this.localUser.passworD_HASH;
+          if (this.localUser.idUser) {
+            if(this.localUser.passwordHash !== this.oldPassword){
+              this.localUser.updatePassword = true;
+              this.localUser.password = this.localUser.passwordHash;
             } else {
-              this.localUser.updatE_PASSWORD = false;
-              this.localUser.password = this.localUser.passworD_HASH;
+              this.localUser.updatePassword = false;
+              this.localUser.password = this.localUser.passwordHash;
             }
             await this.$store.dispatch('user/editUser', {
-              id: this.localUser.pK_USER,
+              id: this.localUser.idUser,
               user: { ...this.localUser }
             });
             this.toast.success('Usuario actualizado con éxito!');
           } else {
-            this.localUser.password = this.localUser.passworD_HASH;
+            this.localUser.password = this.localUser.passwordHash;
             await this.$store.dispatch('user/registerUser', { ...this.localUser });
             this.toast.success('Usuario agregado con éxito!');
           }

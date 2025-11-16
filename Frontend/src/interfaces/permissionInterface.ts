@@ -1,11 +1,11 @@
 export interface Permission {
-  pK_PERMISSION : number;
-  pK_ROLE: number;
-  pK_MODULE: number;
-  modulE_NAME: string;
-  pK_ACTION: number;
-  actioN_NAME: string;
-  state: boolean;
+  idPermission : number;
+  idRole: number;
+  idModule: number;
+  moduleName: string;
+  idAction: number;
+  actionName: string;
+  status: boolean;
 }
 
 export interface PermissionResponse {

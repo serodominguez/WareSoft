@@ -90,7 +90,7 @@ export default defineComponent({
       ] as Link[],
       linkAccess: [
         { icon: 'widgets', text: 'Módulos', route: '/module', module: 'modulos' },
-        { icon: 'supervisor_account', text: 'Permisos', route: '/permission', module: 'exclude' },
+        { icon: 'supervisor_account', text: 'Permisos', route: '/permission', module: 'permisos' },
         { icon: 'manage_accounts', text: 'Roles', route: '/role', module: 'roles' },
         { icon: 'person', text: 'Usuarios', route: '/user', module: 'usuarios' },
       ] as Link[],

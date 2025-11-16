@@ -6,16 +6,16 @@
       @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as Brand).branD_NAME }}</td>
-          <td>{{ (item as Brand).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as Brand).statE_BRAND }}</td>
+          <td>{{ (item as Brand).brandName }}</td>
+          <td>{{ (item as Brand).auditCreateDate }}</td>
+          <td>{{ (item as Brand).statusBrand }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as Brand).statE_BRAND == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Brand).statusBrand == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editBrand(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as Brand).statE_BRAND == 'INACTIVO'">
+            <template v-if="canEdit && (item as Brand).statusBrand == 'Inactivo'">
               <v-btn  color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit && (item as Brand).statE_BRAND == 'ACTIVO'">
+            <template v-if="canEdit && (item as Brand).statusBrand == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -83,9 +83,9 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Marca', key: 'branD_NAME', sortable: false },
-        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
-        { title: 'Estado', key: 'statE_BRAND', sortable: false },
+        { title: 'Marca', key: 'brandName', sortable: false },
+        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+        { title: 'Estado', key: 'statusBrand', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -128,10 +128,10 @@ export default defineComponent({
     },
     openForm() {
       this.selectedBrand = {
-        pK_BRAND: null,
-        branD_NAME: '',
-        audiT_CREATE_DATE: '',
-        statE_BRAND: ''
+        idBrand: null,
+        brandName: '',
+        auditCreateDate: '',
+        statusBrand: ''
       };
       this.form = true;
     },

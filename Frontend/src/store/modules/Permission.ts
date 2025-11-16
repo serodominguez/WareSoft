@@ -67,7 +67,7 @@ const actions = {
     }
   },
 
-  async updatePermissions({ commit, rootState }: any, updatedPermissions: Array<{ pK_PERMISSION: number; state: boolean }>) {
+  async updatePermissions({ commit, rootState }: any, updatedPermissions: Array<{ idPermission: number; status: boolean }>) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -94,9 +94,9 @@ const getters = {
 
   permissionsByModule: (state: PermissionState): PermissionsByModule[] => {
     const grouped = state.permissions.reduce((acc, perm) => {
-      if (!acc[perm.modulE_NAME]) {
-        acc[perm.modulE_NAME] = {
-          module: perm.modulE_NAME,
+      if (!acc[perm.moduleName]) {
+        acc[perm.moduleName] = {
+          module: perm.moduleName,
           permissions: {
             crear: false,
             leer: false,
@@ -106,12 +106,12 @@ const getters = {
         };
       }
 
-      const actionKey = perm.actioN_NAME.toLowerCase() as
+      const actionKey = perm.actionName.toLowerCase() as
         | "crear"
         | "leer"
         | "editar"
         | "eliminar";
-      acc[perm.modulE_NAME].permissions[actionKey] = perm.state;
+      acc[perm.moduleName].permissions[actionKey] = perm.status;
 
       return acc;
     }, {} as Record<string, PermissionsByModule>);

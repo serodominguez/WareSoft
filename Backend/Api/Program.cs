@@ -6,21 +6,19 @@ using Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 var Configuration = builder.Configuration;
 
-
 // Add services to the container.
 var Cors = "Cors";
 
 builder.Services.AddInjectionInfrastructure(Configuration);
 builder.Services.AddInjectionApplication(Configuration);
 builder.Services.AddAuthentication(Configuration);
-//builder.Services.AddMemoryCache();
 builder.Services.AddScoped<PermissionAuthorizationFilter>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<PermissionAuthorizationFilter>();
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
 

@@ -33,7 +33,7 @@ export async function fetchStoresService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ENTITY", 
+  sort = "Id", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
@@ -71,58 +71,58 @@ export async function fetchStoresService(
 
   if (download) {
     configuration.responseType = 'blob';
-    const response = await axios.get('api/Stores', configuration);
+    const response = await axios.get('api/Store', configuration);
     return response.data;
   }
 
-  const response = await axios.get<BaseResponse>('api/Stores', configuration);
+  const response = await axios.get<BaseResponse>('api/Store', configuration);
   return response.data;
 }
 
 export async function selectStoreService(token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>("api/Stores/Select", configuration);
+  const response = await axios.get<BaseResponse>("api/Store/Select", configuration);
   return response.data;
 }
 
 export async function fetchStoreByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>(`api/Stores/${id}`, configuration);
+  const response = await axios.get<BaseResponse>(`api/Store/${id}`, configuration);
   return response.data;
 }
 
 export async function registerStoreService(store: Store, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post<BaseResponse>("api/Stores/Register", store, configuration);
+  const response = await axios.post<BaseResponse>("api/Store/Register", store, configuration);
   return response.data;
 }
 
 export async function editStoreService(id: number, store: Store, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Stores/Edit/${id}`, store, configuration);
+  const response = await axios.put<BaseResponse>(`api/Store/Edit/${id}`, store, configuration);
   return response.data;
 }
 
 export async function enableStoreService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Stores/Enable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Store/Enable/${id}`, {}, configuration);
   return response.data;
 }
 export async function disableStoreService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Stores/Disable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Store/Disable/${id}`, {}, configuration);
   return response.data;
 }
 
 export async function removeStoreService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Stores/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Store/Remove/${id}`, {}, configuration);
   return response.data;
 }

@@ -20,92 +20,92 @@
             return columns;
         }
 
-        #region ColumnsBrands
+        #region ColumnsBrand
         public static List<(string ColumnName, string PropertyName)> GetColumnsBrands()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("MARCA", "BRAND_NAME"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_BRAND")
+                ("MARCA", "BrandName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusBrand")
             };
 
             return columnsProperties;
         }
         #endregion
 
-        #region ColumnsCategories
+        #region ColumnsCategory
         public static List<(string ColumnName, string PropertyName)> GetColumnsCategories()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("CATEGORÍA", "CATEGORY_NAME"),
-                ("DESCRIPCIÓN", "DESCRIPTION"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_CATEGORY")
+                ("CATEGORÍA", "CategoryName"),
+                ("DESCRIPCIÓN", "Description"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusCategory")
             };
 
             return columnsProperties;
         }
         #endregion
 
-        #region ColumnsModules
+        #region ColumnsModule
         public static List<(string ColumnName, string PropertyName)> GetColumnsModules()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("MÓDULO", "MODULE_NAME"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_MODULE")
+                ("MÓDULO", "ModuleName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusModule")
             };
 
             return columnsProperties;
         }
         #endregion
 
-        #region ColumnsRoles
+        #region ColumnsRole
         public static List<(string ColumnName, string PropertyName)> GetColumnsRoles()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("ROL", "ROLE_NAME"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_ROLE")
+                ("ROL", "RoleName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusRole")
             };
 
             return columnsProperties;
         }
         #endregion
 
-        #region ColumnsStores
+        #region ColumnsStore
         public static List<(string ColumnName, string PropertyName)> GetColumnsStores()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("TIENDA", "STORE_NAME"),
-                ("ENCARGADO", "MANAGER"),
-                ("DIRECCIÓN", "ADDRESS"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_STORE")
+                ("TIENDA", "StoreName"),
+                ("ENCARGADO", "Manager"),
+                ("DIRECCIÓN", "Address"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusStore")
             };
 
             return columnsProperties;
         }
         #endregion
 
-        #region ColumnsUsers
+        #region ColumnsUser
         public static List<(string ColumnName, string PropertyName)> GetColumnsUsers()
         {
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
-                ("USUARIO", "USER_NAME"),
-                ("NOMBRES", "NAMES"),
-                ("APELLIDOS", "LAST_NAMES"),
-                ("TELÉFONO", "PHONE_NUMBER"),
-                ("ROL", "ROLE_NAME"),
-                ("TIENDA", "STORE_NAME"),
-                ("FECHA DE CREACIÓN", "AUDIT_CREATE_DATE"),
-                ("ESTADO", "STATE_USER")
+                ("USUARIO", "UserName"),
+                ("NOMBRES", "Names"),
+                ("APELLIDOS", "LastNames"),
+                ("TELÉFONO", "PhoneNumber"),
+                ("ROL", "RoleName"),
+                ("TIENDA", "StoreName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusUser")
             };
 
             return columnsProperties;

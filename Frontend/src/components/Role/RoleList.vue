@@ -6,16 +6,16 @@
       @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as Role).rolE_NAME }}</td>
-          <td>{{ (item as Role).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as Role).statE_ROLE }}</td>
+          <td>{{ (item as Role).roleName }}</td>
+          <td>{{ (item as Role).auditCreateDate }}</td>
+          <td>{{ (item as Role).statusRole }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as Role).statE_ROLE == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Role).statusRole == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editRole(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as Role).statE_ROLE == 'INACTIVO'">
+            <template v-if="canEdit && (item as Role).statusRole == 'Inactivo'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit && (item as Role).statE_ROLE == 'ACTIVO'">
+            <template v-if="canEdit && (item as Role).statusRole == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -83,9 +83,9 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Rol', key: 'rolE_NAME', sortable: false },
-        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
-        { title: 'Estado', key: 'statE_ROLE', sortable: false },
+        { title: 'Rol', key: 'roleName', sortable: false },
+        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+        { title: 'Estado', key: 'statusRole', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -128,10 +128,10 @@ export default defineComponent({
     },
     openForm() {
       this.selectedRole = {
-        pK_ROLE: null,
-        rolE_NAME: '',
-        audiT_CREATE_DATE: '',
-        statE_ROLE: ''
+        idRole: null,
+        roleName: '',
+        auditCreateDate: '',
+        statusRole: ''
       };
       this.form = true;
     },

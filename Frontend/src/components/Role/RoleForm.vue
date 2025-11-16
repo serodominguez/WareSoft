@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localRole.pK_ROLE ? 'Editar Rol' : 'Agregar Rol' }}</span>
+        <span>{{ localRole.idRole ? 'Editar Rol' : 'Agregar Rol' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,8 +10,8 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localRole.rolE_NAME"
-                  :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase"
+                <v-text-field color="primary" variant="underlined" v-model="localRole.roleName"
+                  :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20"
                   label="Nombre del Rol" required />
               </v-col>
             </v-row>
@@ -52,8 +52,8 @@ export default defineComponent({
     role: {
       type: Object as PropType<Role | null>,
       default: () => ({
-        pK_ROLE: null,
-        rolE_NAME: ''
+        idRole: null,
+        roleName: ''
       }),
     },
   },
@@ -84,9 +84,6 @@ export default defineComponent({
     },
   },
   methods: {
-    uppercase() {
-      this.localRole.rolE_NAME = this.localRole.rolE_NAME.toUpperCase();
-    },
     close() {
       this.isOpen = false;
     },
@@ -94,9 +91,9 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localRole.pK_ROLE) {
+          if (this.localRole.idRole) {
             await this.$store.dispatch('role/editRole', {
-              id: this.localRole.pK_ROLE,
+              id: this.localRole.idRole,
               role: { ...this.localRole }
             });
             this.toast.success('Rol actualizado con éxito!');

@@ -1,9 +1,9 @@
 export interface Category {
-  pK_CATEGORY: number | null;
-  categorY_NAME: string;
+  idCategory: number | null;
+  categoryName: string;
   description: string;
-  audiT_CREATE_DATE: string;
-  statE_CATEGORY: string;
+  auditCreateDate: string;
+  statusCategory: string;
 }
 
 export interface CategoryState {

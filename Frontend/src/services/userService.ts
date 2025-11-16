@@ -33,7 +33,7 @@ export async function fetchUsersService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ENTITY", 
+  sort = "Id", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
@@ -71,51 +71,51 @@ export async function fetchUsersService(
 
   if (download) {
     configuration.responseType = 'blob';
-    const response = await axios.get('api/Users', configuration);
+    const response = await axios.get('api/User', configuration);
     return response.data;
   }
 
-  const response = await axios.get<BaseResponse>('api/Users', configuration);
+  const response = await axios.get<BaseResponse>('api/User', configuration);
   return response.data;
 }
 
 export async function fetchUserByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>(`api/Users/${id}`, configuration);
+  const response = await axios.get<BaseResponse>(`api/User/${id}`, configuration);
   return response.data;
 }
 
 export async function registerUserService(user: User, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post<BaseResponse>("api/Users/Register", user, configuration);
+  const response = await axios.post<BaseResponse>("api/User/Register", user, configuration);
   return response.data;
 }
 
 export async function editUserService(id: number, user: User, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Users/Edit/${id}`, user, configuration);
+  const response = await axios.put<BaseResponse>(`api/User/Edit/${id}`, user, configuration);
   return response.data;
 }
 
 export async function enableUserService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Users/Enable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/User/Enable/${id}`, {}, configuration);
   return response.data;
 }
 export async function disableUserService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Users/Disable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/User/Disable/${id}`, {}, configuration);
   return response.data;
 }
 
 export async function removeUserService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Users/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/User/Remove/${id}`, {}, configuration);
   return response.data;
 }

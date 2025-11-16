@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import store, { RootState } from '@/store';
+import { normalize } from '@/helpers/utils';
 import HomeView from '../views/HomeView.vue'
 import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
@@ -10,15 +11,25 @@ import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
 import UserView from '@/views/UserView.vue'
  
+// Define los meta types para TypeScript
+declare module 'vue-router' {
+  interface RouteMeta {
+    free?: boolean;
+    requiresAuth?: boolean;
+    module?: string; // Solo necesitamos el módulo, no la acción específica
+  }
+}
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
     component: HomeView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
     }
   },
+
   {
     path: '/about',
     name: 'about',
@@ -27,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
     meta: {
-      administrator: true,
+      requiresAuth: true,
     }
   },
   {
@@ -35,7 +46,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'brand',
     component: BrandView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'marcas'
     }
   },
     {
@@ -43,7 +55,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'category',
     component: CategoryView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'categorias'
     }
   },
   {
@@ -59,7 +72,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'module',
     component: ModuleView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'modulos'
     }
   },
   {
@@ -67,7 +81,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'permission',
     component: PermissionView,
     meta: {
-      free: true 
+      requiresAuth: true,
+      module: 'permisos'
     }
   },
   {
@@ -75,7 +90,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'role',
     component: RoleView,
   meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'roles'
     }
   },
   {
@@ -83,7 +99,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'store',
     component: StoreView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'tiendas'
     }
   },
   {
@@ -91,7 +108,8 @@ const routes: Array<RouteRecordRaw> = [
     name: 'user',
     component: UserView,
     meta: {
-      administrator: true,
+      requiresAuth: true,
+      module: 'usuarios'
     }
   },
 ]
@@ -105,25 +123,48 @@ router.beforeEach((to, from, next) => {
   const state = store.state as RootState;
   const currentUser = state.currentUser;
 
-  if(to.matched.some(record => record.meta.free)){
-    next()
-  } else if (currentUser && currentUser.role == 'ADMINISTRADORES'){
-    if (to.matched.some(record => record.meta.administrator)){
-        next()
-    }
-  } else if (currentUser && currentUser.role == 'ALMACENEROS'){
-    if (to.matched.some(record => record.meta.warehouse)){
-        next()
-    }
-  } else if (currentUser && currentUser.role == 'OPERARIOS'){
-    if (to.matched.some(record => record.meta.operator)){
-        next()
+  // Rutas libres (login, etc)
+  if (to.matched.some(record => record.meta.free)) {
+    next();
+    return;
+  }
+
+  // Verificar autenticación
+  if (!currentUser) {
+    next({ name: 'login' });
+    return;
+  }
+
+  // Rutas que requieren autenticación pero no permisos específicos (home, about)
+  if (to.matched.some(record => record.meta.requiresAuth && !record.meta.module)) {
+    next();
+    return;
+  }
+
+  // Verificar permisos del módulo (solo verifica si tiene ALGÚN permiso en el módulo)
+  const routeWithModule = to.matched.find(record => record.meta.module);
+  
+  if (routeWithModule && routeWithModule.meta.module) {
+    const module = routeWithModule.meta.module;
+    
+    // Normalizar el módulo de la ruta
+    const normalizedRouteModule = normalize(module);
+    
+    // Verificar si el usuario tiene ALGÚN permiso en este módulo
+    const hasModuleAccess = currentUser.permissions.some(
+      (p: { module: string; action: string }) => 
+        normalize(p.module) === normalizedRouteModule
+    );
+    
+    if (hasModuleAccess) {
+      next();
+    } else {
+      // Redirigir a home si no tiene ningún permiso en el módulo
+      next({ name: 'home' });
     }
   } else {
-    next({
-      name: 'login'
-    })
+    next();
   }
-})
+});
 
 export default router

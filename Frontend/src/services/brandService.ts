@@ -31,7 +31,7 @@ export async function fetchBrandsService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ENTITY", 
+  sort = "Id", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
@@ -65,45 +65,45 @@ export async function fetchBrandsService(
 
   if (download) {
     configuration.responseType = 'blob';
-    const response = await axios.get('api/Brands', configuration);
+    const response = await axios.get('api/Brand', configuration);
     return response.data;
   }
 
-  const response = await axios.get<BaseResponse>('api/Brands', configuration);
+  const response = await axios.get<BaseResponse>('api/Brand', configuration);
   return response.data;
 }
 
 export async function selectBrandService(): Promise<BaseResponse> {
-  const response = await axios.get<BaseResponse>("api/Brands/Select");
+  const response = await axios.get<BaseResponse>("api/Brand/Select");
   return response.data;
 }
 
 export async function fetchBrandByIdService(id: number): Promise<BaseResponse> {
-  const response = await axios.get<BaseResponse>(`api/Brands/${id}`);
+  const response = await axios.get<BaseResponse>(`api/Brand/${id}`);
   return response.data;
 }
 
 export async function registerBrandService(brand: Brand): Promise<BaseResponse> {
-  const response = await axios.post<BaseResponse>("api/Brands/Register", brand);
+  const response = await axios.post<BaseResponse>("api/Brand/Register", brand);
   return response.data;
 }
 
 export async function editBrandService(id: number, brand: Brand): Promise<BaseResponse> {
-  const response = await axios.put<BaseResponse>(`api/Brands/Edit/${id}`, brand);
+  const response = await axios.put<BaseResponse>(`api/Brand/Edit/${id}`, brand);
   return response.data;
 }
 
 export async function enableBrandService(id: number): Promise<BaseResponse> {
-  const response = await axios.put<BaseResponse>(`api/Brands/Enable/${id}`, {});
+  const response = await axios.put<BaseResponse>(`api/Brand/Enable/${id}`, {});
   return response.data;
 }
 
 export async function disableBrandService(id: number): Promise<BaseResponse> {
-  const response = await axios.put<BaseResponse>(`api/Brands/Disable/${id}`, {});
+  const response = await axios.put<BaseResponse>(`api/Brand/Disable/${id}`, {});
   return response.data;
 }
 
 export async function removeBrandService(id: number): Promise<BaseResponse> {
-  const response = await axios.put<BaseResponse>(`api/Brands/Remove/${id}`, {});
+  const response = await axios.put<BaseResponse>(`api/Brand/Remove/${id}`, {});
   return response.data;
 }

@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localBrand.branD_NAME }}.
+                el ítem: {{ localBrand.brandName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         brand: {
             type: Object as PropType<Brand | null>,
             default: () => ({
-                pK_BRAND: null,
-                branD_NAME: ''
+                idBrand: null,
+                brandName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('brand/removeBrand', this.localBrand.pK_BRAND);
+                await this.$store.dispatch('brand/removeBrand', this.localBrand.idBrand);
                 this.toast.success('Marca eliminada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('brand/enableBrand', this.localBrand.pK_BRAND);
+                await this.$store.dispatch('brand/enableBrand', this.localBrand.idBrand);
                 this.toast.success('Marca habilitada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('brand/disableBrand', this.localBrand.pK_BRAND);
+                await this.$store.dispatch('brand/disableBrand', this.localBrand.idBrand);
                 this.toast.success('Marca deshabilitada con éxito!');
                 this.close();
             } catch (error: any) {

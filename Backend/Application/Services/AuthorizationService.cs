@@ -1,8 +1,9 @@
 ﻿using Application.Commons.Bases.Response;
-using Application.Dtos.Request.Users;
+using Application.Dtos.Request.User;
 using Application.Interfaces;
 using Application.Security;
 using Infrastructure.Persistences.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Utilities.Static;
 
 namespace Application.Services
@@ -21,11 +22,13 @@ namespace Application.Services
         public async Task<BaseResponse<string>> GenerateToken(TokenRequestDto requestDto)
         {
             var response = new BaseResponse<string>();
-            var user = await _unitOfWork.Users.AccountByUserNameAsync(requestDto.UserName!);
+            var user = await _unitOfWork.User.GetUsersQueryable()
+                            .Where(u => u.UserName == requestDto.UserName && u.Status == true)
+                            .FirstOrDefaultAsync();
 
-            if (user is not null && user.AUDIT_DELETE_USER == null && user.AUDIT_DELETE_DATE == null && user.STATE == true)
+            if (user is not null)
             {
-                if (!_security.VerifyPasswordHash(requestDto.Password!, user.PASSWORD_HASH!, user.PASSWORD_SALT!))
+                if (!_security.VerifyPasswordHash(requestDto.Password!, user.PasswordHash!, user.PasswordSalt!))
                 {
                     response.IsSuccess = false;
                     response.Message = ReplyMessage.MESSAGE_INCORRECT_PASSWORD;

@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localStore.pK_STORE ? 'Editar Tienda' : 'Agregar Tienda' }}</span>
+        <span>{{ localStore.idStore ? 'Editar Tienda' : 'Agregar Tienda' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,27 +10,27 @@
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localStore.storE_NAME"
-                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" @keyup="uppercase" label="Tienda"
+                <v-text-field color="primary" variant="underlined" v-model="localStore.storeName"
+                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" label="Tienda"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.manager"
-                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" @keyup="uppercase" label="Encargado"
+                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" label="Encargado"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.address"
-                  :rules="[rules.required]" counter="60" :maxlength="60" @keyup="uppercase" label="Dirección"
+                  :rules="[rules.required]" counter="60" :maxlength="60" label="Dirección"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localStore.phonE_NUMBER" counter="8"
+                <v-text-field color="primary" variant="underlined" v-model="localStore.phoneNumber" counter="8"
                   :rules="[rules.onlyNumbers]" :maxlength="8" label="Teléfono" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.city" counter="15"
-                  :rules="[rules.onlyLetters]" :maxlength="15" @keyup="uppercase" label="Ciudad" />
+                  :rules="[rules.onlyLetters]" :maxlength="15" label="Ciudad" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.email" counter="50"
@@ -77,11 +77,11 @@ export default defineComponent({
     store: {
       type: Object as PropType<Store | null>,
       default: () => ({
-        pK_STORE: null,
-        storE_NAME: '',
+        idStore: null,
+        storeName: '',
         manager: '',
         address: '',
-        phonE_NUMBER: null,
+        phoneNumber: null,
         city: '',
         email: '',
         type: ''
@@ -94,7 +94,7 @@ export default defineComponent({
       valid: false,
       localStore: { ...this.store } as Store,
       toast: useToast(),
-      types: ['SUCURSAL', 'ALMACÉN'],
+      types: ['Casa Matriz', 'Sucursal', 'Almacén'],
       rules: {
         required: (value: string) => !!value || 'Este campo es requerido.',
         onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
@@ -118,13 +118,6 @@ export default defineComponent({
     },
   },
   methods: {
-    uppercase() {
-      this.localStore.storE_NAME = this.localStore.storE_NAME.toUpperCase();
-      this.localStore.manager = this.localStore.manager.toUpperCase();
-      this.localStore.address = this.localStore.address.toUpperCase();
-      this.localStore.manager = this.localStore.manager.toUpperCase();
-      this.localStore.city = this.localStore.city.toUpperCase();
-    },
     close() {
       this.isOpen = false;
     },
@@ -132,9 +125,9 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localStore.pK_STORE) {
+          if (this.localStore.idStore) {
             await this.$store.dispatch('store/editStore', {
-              id: this.localStore.pK_STORE,
+              id: this.localStore.idStore,
               store: { ...this.localStore }
             });
             this.toast.success('Tienda actualizada con éxito!');

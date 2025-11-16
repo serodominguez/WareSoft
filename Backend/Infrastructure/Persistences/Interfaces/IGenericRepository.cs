@@ -13,6 +13,5 @@ namespace Infrastructure.Persistences.Interfaces
         Task<bool> UpdateAsync(T entity);
         Task<bool> RemoveAsync(T entity);
         IQueryable<T> GetEntityQuery(Expression<Func<T, bool>>? filter = null);
-
     }
 }

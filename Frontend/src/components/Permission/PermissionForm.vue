@@ -7,7 +7,7 @@
       <v-row>
         <v-col cols="4" md="4" lg="2" xl="2">
           <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="selectedRoleId"
-            item-title="rolE_NAME" item-value="pK_ROLE" no-data-text="No hay datos disponibles" label="Rol" />
+            item-title="roleName" item-value="idRole" no-data-text="No hay datos disponibles" label="Rol" />
         </v-col>
         <v-col cols="4" md="4" lg="4" xl="4" class="d-flex align-center">
           <v-btn color="indigo" @click="loadPermissions" :disabled="!selectedRoleId || loading" :loading="loading"> Cargar </v-btn>
@@ -120,20 +120,20 @@ export default defineComponent({
         const updatedPermissions = this.permissions.map((perm: any) => {
           // Encontrar el módulo correspondiente en localPermissions
           const localModule = this.localPermissions.find(
-            (lp) => lp.module === perm.modulE_NAME
+            (lp) => lp.module === perm.moduleName
           );
 
           if (localModule) {
-            const actionKey = perm.actioN_NAME.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
+            const actionKey = perm.actionName.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
             return {
-              pK_PERMISSION: perm.pK_PERMISSION,
-              state: localModule.permissions[actionKey]
+              idPermission: perm.idPermission,
+              status: localModule.permissions[actionKey]
             };
           }
 
           return {
-            pK_PERMISSION: perm.pK_PERMISSION,
-            state: perm.state
+            idPermission: perm.idPermission,
+            status: perm.status
           };
         });
 
@@ -162,7 +162,7 @@ export default defineComponent({
   },
 
   mounted() {
-    this.$store.dispatch('role/fetchRoles');
+    this.$store.dispatch('role/selectRole');
   },
 });
 </script>

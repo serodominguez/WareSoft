@@ -33,7 +33,7 @@ export async function fetchCategoriesService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ENTITY", 
+  sort = "Id", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
@@ -71,58 +71,58 @@ export async function fetchCategoriesService(
 
   if (download) {
     configuration.responseType = 'blob';
-    const response = await axios.get('api/Categories', configuration);
+    const response = await axios.get('api/Category', configuration);
     return response.data;
   }
 
-  const response = await axios.get<BaseResponse>('api/Categories', configuration);
+  const response = await axios.get<BaseResponse>('api/Category', configuration);
   return response.data;
 }
 
 export async function selectCategoryService(token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>("api/Categories/Select", configuration);
+  const response = await axios.get<BaseResponse>("api/Category/Select", configuration);
   return response.data;
 }
 
 export async function fetchCategoryByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>(`api/Categories/${id}`, configuration);
+  const response = await axios.get<BaseResponse>(`api/Category/${id}`, configuration);
   return response.data;
 }
 
 export async function registerCategoryService(category: Category, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post<BaseResponse>("api/Categories/Register", category, configuration);
+  const response = await axios.post<BaseResponse>("api/Category/Register", category, configuration);
   return response.data;
 }
 
 export async function editCategoryService(id: number, category: Category, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Categories/Edit/${id}`, category, configuration);
+  const response = await axios.put<BaseResponse>(`api/Category/Edit/${id}`, category, configuration);
   return response.data;
 }
 
 export async function enableCategoryService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Categories/Enable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Category/Enable/${id}`, {}, configuration);
   return response.data;;
 }
 export async function disableCategoryService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Categories/Disable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Category/Disable/${id}`, {}, configuration);
   return response.data;
 }
 
 export async function removeCategoryService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Categories/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Category/Remove/${id}`, {}, configuration);
   return response.data;
 }

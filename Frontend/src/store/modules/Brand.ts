@@ -60,7 +60,7 @@ const actions = {
       pageNumber = 1, 
       pageSize = 10, 
       order = "desc", 
-      sort = "PK_ENTITY", 
+      sort = "Id", 
       textFilter = null, 
       numberFilter = null,
       stateFilter = 1,
@@ -109,7 +109,7 @@ const actions = {
       pageNumber = 1, 
       pageSize = 10, 
       order = "desc", 
-      sort = "PK_ENTITY", 
+      sort = "Id", 
       textFilter = null, 
       numberFilter = null,
       stateFilter = 1,
@@ -307,5 +307,3 @@ export default {
   actions,
   getters,
 };
-
-export type { Brand };

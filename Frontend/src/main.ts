@@ -15,7 +15,7 @@ import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
 // Configuración de Axios
-axios.defaults.baseURL='https://localhost:7228/'
+axios.defaults.baseURL='https://localhost:7145/'
 
 // Interceptor para agregar token dinámicamente a cada petición
 axios.interceptors.request.use(

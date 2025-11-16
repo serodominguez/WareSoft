@@ -33,7 +33,7 @@ export async function fetchRolesService(
   pageNumber = 1, 
   pageSize = 10, 
   order = "desc", 
-  sort = "PK_ENTITY", 
+  sort = "Id", 
   textFilter?: string | null, 
   numberFilter?: number | null,
   stateFilter: number = 1,
@@ -71,58 +71,58 @@ export async function fetchRolesService(
 
   if (download) {
     configuration.responseType = 'blob';
-    const response = await axios.get('api/Roles', configuration);
+    const response = await axios.get('api/Role', configuration);
     return response.data;
   }
 
-  const response = await axios.get<BaseResponse>('api/Roles', configuration);
+  const response = await axios.get<BaseResponse>('api/Role', configuration);
   return response.data;
 }
 
 export async function selectRoleService(token: string): Promise<BaseResponse> {
 
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.get<BaseResponse>("api/Roles/Select", configuration);
+  const response = await axios.get<BaseResponse>("api/Role/Select", configuration);
   return response.data;
 }
 
 export async function fetchRoleByIdService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.get<BaseResponse>(`api/Roles/${id}`, configuration);
+  const response = await axios.get<BaseResponse>(`api/Role/${id}`, configuration);
   return response.data;
 }
 
 export async function registerRoleService(role: Role, token: string): Promise<BaseResponse> {
   
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.post<BaseResponse>("api/Roles/Register", role, configuration);
+  const response = await axios.post<BaseResponse>("api/Role/Register", role, configuration);
   return response.data;
 }
 
 export async function editRoleService(id: number, role: Role, token: string): Promise<BaseResponse> {
   
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.put<BaseResponse>(`api/Roles/Edit/${id}`, role, configuration);
+  const response = await axios.put<BaseResponse>(`api/Role/Edit/${id}`, role, configuration);
   return response.data;
 }
 
 export async function enableRoleService(id: number, token: string): Promise<BaseResponse> {
     
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.put<BaseResponse>(`api/Roles/Enable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Role/Enable/${id}`, {}, configuration);
   return response.data;
 }
 export async function disableRoleService(id: number, token: string): Promise<BaseResponse> {
 
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.put<BaseResponse>(`api/Roles/Disable/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Role/Disable/${id}`, {}, configuration);
   return response.data;
 }
 
 export async function removeRoleService(id: number, token: string): Promise<BaseResponse> {
   
   const configuration = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.put<BaseResponse>(`api/Roles/Remove/${id}`, {}, configuration);
+  const response = await axios.put<BaseResponse>(`api/Role/Remove/${id}`, {}, configuration);
   return response.data;
 }

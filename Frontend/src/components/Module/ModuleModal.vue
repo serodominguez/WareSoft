@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localModule.modulE_NAME }}.
+                el ítem: {{ localModule.moduleName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         module: {
             type: Object as PropType<Module | null>,
             default: () => ({
-                pK_MODULE: null,
-                modulE_NAME: ''
+                idModule: null,
+                moduleName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('module/removeModule', this.localModule.pK_MODULE);
+                await this.$store.dispatch('module/removeModule', this.localModule.idModule);
                 this.toast.success('Módulo eliminado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('module/enableModule', this.localModule.pK_MODULE);
+                await this.$store.dispatch('module/enableModule', this.localModule.idModule);
                 this.toast.success('Módulo habilitado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('module/disableModule', this.localModule.pK_MODULE);
+                await this.$store.dispatch('module/disableModule', this.localModule.idModule);
                 this.toast.success('Módulo deshabilitado con éxito!');
                 this.close();
             } catch (error: any) {

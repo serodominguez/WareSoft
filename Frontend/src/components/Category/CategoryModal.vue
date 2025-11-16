@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localCategory.categorY_NAME }}.
+                el ítem: {{ localCategory.categoryName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         category: {
             type: Object as PropType<Category | null>,
             default: () => ({
-                pK_CATEGORY: null,
-                categorY_NAME: ''
+                idCategory: null,
+                categoryName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('category/removeCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/removeCategory', this.localCategory.idCategory);
                 this.toast.success('Categoría eliminada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('category/enableCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/enableCategory', this.localCategory.idCategory);
                 this.toast.success('Categoría habilitada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('category/disableCategory', this.localCategory.pK_CATEGORY);
+                await this.$store.dispatch('category/disableCategory', this.localCategory.idCategory);
                 this.toast.success('Categoría deshabilitada con éxito!');
                 this.close();
             } catch (error: any) {

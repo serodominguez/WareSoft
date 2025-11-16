@@ -6,17 +6,17 @@
       @update:items-per-page="updateItemsPerPage" @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as Category).categorY_NAME }}</td>
+          <td>{{ (item as Category).categoryName }}</td>
           <td>{{ (item as Category).description }}</td>
-          <td>{{ (item as Category).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as Category).statE_CATEGORY }}</td>
+          <td>{{ (item as Category).auditCreateDate }}</td>
+          <td>{{ (item as Category).statusCategory }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as Category).statE_CATEGORY == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Category).statusCategory == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editCategory(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as Category).statE_CATEGORY == 'INACTIVO'">
+            <template v-if="canEdit && (item as Category).statusCategory == 'Inactivo'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit && (item as Category).statE_CATEGORY == 'ACTIVO'">
+            <template v-if="canEdit && (item as Category).statusCategory == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -84,10 +84,10 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Categoría', key: 'categorY_NAME', sortable: false },
+        { title: 'Categoría', key: 'categoryName', sortable: false },
         { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
-        { title: 'Estado', key: 'statE_CATEGORY', sortable: false },
+        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+        { title: 'Estado', key: 'statusCategory', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -130,11 +130,11 @@ export default defineComponent({
     },
     openForm() {
       this.selectedCategory = {
-        pK_CATEGORY: null,
-        categorY_NAME: '',
+        idCategory: null,
+        categoryName: '',
         description: '',
-        audiT_CREATE_DATE: '',
-        statE_CATEGORY: ''
+        auditCreateDate: '',
+        statusCategory: ''
       };
       this.form = true;
     },

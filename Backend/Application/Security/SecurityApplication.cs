@@ -17,22 +17,22 @@ namespace Application.Security
             _configuration = configuration;
         }
 
-        public string GenerateToken(Users user)
+        public string GenerateToken(UserEntity user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.PK_ENTITY.ToString()),
-                new Claim(ClaimTypes.Name, user.USER_NAME!),
-                new Claim(ClaimTypes.Role, user.Roles!.ROLE_NAME!),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName!),
+                new Claim(ClaimTypes.Role, user.Role!.RoleName!),
 
-                new Claim("pk_user",user.PK_ENTITY.ToString()),
-                new Claim("user_name", user.USER_NAME!),
-                new Claim("role", user.Roles.ROLE_NAME!),
-                new Claim("store_name", user.Stores!.STORE_NAME!),
-                new Claim("pk_store", user.PK_STORE.ToString())
+                new Claim("userId",user.Id.ToString()),
+                new Claim("userName", user.UserName!),
+                new Claim("role", user.Role.RoleName!),
+                new Claim("storeName", user.Store!.StoreName!),
+                new Claim("storeId", user.IdStore.ToString())
             };
 
             var token = new JwtSecurityToken(

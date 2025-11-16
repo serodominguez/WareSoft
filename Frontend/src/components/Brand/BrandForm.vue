@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localBrand.pK_BRAND ? 'Editar Marca' : 'Agregar Marca' }}</span>
+        <span>{{ localBrand.idBrand ? 'Editar Marca' : 'Agregar Marca' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,8 +10,8 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localBrand.branD_NAME"
-                  :rules="[rules.required]" counter="25" :maxlength="25" @keyup="uppercase"
+                <v-text-field color="primary" variant="underlined" v-model="localBrand.brandName"
+                  :rules="[rules.required]" counter="25" :maxlength="25"
                   label="Nombre de la Marca" required />
               </v-col>
             </v-row>
@@ -52,8 +52,8 @@ export default defineComponent({
     brand: {
       type: Object as PropType<Brand | null>,
       default: () => ({
-        pK_BRAND: null,
-        branD_NAME: ''
+        idBrand: null,
+        brandName: ''
       }),
     },
   },
@@ -83,9 +83,6 @@ export default defineComponent({
     },
   },
   methods: {
-    uppercase() {
-      this.localBrand.branD_NAME = this.localBrand.branD_NAME.toUpperCase();
-    },
     close() {
       this.isOpen = false;
     },
@@ -93,9 +90,9 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localBrand.pK_BRAND) {
+          if (this.localBrand.idBrand) {
             await this.$store.dispatch('brand/editBrand', {
-              id: this.localBrand.pK_BRAND,
+              id: this.localBrand.idBrand,
               brand: { ...this.localBrand }
             });
             this.toast.success('Marca actualizada con éxito!');

@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Infrastructure.Persistences.Contexts.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -9,32 +8,32 @@ namespace Infrastructure.Persistences.Contexts
     {
         public DbContextSystem(DbContextOptions<DbContextSystem> options) : base(options) { }
 
-        public virtual DbSet<Actions> Actions { get; set; }
-        public virtual DbSet<Brands> Brands { get; set; } 
-        public virtual DbSet<Categories> Categories { get; set; }
-        public virtual DbSet<Consumers> Consumers { get; set; }
-        public virtual DbSet<GoodsIssue> GoodsIssues { get; set; } = null!;
-        public virtual DbSet<GoodsIssueDetails> GoodsIssuesDetails { get; set; }
-        public virtual DbSet<GoodsReceipt> GoodsReceipt { get; set; }
-        public virtual DbSet<GoodsReceiptDetails> GoodsReceiptDetails { get; set; }
-        public virtual DbSet<InboundTransfer> InboundTransfer { get; set; }
-        public virtual DbSet<InboundTransferDetails> InboundTransferDetails { get; set; }
-        public virtual DbSet<Inventory> Inventory { get; set; }
-        public virtual DbSet<Modules> Modules { get; set; }
-        public virtual DbSet<OutboundTransfer> OutboundTransfer { get; set; }
-        public virtual DbSet<OutboundTransferDetails> OutboundTransferDetails { get; set; }
-        public virtual DbSet<Permissions> Permissions { get; set; }
-        public virtual DbSet<Products> Products { get; set; }
-        public virtual DbSet<Roles> Roles { get; set; }
-        public virtual DbSet<Stores> Stores { get; set; }
-        public virtual DbSet<Suppliers> Suppliers { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<ActionEntity> Action { get; set; }
+        public virtual DbSet<BrandEntity> Brand { get; set; }
+        public virtual DbSet<CategoryEntity> Category { get; set; }
+        public virtual DbSet<ConsumerEntity> Consumer { get; set; }
+        public virtual DbSet<GoodsIssueEntity> GoodsIssues { get; set; } = null!;
+        public virtual DbSet<GoodsIssueDetailsEntity> GoodsIssuesDetails { get; set; }
+        public virtual DbSet<GoodsReceiptEntity> GoodsReceipt { get; set; }
+        public virtual DbSet<GoodsReceiptDetailsEntity> GoodsReceiptDetails { get; set; }
+        public virtual DbSet<InboundTransferEntity> InboundTransfer { get; set; }
+        public virtual DbSet<InboundTransferDetailsEntity> InboundTransferDetails { get; set; }
+        public virtual DbSet<InventoryEntity> Inventory { get; set; }
+        public virtual DbSet<ModuleEntity> Module { get; set; }
+        public virtual DbSet<OutboundTransferEntity> OutboundTransfer { get; set; }
+        public virtual DbSet<OutboundTransferDetailsEntity> OutboundTransferDetails { get; set; }
+        public virtual DbSet<PermissionEntity> Permission { get; set; }
+        public virtual DbSet<ProductEntity> Product { get; set; }
+        public virtual DbSet<RoleEntity> Role { get; set; }
+        public virtual DbSet<StoreEntity> Store { get; set; }
+        public virtual DbSet<SupplierEntity> Supplier { get; set; }
+        public virtual DbSet<UserEntity> User { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.HasAnnotation("Relational:Collation", "Modern_Spanish_CI_AS");
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(modelBuilder);
 
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             OnModelCreatingPartial(modelBuilder);
         }

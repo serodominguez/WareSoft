@@ -10,28 +10,26 @@ namespace Infrastructure.Persistences.Repositories
     {
         private readonly DbContextSystem _context;
 
-
-        public IGenericRepository<Brands> _brands = null!;
-        public IGenericRepository<Categories> _categories = null!; 
-        public IGenericRepository<Stores> _stores = null!;
-        public IModulesRepository _modules = null!;
-        public IPermissionsRepository _permissions = null!;
-        public IRolesRepository _roles = null!;
-        public IUsersRepository _users = null!;
+        public IGenericRepository<BrandEntity> _brand = null!;
+        public IGenericRepository<CategoryEntity> _category = null!;
+        public IGenericRepository<StoreEntity> _store = null!;
+        public IModuleRepository _module = null!;
+        public IPermissionRepository _permission = null!;
+        public IRoleRepository _role = null!;
+        public IUserRepository _user = null!;
 
         public UnitOfWork(DbContextSystem context)
         {
             _context = context;
         }
 
-        public IGenericRepository<Brands> Brands => _brands ?? new GenericRepository<Brands>(_context);
-        public IGenericRepository<Categories> Categories => _categories ?? new GenericRepository<Categories>(_context);
-        public IGenericRepository<Stores> Stores => _stores ?? new GenericRepository<Stores>(_context);
-        public IModulesRepository Modules => _modules ?? new ModulesRepository(_context);
-        public IPermissionsRepository Permissions => _permissions ?? new PermissionsRepository(_context);
-        public IRolesRepository  Roles => _roles ?? new RolesRepository(_context);
-        public IUsersRepository Users => _users ?? new UsersRepository(_context);
-
+        public IGenericRepository<BrandEntity> Brand => _brand ?? new GenericRepository<BrandEntity>(_context);
+        public IGenericRepository<CategoryEntity> Category => _category ?? new GenericRepository<CategoryEntity>(_context);
+        public IGenericRepository<StoreEntity> Store => _store ?? new GenericRepository<StoreEntity>(_context);
+        public IModuleRepository Module => _module ?? new ModuleRepository(_context);
+        public IPermissionRepository Permission => _permission ?? new PermissionRepository(_context);
+        public IRoleRepository Role => _role ?? new RoleRepository(_context);
+        public IUserRepository User => _user ?? new UserRepository(_context);
 
         public IDbTransaction BeginTransaction()
         {

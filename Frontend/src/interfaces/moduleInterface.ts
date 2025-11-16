@@ -1,8 +1,8 @@
 export interface Module {
-  pK_MODULE: number | null;
-  modulE_NAME: string;
-  audiT_CREATE_DATE: string;
-  statE_MODULE: string;
+  idModule: number | null;
+  moduleName: string;
+  auditCreateDate: string;
+  statusModule: string;
 }
 
 export interface ModuleState {

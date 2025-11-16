@@ -2,7 +2,7 @@
 {
     public enum StateTypes
     {
-        INACTIVE = 0,
-        ACTIVE = 1
+        Inactivo = 0,
+        Activo = 1
     }
 }

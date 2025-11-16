@@ -6,21 +6,21 @@
       @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as User).useR_NAME }}</td>
+          <td>{{ (item as User).userName }}</td>
           <td>{{ (item as User).names }}</td>
-          <td>{{ (item as User).lasT_NAMES }}</td>
-          <td>{{ (item as User).phonE_NUMBER }}</td>
-          <td>{{ (item as User).rolE_NAME }}</td>
-          <td>{{ (item as User).storE_NAME }}</td>
-          <td>{{ (item as User).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as User).statE_USER }}</td>
+          <td>{{ (item as User).lastNames }}</td>
+          <td>{{ (item as User).phoneNumber }}</td>
+          <td>{{ (item as User).roleName }}</td>
+          <td>{{ (item as User).storeName }}</td>
+          <td>{{ (item as User).auditCreateDate }}</td>
+          <td>{{ (item as User).statusUser }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as User).statE_USER == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as User).statusUser == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editUser(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as User).statE_USER == 'INACTIVO'">
+            <template v-if="canEdit && (item as User).statusUser == 'Inactivo'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit && (item as User).statE_USER == 'ACTIVO'">
+            <template v-if="canEdit && (item as User).statusUser == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -88,14 +88,14 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Usuario', key: 'useR_NAME', sortable: false  },
+        { title: 'Usuario', key: 'userName', sortable: false  },
         { title: 'Nombres', key: 'names', sortable: false  },
-        { title: 'Apellidos', key: 'lasT_NAME', sortable: false  },
-        { title: 'Teléfono', key: 'phonE_NUMBER', sortable: false  },
-        { title: 'Rol', key: 'rolE_NAME', sortable: false  },
-        { title: 'Sucursal', key: 'storE_NAME', sortable: false  },
-        { title: 'Fecha registro', key: 'audiT_CREATE_DATE', sortable: false  },
-        { title: 'Estado', key: 'statE_USER', sortable: false },
+        { title: 'Apellidos', key: 'lastNames', sortable: false  },
+        { title: 'Teléfono', key: 'phoneNumber', sortable: false  },
+        { title: 'Rol', key: 'roleName', sortable: false  },
+        { title: 'Sucursal', key: 'storeName', sortable: false  },
+        { title: 'Fecha registro', key: 'auditCreateDate', sortable: false  },
+        { title: 'Estado', key: 'statusUser', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -138,21 +138,21 @@ export default defineComponent({
     },
     openForm() {
       this.selectedUser = {
-        pK_USER: null,
-        useR_NAME: '',
+        idUser: null,
+        userName: '',
         password: '',
-        passworD_HASH: '',
+        passwordHash: '',
         names: '',
-        lasT_NAMES: '',
-        identificatioN_NUMBER: '',
-        phonE_NUMBER: null,
-        pK_ROLE: null,
-        rolE_NAME: '',
-        pK_STORE: null,
-        storE_NAME: '',
-        audiT_CREATE_DATE: '',
-        statE_USER: '',
-        updatE_PASSWORD: false
+        lastNames: '',
+        identificationNumber: '',
+        phoneNumber: null,
+        idRole: null,
+        roleName: '',
+        idStore: null,
+        storeName: '',
+        auditCreateDate: '',
+        statusUser: '',
+        updatePassword: false
       };
       this.form = true;
     },

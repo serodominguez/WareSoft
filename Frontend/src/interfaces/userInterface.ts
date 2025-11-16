@@ -1,19 +1,19 @@
 export interface User {
-  pK_USER: number | null;
-  useR_NAME: string;
+  idUser: number | null;
+  userName: string;
   password: string;
-  passworD_HASH: string;
+  passwordHash: string;
   names: string;
-  lasT_NAMES: string;
-  identificatioN_NUMBER: string;
-  phonE_NUMBER: number | null;
-  pK_ROLE: number | null;
-  rolE_NAME: string,
-  pK_STORE: number | null;
-  storE_NAME: string,
-  audiT_CREATE_DATE: string;
-  statE_USER: string;
-  updatE_PASSWORD: boolean;
+  lastNames: string;
+  identificationNumber: string;
+  phoneNumber: number | null;
+  idRole: number | null;
+  roleName: string,
+  idStore: number | null;
+  storeName: string,
+  auditCreateDate: string;
+  statusUser: string;
+  updatePassword: boolean;
 }
 
 export interface UserState {

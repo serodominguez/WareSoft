@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localRole.rolE_NAME }}.
+                el ítem: {{ localRole.roleName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         role: {
             type: Object as PropType<Role | null>,
             default: () => ({
-                pK_ROLE: null,
-                rolE_NAME: ''
+                idRole: null,
+                roleName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('role/removeRole', this.localRole.pK_ROLE);
+                await this.$store.dispatch('role/removeRole', this.localRole.idRole);
                 this.toast.success('Rol eliminado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('role/enableRole', this.localRole.pK_ROLE);
+                await this.$store.dispatch('role/enableRole', this.localRole.idRole);
                 this.toast.success('Rol habilitado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('role/disableRole', this.localRole.pK_ROLE);
+                await this.$store.dispatch('role/disableRole', this.localRole.idRole);
                 this.toast.success('Rol deshabilitado con éxito!');
                 this.close();
             } catch (error: any) {

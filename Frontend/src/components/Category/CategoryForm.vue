@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localCategory.pK_CATEGORY ? 'Editar Categoría' : 'Agregar Categoría' }}</span>
+        <span>{{ localCategory.idCategory ? 'Editar Categoría' : 'Agregar Categoría' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,13 +10,13 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localCategory.categorY_NAME"
-                  :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25" @keyup="uppercase"
+                <v-text-field color="primary" variant="underlined" v-model="localCategory.categoryName"
+                  :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25"
                   label="Nombre de la Categoría" required />
               </v-col>
               <v-col cols="12" md="12" lg="12" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localCategory.description"
-                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" @keyup="uppercase"
+                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50"
                   label="Descripción" required />
               </v-col>
             </v-row>
@@ -57,8 +57,8 @@ export default defineComponent({
     category: {
       type: Object as PropType<Category | null>,
       default: () => ({
-        pK_CATEGORY: null,
-        categorY_NAME: '',
+        idCategory: null,
+        categoryName: '',
         description: ''
       }),
     },
@@ -90,10 +90,6 @@ export default defineComponent({
     },
   },
   methods: {
-    uppercase() {
-      this.localCategory.categorY_NAME = this.localCategory.categorY_NAME.toUpperCase();
-      this.localCategory.description = this.localCategory.description.toUpperCase();
-    },
     close() {
       this.isOpen = false;
     },
@@ -101,9 +97,9 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localCategory.pK_CATEGORY) {
+          if (this.localCategory.idCategory) {
             await this.$store.dispatch('category/editCategory', {
-              id: this.localCategory.pK_CATEGORY,
+              id: this.localCategory.idCategory,
               category: { ...this.localCategory }
             });
             this.toast.success('Categoría actualizada con éxito!');

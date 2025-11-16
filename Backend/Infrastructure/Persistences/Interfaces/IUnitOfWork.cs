@@ -5,14 +5,14 @@ namespace Infrastructure.Persistences.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IGenericRepository<Brands> Brands { get; }
-        IGenericRepository<Categories> Categories { get; }
-        IGenericRepository<Stores> Stores { get; }
-        IModulesRepository Modules { get; }
-        IPermissionsRepository Permissions { get; }
-        IRolesRepository Roles { get; }
-        IUsersRepository Users { get; }
-        
+        IGenericRepository<BrandEntity> Brand { get; }
+        IGenericRepository<CategoryEntity> Category { get; }
+        IGenericRepository<StoreEntity> Store { get; }
+        IModuleRepository Module { get; }
+        IPermissionRepository Permission { get; }
+        IRoleRepository Role { get; }
+        IUserRepository User { get; }
+
         void SaveChanges();
         Task SaveChangesAsync();
 

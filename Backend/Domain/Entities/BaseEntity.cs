@@ -2,13 +2,13 @@
 {
     public class BaseEntity
     {
-        public int PK_ENTITY { get; set; }
-        public int? AUDIT_CREATE_USER { get; set; }
-        public DateTime? AUDIT_CREATE_DATE { get; set; }
-        public int? AUDIT_UPDATE_USER { get; set; }
-        public DateTime? AUDIT_UPDATE_DATE { get; set; }
-        public int? AUDIT_DELETE_USER { get; set; }
-        public DateTime? AUDIT_DELETE_DATE { get; set; }
-        public bool STATE { get; set; }
+        public int Id { get; set; }
+        public int? AuditCreateUser { get; set; }
+        public DateTime? AuditCreateDate { get; set; }
+        public int? AuditUpdateUser { get; set; }
+        public DateTime? AuditUpdateDate { get; set; }
+        public int? AuditDeleteUser { get; set; }
+        public DateTime? AuditDeleteDate { get; set; }
+        public bool Status { get; set; }
     }
 }

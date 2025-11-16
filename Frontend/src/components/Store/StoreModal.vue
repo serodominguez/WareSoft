@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localStore.storE_NAME }}.
+                el ítem: {{ localStore.storeName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         store: {
             type: Object as PropType<Store | null>,
             default: () => ({
-                pK_STORE: null,
-                storE_NAME: ''
+                idStore: null,
+                storeName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('store/removeStore', this.localStore.pK_STORE);
+                await this.$store.dispatch('store/removeStore', this.localStore.idStore);
                 this.toast.success('Tienda eliminada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('store/enableStore', this.localStore.pK_STORE);
+                await this.$store.dispatch('store/enableStore', this.localStore.idStore);
                 this.toast.success('Tienda habilitada con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('store/disableStore', this.localStore.pK_STORE);
+                await this.$store.dispatch('store/disableStore', this.localStore.idStore);
                 this.toast.success('Tienda deshabilitada con éxito!');
                 this.close();
             } catch (error: any) {

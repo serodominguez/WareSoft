@@ -6,19 +6,19 @@
       @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as Store).storE_NAME }}</td>
+          <td>{{ (item as Store).storeName }}</td>
           <td>{{ (item as Store).manager }}</td>
           <td>{{ (item as Store).address }}</td>
           <td>{{ (item as Store).city }}</td>
-          <td>{{ (item as Store).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as Store).statE_STORE }}</td>
+          <td>{{ (item as Store).auditCreateDate }}</td>
+          <td>{{ (item as Store).statusStore }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as Store).statE_STORE == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Store).statusStore == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editStore(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as Store).statE_STORE == 'INACTIVO'">
+            <template v-if="canEdit && (item as Store).statusStore == 'Inactivo'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit &&  (item as Store).statE_STORE == 'ACTIVO'">
+            <template v-if="canEdit &&  (item as Store).statusStore == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -86,12 +86,12 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Tienda', key: 'storE_NAME', sortable: false },
+        { title: 'Tienda', key: 'storeName', sortable: false },
         { title: 'Encargado', key: 'manager', sortable: false },
         { title: 'Dirección', key: 'address', sortable: false },
         { title: 'Ciudad', key: 'city', sortable: false },
-        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
-        { title: 'Estado', key: 'statE_STORE', sortable: false },
+        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+        { title: 'Estado', key: 'statusStore', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -134,16 +134,16 @@ export default defineComponent({
     },
     openForm() {
       this.selectedStore = {
-        pK_STORE: null,
-        storE_NAME: '',
+        idStore: null,
+        storeName: '',
         manager: '',
         address: '',
-        phonE_NUMBER: null,
+        phoneNumber: null,
         city: '',
         email: '',
         type: '',
-        audiT_CREATE_DATE: '',
-        statE_STORE: ''
+        auditCreateDate: '',
+        statusStore: ''
       };
       this.form = true;
     },

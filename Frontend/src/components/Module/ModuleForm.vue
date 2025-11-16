@@ -2,7 +2,7 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{ localModule.pK_MODULE ? 'Editar Módulo' : 'Agregar Módulo' }}</span>
+        <span>{{ localModule.idModule ? 'Editar Módulo' : 'Agregar Módulo' }}</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -10,7 +10,7 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localModule.modulE_NAME"
+                <v-text-field color="primary" variant="underlined" v-model="localModule.moduleName"
                   :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25"
                   label="Nombre del Módulo" required />
               </v-col>
@@ -52,8 +52,8 @@ export default defineComponent({
     module: {
       type: Object as PropType<Module | null>,
       default: () => ({
-        pK_MODULE: null,
-        modulE_NAME: ''
+        idModule: null,
+        moduleName: ''
       }),
     },
   },
@@ -91,9 +91,9 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localModule.pK_MODULE) {
+          if (this.localModule.idModule) {
             await this.$store.dispatch('module/editModule', {
-              id: this.localModule.pK_MODULE,
+              id: this.localModule.idModule,
               module: { ...this.localModule }
             });
             this.toast.success('Módulo actualizado con éxito!');

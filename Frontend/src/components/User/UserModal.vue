@@ -10,7 +10,7 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ localUser.useR_NAME }}.
+                el ítem: {{ localUser.userName }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
@@ -40,8 +40,8 @@ export default defineComponent({
         user: {
             type: Object as PropType<User | null>,
             default: () => ({
-                pK_USER: null,
-                useR_NAME: ''
+                idUser: null,
+                userName: ''
             }),
         },
         action: {
@@ -75,7 +75,7 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('user/removeUser', this.localUser.pK_USER);
+                await this.$store.dispatch('user/removeUser', this.localUser.idUser);
                 this.toast.success('Usuario eliminado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -86,7 +86,7 @@ export default defineComponent({
         },
         async enabled() {
             try {
-                await this.$store.dispatch('user/enableUser', this.localUser.pK_USER);
+                await this.$store.dispatch('user/enableUser', this.localUser.idUser);
                 this.toast.success('Usuario habilitado con éxito!');
                 this.close();
             } catch (error: any) {
@@ -97,7 +97,7 @@ export default defineComponent({
         },
         async disabled() {
             try {
-                await this.$store.dispatch('user/disableUser', this.localUser.pK_USER);
+                await this.$store.dispatch('user/disableUser', this.localUser.idUser);
                 this.toast.success('Usuario deshabilitado con éxito!');
                 this.close();
             } catch (error: any) {

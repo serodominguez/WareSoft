@@ -6,16 +6,16 @@
       @update:page="changePage">
       <template v-slot:item="{ item }">
         <tr>
-          <td>{{ (item as Module).modulE_NAME }}</td>
-          <td>{{ (item as Module).audiT_CREATE_DATE }}</td>
-          <td>{{ (item as Module).statE_MODULE }}</td>
+          <td>{{ (item as Module).moduleName }}</td>
+          <td>{{ (item as Module).auditCreateDate }}</td>
+          <td>{{ (item as Module).statusModule }}</td>
           <td>
-            <v-btn v-if="canEdit && (item as Module).statE_MODULE == 'ACTIVO'" color="indigo" icon="edit" variant="text"
+            <v-btn v-if="canEdit && (item as Module).statusModule == 'Activo'" color="indigo" icon="edit" variant="text"
               @click="editModule(item)" size="small"></v-btn>
-            <template v-if="canEdit && (item as Module).statE_MODULE == 'INACTIVO'">
+            <template v-if="canEdit && (item as Module).statusModule == 'Inactivo'">
               <v-btn color="indigo" icon="check" variant="text" @click="openModal(item, 1)" size="small"></v-btn>
             </template>
-            <template v-if="canEdit && (item as Module).statE_MODULE == 'ACTIVO'">
+            <template v-if="canEdit && (item as Module).statusModule == 'Activo'">
               <v-btn color="indigo" icon="block" variant="text" @click="openModal(item, 2)" size="small"></v-btn>
             </template>
             <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text" @click="openModal(item, 0)" size="small"></v-btn>
@@ -83,9 +83,9 @@ export default defineComponent({
   computed: {
     headers() {
       return [
-        { title: 'Módulo', key: 'modulE_NAME', sortable: false },
-        { title: 'Fecha de registro', key: 'audiT_CREATE_DATE', sortable: false },
-        { title: 'Estado', key: 'statE_MODULE', sortable: false },
+        { title: 'Módulo', key: 'moduleName', sortable: false },
+        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+        { title: 'Estado', key: 'statusModule', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false },
       ];
     },
@@ -128,10 +128,10 @@ export default defineComponent({
     },
     openForm() {
       this.selectedModule = {
-        pK_MODULE: null,
-        modulE_NAME: '',
-        audiT_CREATE_DATE: '',
-        statE_MODULE: ''
+        idModule: null,
+        moduleName: '',
+        auditCreateDate: '',
+        statusModule: ''
       };
       this.form = true;
     },

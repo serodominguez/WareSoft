@@ -32,8 +32,7 @@ namespace Infrastructure.Persistences.Repositories
 
         public async Task<T?> GetByIdAsync(int id)
         {
-            var entity = await _entity.AsNoTracking().FirstOrDefaultAsync(x => x.PK_ENTITY.Equals(id));
-
+            var entity = await _entity.AsNoTracking().FirstOrDefaultAsync(x => x.Id.Equals(id));
             return entity;
         }
 
@@ -47,9 +46,9 @@ namespace Infrastructure.Persistences.Repositories
         public async Task<bool> EditAsync(T entity)
         {
             _context.Update(entity);
-            _context.Entry(entity).Property(x => x.STATE).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_CREATE_USER).IsModified = false;
-            _context.Entry(entity).Property(x => x.AUDIT_CREATE_DATE).IsModified = false;
+            _context.Entry(entity).Property(x => x.Status).IsModified = false;
+            _context.Entry(entity).Property(x => x.AuditCreateUser).IsModified = false;
+            _context.Entry(entity).Property(x => x.AuditCreateDate).IsModified = false;
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }

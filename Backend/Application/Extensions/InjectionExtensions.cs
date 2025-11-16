@@ -14,8 +14,8 @@ namespace Application.Extensions
         public static IServiceCollection AddInjectionApplication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton(configuration);
-            
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).ToArray();
+
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic).ToArray();
 
             foreach (var assembly in assemblies)
             {
@@ -32,13 +32,13 @@ namespace Application.Extensions
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IGenerateExcelService, GenerateExcelService>();
-            services.AddScoped<IBrandsService, BrandsService>();
-            services.AddScoped<ICategoriesService, CategoriesService>();
-            services.AddScoped<IModulesService, ModulesService>();
-            services.AddScoped<IPermissionsService, PermissionsService>();
-            services.AddScoped<IRolesService, RolesService>();
-            services.AddScoped<IStoresService, StoresService>();
-            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IBrandService, BrandService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IModuleService, ModuleService>();
+            services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IStoreService, StoreService>();
+            services.AddScoped<IUserService, UserService>();
 
             return services;
         }

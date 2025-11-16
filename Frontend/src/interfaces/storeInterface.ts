@@ -1,14 +1,14 @@
 export interface Store {
-  pK_STORE: number | null;
-  storE_NAME: string;
+  idStore: number | null;
+  storeName: string;
   manager: string;
   address: string;
-  phonE_NUMBER: number | null;
+  phoneNumber: number | null;
   city: string;
   email: string;
   type: string;
-  audiT_CREATE_DATE: string;
-  statE_STORE: string;
+  auditCreateDate: string;
+  statusStore: string;
 }
 
 export interface StoreState {

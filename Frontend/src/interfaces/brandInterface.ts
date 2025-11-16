@@ -1,8 +1,8 @@
 export interface Brand {
-  pK_BRAND: number | null;
-  branD_NAME: string;
-  audiT_CREATE_DATE: string;
-  statE_BRAND: string;
+  idBrand: number | null;
+  brandName: string;
+  auditCreateDate: string;
+  statusBrand: string;
 }
 
 export interface BrandState {

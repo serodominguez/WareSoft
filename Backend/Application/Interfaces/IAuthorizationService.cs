@@ -1,5 +1,5 @@
 ﻿using Application.Commons.Bases.Response;
-using Application.Dtos.Request.Users;
+using Application.Dtos.Request.User;
 
 namespace Application.Interfaces
 {

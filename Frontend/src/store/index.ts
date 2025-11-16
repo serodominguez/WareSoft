@@ -17,11 +17,11 @@ interface Permission {
 }
 
 interface JwtPayload {
-  pk_user: string;
-  user_name: string;
-  role: string;
-  store_name: string;
-  pk_store: string;
+  userId: string;       
+  userName: string;     
+  role: string;         
+  storeName: string; 
+  storeId: string;  
   nbf: number;
   exp: number;
   iss: string;
@@ -98,7 +98,7 @@ const store = createStore({
       const decoded = jwtDecode<JwtPayload>(token);
       
       // Obtener userId usando los claims personalizados (más simple)
-      const userId = parseInt(decoded.pk_user);
+      const userId = parseInt(decoded.userId);
       
       // Cargar permisos del usuario
       await dispatch('loadUserPermissions', { decoded, userId });
@@ -107,15 +107,15 @@ const store = createStore({
     async loadUserPermissions({ commit }, { decoded, userId }: { decoded: JwtPayload, userId: number }) {
       try {
         // Llamar al endpoint de permisos
-        const response = await axios.get(`/api/Permissions/User/${userId}`);
+        const response = await axios.get(`/api/Permission/User`);
         
         if (response.data.isSuccess) {
           const user: CurrentUser = {
             userId: userId,
-            userName: decoded.user_name, // ← Usar el claim personalizado
-            role: decoded.role,          // ← Usar el claim personalizado
-            storeId: parseInt(decoded.pk_store),
-            storeName: decoded.store_name,
+            userName: decoded.userName,
+            role: decoded.role,          
+            storeId: parseInt(decoded.storeId),
+            storeName: decoded.storeName,
             permissions: response.data.data || [],
           };
           
@@ -125,10 +125,10 @@ const store = createStore({
           // Crear usuario sin permisos
           const user: CurrentUser = {
             userId: userId,
-            userName: decoded.user_name,
+            userName: decoded.userName,
             role: decoded.role,
-            storeId: parseInt(decoded.pk_store),
-            storeName: decoded.store_name,
+            storeId: parseInt(decoded.storeId),
+            storeName: decoded.storeName,
             permissions: [],
           };
           commit("SET_USER", user);
@@ -138,10 +138,10 @@ const store = createStore({
         // Crear usuario sin permisos en caso de error
         const user: CurrentUser = {
           userId: userId,
-          userName: decoded.user_name,
+          userName: decoded.userName,
           role: decoded.role,
-          storeId: parseInt(decoded.pk_store),
-          storeName: decoded.store_name,
+          storeId: parseInt(decoded.storeId),
+          storeName: decoded.storeName,
           permissions: [],
         };
         commit("SET_USER", user);
@@ -169,7 +169,7 @@ const store = createStore({
             commit("SET_USER", user);
           } else {
             // Si no hay usuario guardado, recargar permisos
-            const userId = parseInt(decodedToken.pk_user);
+            const userId = parseInt(decodedToken.userId);
             await dispatch('loadUserPermissions', { decoded: decodedToken, userId });
           }
           

@@ -1,4 +1,4 @@
-﻿using Application.Dtos.Request.Users;
+﻿using Application.Dtos.Request.User;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
