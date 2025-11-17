@@ -97,22 +97,44 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localCategory.idCategory) {
-            await this.$store.dispatch('category/editCategory', {
+          const isEditing = !!this.localCategory.idCategory;
+          let result;
+
+          if (isEditing) {
+            result = await this.$store.dispatch('category/editCategory', {
               id: this.localCategory.idCategory,
               category: { ...this.localCategory }
             });
-            this.toast.success('Categoría actualizada con éxito!');
           } else {
-            await this.$store.dispatch('category/registerCategory', { ...this.localCategory });
-            this.toast.success('Categoría agregada con éxito!');
+            result = await this.$store.dispatch('category/registerCategory', { ...this.localCategory });
           }
-          this.$emit('saved', { ...this.localCategory });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing
+              ? 'Categoría actualizada con éxito!'
+              : 'Categoría registrada con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localCategory });
+            this.close();
+          }
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar la categoría.');
+          const isEditing = !!this.localCategory.idCategory;
+          let errorMsg = isEditing
+            ? 'Error en actualizar la categoría'
+            : 'Error en guardar la categoría';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

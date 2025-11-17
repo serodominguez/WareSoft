@@ -91,22 +91,45 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localRole.idRole) {
-            await this.$store.dispatch('role/editRole', {
+          const isEditing = !!this.localRole.idRole;
+          let result;
+
+          if (isEditing) {
+            result = await this.$store.dispatch('role/editRole', {
               id: this.localRole.idRole,
               role: { ...this.localRole }
             });
-            this.toast.success('Rol actualizado con éxito!');
           } else {
-            await this.$store.dispatch('role/registerRole', { ...this.localRole });
-            this.toast.success('Rol agregado con éxito!');
+            result = await this.$store.dispatch('role/registerRole', { ...this.localRole });
           }
-          this.$emit('saved', { ...this.localRole });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing
+              ? 'Rol actualizado con éxito!'
+              : 'Rol registrado con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localRole });
+            this.close();
+          }
+
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar el rol.');
+          const isEditing = !!this.localRole.idRole;
+          let errorMsg = isEditing
+            ? 'Error en actualizar el rol'
+            : 'Error en guardar el rol';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

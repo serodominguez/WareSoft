@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Module, ModuleState, BaseResponse } from '@/interfaces/moduleInterface';
+import { Module, ModuleState, BaseResponse, FilterParams } from '@/interfaces/moduleInterface';
 import {
   fetchModulesService,
   fetchModuleByIdService,
@@ -27,6 +27,7 @@ const state: ModuleState = {
   totalModules: 0,
   loading: false,
   error: null as string | null,
+  lastFilterParams: undefined,
 };
 
 const isExpired = (token: string | null): boolean => {
@@ -56,6 +57,9 @@ const mutations = {
   SET_ERROR(state: any, error: string | null) {
     state.error = error;
   },
+  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+    state.lastFilterParams = params;
+  },
 };
 
 const actions = {
@@ -75,6 +79,20 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_MODULES", []);
+
+    const filterParams = {
+      pageNumber,
+      pageSize,
+      order,
+      sort,
+      textFilter,
+      numberFilter,
+      stateFilter,
+      startDate,
+      endDate
+    };
+    commit("SET_LAST_FILTER_PARAMS", filterParams);
+
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -181,7 +199,7 @@ const actions = {
     }
   },
 
-  async registerModule({ commit, dispatch, rootState }: any, module: Module) {
+  async registerModule({ commit, dispatch, rootState, state }: any, module: Module) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -191,16 +209,19 @@ const actions = {
 
       const result: BaseResponse = await registerModuleService(module, token);
       if (result.isSuccess) {
-        dispatch("fetchModules", {});
+        dispatch("fetchModules", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editModule({ commit, dispatch, rootState }: any, { id, module }: { id: number; module: Module }) {
+  async editModule({ commit, dispatch, rootState, state }: any, { id, module }: { id: number; module: Module }) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -210,16 +231,19 @@ const actions = {
 
       const result: BaseResponse = await editModuleService(id, module, token);
       if (result.isSuccess) {
-        dispatch("fetchModules", {});
+        dispatch("fetchModules", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableModule({ commit, dispatch, rootState }: any, id: number) {
+  async enableModule({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -229,15 +253,19 @@ const actions = {
 
       const result: BaseResponse = await enableModuleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchModules", {});
+        dispatch("fetchModules", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
-  async disableModule({ commit, dispatch, rootState }: any, id: number) {
+  
+  async disableModule({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -247,16 +275,19 @@ const actions = {
 
       const result: BaseResponse = await disableModuleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchModules", {});
+        dispatch("fetchModules", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeModule({ commit, dispatch, rootState }: any, id: number) {
+  async removeModule({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -265,12 +296,15 @@ const actions = {
       }
       const result: BaseResponse = await removeModuleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchModules", {});
+        dispatch("fetchModules", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
 
   },
@@ -291,5 +325,3 @@ export default {
   actions,
   getters,
 };
-
-export type { Module };

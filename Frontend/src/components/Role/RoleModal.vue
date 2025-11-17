@@ -75,35 +75,71 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('role/removeRole', this.localRole.idRole);
-                this.toast.success('Rol eliminado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al eliminar el rol.');
+                const result = await this.$store.dispatch('role/removeRole', this.localRole.idRole);
+                if (result.isSuccess) {
+                    this.toast.success('Rol eliminado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en eliminar el rol';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async enabled() {
             try {
-                await this.$store.dispatch('role/enableRole', this.localRole.idRole);
-                this.toast.success('Rol habilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al habilitar el rol.');
+                const result = await this.$store.dispatch('role/enableRole', this.localRole.idRole);
+                if (result.isSuccess) {
+                    this.toast.success('Rol habilitado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en habilitar el rol';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async disabled() {
             try {
-                await this.$store.dispatch('role/disableRole', this.localRole.idRole);
-                this.toast.success('Rol deshabilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al deshabilitar el rol.');
+                const result = await this.$store.dispatch('role/disableRole', this.localRole.idRole);
+                if (result.isSuccess) {
+                    this.toast.success('Rol deshabilitado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en deshabilitar el rol';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
     },

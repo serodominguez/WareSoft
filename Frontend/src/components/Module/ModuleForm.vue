@@ -91,22 +91,45 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localModule.idModule) {
-            await this.$store.dispatch('module/editModule', {
+          const isEditing = !!this.localModule.idModule;
+          let result;
+
+          if (isEditing) {
+            result = await this.$store.dispatch('module/editModule', {
               id: this.localModule.idModule,
               module: { ...this.localModule }
             });
-            this.toast.success('Módulo actualizado con éxito!');
           } else {
-            await this.$store.dispatch('module/registerModule', { ...this.localModule });
-            this.toast.success('Módulo agregado con éxito!');
+            result = await this.$store.dispatch('module/registerModule', { ...this.localModule });
           }
-          this.$emit('saved', { ...this.localModule });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing
+              ? 'Módulo actualizado con éxito!'
+              : 'Módulo registrado con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localModule });
+            this.close();
+          }
+
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar el módulo.');
+          const isEditing = !!this.localModule.idModule;
+          let errorMsg = isEditing
+            ? 'Error en actualizar el módulo'
+            : 'Error en guardar el módulo';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

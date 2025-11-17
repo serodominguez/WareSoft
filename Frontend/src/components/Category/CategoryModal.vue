@@ -75,35 +75,73 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('category/removeCategory', this.localCategory.idCategory);
-                this.toast.success('Categoría eliminada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al eliminar la categoría.');
+                const result = await this.$store.dispatch('category/removeCategory', this.localCategory.idCategory);
+                if (result.isSuccess) {
+                    this.toast.success('Categoría eliminada con éxito!');
+                    this.close()
                 }
+                ;
+            } catch (error: any) {
+                let errorMsg = 'Error en eliminar la categoría';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async enabled() {
             try {
-                await this.$store.dispatch('category/enableCategory', this.localCategory.idCategory);
-                this.toast.success('Categoría habilitada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al habilitar la categoría.');
+                const result = await this.$store.dispatch('category/enableCategory', this.localCategory.idCategory);
+                if (result.isSuccess) {
+                    this.toast.success('Categoría habilitada con éxito!');
+                    this.close();
                 }
+
+            } catch (error: any) {
+                let errorMsg = 'Error en habilitar la categoría';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async disabled() {
             try {
-                await this.$store.dispatch('category/disableCategory', this.localCategory.idCategory);
-                this.toast.success('Categoría deshabilitada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al deshabilitar la categoría.');
+                const result = await this.$store.dispatch('category/disableCategory', this.localCategory.idCategory);
+                if (result.isSuccess) {
+                    this.toast.success('Categoría deshabilitada con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en deshabilitar la categoría';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
     },

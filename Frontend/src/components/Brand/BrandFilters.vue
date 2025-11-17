@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer v-model="drawerModel" temporary>
+  <v-navigation-drawer v-model="drawerModel" temporary app>
     <v-list>
       <v-list-item>
       <div class="d-flex justify-space-between align-center w-100">
@@ -22,6 +22,7 @@
       <v-list-item>
         <v-date-input v-model="endDateModel" label="Hasta:" prepend-icon="" variant="underlined"
           persistent-placeholder></v-date-input>
+        <v-btn color="primary" block @click="clearFilters"> Limpiar Filtros </v-btn>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -83,13 +84,21 @@ export default defineComponent({
       set: (value) => emit('update:endDate', value)
     });
 
+    const clearFilters = () => {
+      selectedFilterModel.value = 'Marca';
+      stateModel.value = 'Activos';
+      startDateModel.value = null;
+      endDateModel.value = null;
+    };
+
     return {
       filters,
       drawerModel,
       selectedFilterModel,
       stateModel,
       startDateModel,
-      endDateModel
+      endDateModel,
+      clearFilters
     };
   }
 });

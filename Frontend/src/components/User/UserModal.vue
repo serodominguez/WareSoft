@@ -75,35 +75,73 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('user/removeUser', this.localUser.idUser);
-                this.toast.success('Usuario eliminado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al eliminar el usuario.');
+                const result = await this.$store.dispatch('user/removeUser', this.localUser.idUser);
+                if (result.isSuccess) {
+                    this.toast.success('Usuario eliminado con éxito!');
+                    this.close();
                 }
+
+            } catch (error: any) {
+                let errorMsg = 'Error en eliminar el usuario';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async enabled() {
             try {
-                await this.$store.dispatch('user/enableUser', this.localUser.idUser);
-                this.toast.success('Usuario habilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al habilitar el usuario.');
+                const result = await this.$store.dispatch('user/enableUser', this.localUser.idUser);
+                if (result.isSuccess) {
+                    this.toast.success('Usuario habilitado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en habilitar el usuario';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async disabled() {
             try {
-                await this.$store.dispatch('user/disableUser', this.localUser.idUser);
-                this.toast.success('Usuario deshabilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al deshabilitar el usuario.');
+                const result = await this.$store.dispatch('user/disableUser', this.localUser.idUser);
+                if (result.isSuccess) {
+                    this.toast.success('Usuario deshabilitado con éxito!');
+                    this.close();
                 }
+
+            } catch (error: any) {
+                let errorMsg = 'Error en deshabilitar el usuario';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
     },

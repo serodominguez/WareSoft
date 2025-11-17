@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { User, UserState, BaseResponse } from '@/interfaces/userInterface';
+import { User, UserState, BaseResponse, FilterParams } from '@/interfaces/userInterface';
 import {
   fetchUsersService,
   fetchUserByIdService,
@@ -27,6 +27,7 @@ const state: UserState = {
   totalUsers: 0,
   loading: false,
   error: null as string | null,
+  lastFilterParams: undefined,
 };
 
 const isExpired = (token: string | null): boolean => {
@@ -56,6 +57,9 @@ const mutations = {
   SET_ERROR(state: any, error: string | null) {
     state.error = error;
   },
+  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+    state.lastFilterParams = params;
+  },
 };
 
 const actions = {
@@ -75,6 +79,20 @@ const actions = {
   ) {
     commit("SET_LOADING", true);
     commit("SET_USERS", []);
+
+    const filterParams = {
+      pageNumber,
+      pageSize,
+      order,
+      sort,
+      textFilter,
+      numberFilter,
+      stateFilter,
+      startDate,
+      endDate
+    };
+    commit("SET_LAST_FILTER_PARAMS", filterParams);
+
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -202,7 +220,7 @@ async downloadUsersExcel(
     }
   },
 
-  async registerUser({ commit, dispatch, rootState }: any, user: User) {
+  async registerUser({ commit, dispatch, rootState, state }: any, user: User) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -212,16 +230,19 @@ async downloadUsersExcel(
 
       const result: BaseResponse = await registerUserService(user, token);
       if (result.isSuccess) {
-        dispatch("fetchUsers", {});
+        dispatch("fetchUsers", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editUser({ commit, dispatch, rootState }: any, { id, user }: { id: number; user: User }) {
+  async editUser({ commit, dispatch, rootState, state }: any, { id, user }: { id: number; user: User }) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -231,16 +252,19 @@ async downloadUsersExcel(
 
       const result: BaseResponse = await editUserService(id, user, token);
       if (result.isSuccess) {
-        dispatch("fetchUsers", {});
+        dispatch("fetchUsers", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableUser({ commit, dispatch, rootState }: any, id: number) {
+  async enableUser({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -250,15 +274,18 @@ async downloadUsersExcel(
 
       const result: BaseResponse = await enableUserService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchUsers", {});
+        dispatch("fetchUsers", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
-  async disableUser({ commit, dispatch, rootState }: any, id: number) {
+  async disableUser({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -268,16 +295,19 @@ async downloadUsersExcel(
 
       const result: BaseResponse = await disableUserService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchUsers", {});
+        dispatch("fetchUsers", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeUser({ commit, dispatch, rootState }: any, id: number) {
+  async removeUser({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -287,12 +317,15 @@ async downloadUsersExcel(
 
       const result: BaseResponse = await removeUserService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchUsers", {});
+        dispatch("fetchUsers", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
@@ -312,5 +345,3 @@ export default {
   actions,
   getters,
 };
-
-export type { User };

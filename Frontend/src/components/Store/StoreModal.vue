@@ -75,35 +75,72 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('store/removeStore', this.localStore.idStore);
-                this.toast.success('Tienda eliminada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al eliminar la tienda.');
+                const result = await this.$store.dispatch('store/removeStore', this.localStore.idStore);
+                if (result.isSuccess) {
+                    this.toast.success('Tienda eliminada con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en eliminar la tienda';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async enabled() {
             try {
-                await this.$store.dispatch('store/enableStore', this.localStore.idStore);
-                this.toast.success('Tienda habilitada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al habilitar la tienda.');
+                const result = await this.$store.dispatch('store/enableStore', this.localStore.idStore);
+                if (result.isSuccess) {
+                    this.toast.success('Tienda habilitada con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en habilitar la tienda';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async disabled() {
             try {
-                await this.$store.dispatch('store/disableStore', this.localStore.idStore);
-                this.toast.success('Tienda deshabilitada con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al deshabilitar la tienda.');
+                const result = await this.$store.dispatch('store/disableStore', this.localStore.idStore);
+                if (result.isSuccess) {
+                    this.toast.success('Tienda deshabilitada con éxito!');
+                    this.close();
                 }
+
+            } catch (error: any) {
+                let errorMsg = 'Error en deshabilitar la tienda';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
     },

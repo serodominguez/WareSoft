@@ -158,30 +158,53 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localUser.idUser) {
-            if(this.localUser.passwordHash !== this.oldPassword){
+          const isEditing = !!this.localUser.idUser;
+          let result;
+
+          if (isEditing) {
+            if (this.localUser.passwordHash !== this.oldPassword) {
               this.localUser.updatePassword = true;
               this.localUser.password = this.localUser.passwordHash;
             } else {
               this.localUser.updatePassword = false;
               this.localUser.password = this.localUser.passwordHash;
             }
-            await this.$store.dispatch('user/editUser', {
+            result = await this.$store.dispatch('user/editUser', {
               id: this.localUser.idUser,
               user: { ...this.localUser }
             });
-            this.toast.success('Usuario actualizado con éxito!');
           } else {
             this.localUser.password = this.localUser.passwordHash;
-            await this.$store.dispatch('user/registerUser', { ...this.localUser });
-            this.toast.success('Usuario agregado con éxito!');
+            result = await this.$store.dispatch('user/registerUser', { ...this.localUser });
           }
-          this.$emit('saved', { ...this.localUser });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing
+              ? 'Usuario actualizado con éxito!'
+              : 'Usuario registrado con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localUser });
+            this.close();
+          }
+
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar el usuario.');
+          const isEditing = !!this.localUser.idUser;
+          let errorMsg = isEditing
+            ? 'Error en actualizar el usuario'
+            : 'Error en guardar el usuario';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

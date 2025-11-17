@@ -1,6 +1,6 @@
 import mainStore from "@/store";
 import { jwtDecode } from "jwt-decode";
-import { Role, RoleState, BaseResponse } from '@/interfaces/roleInterface';
+import { Role, RoleState, BaseResponse, FilterParams } from '@/interfaces/roleInterface';
 import {
   fetchRolesService,
   selectRoleService,
@@ -28,6 +28,7 @@ const state: RoleState = {
   totalRoles: 0,
   loading: false,
   error: null as string | null,
+  lastFilterParams: undefined,
 };
 
 const isExpired = (token: string | null): boolean => {
@@ -57,25 +58,42 @@ const mutations = {
   SET_ERROR(state: any, error: string | null) {
     state.error = error;
   },
+  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+    state.lastFilterParams = params;
+  },
 };
 
 const actions = {
   async fetchRoles(
     { commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
+    {
+      pageNumber = 1,
+      pageSize = 10,
+      order = "desc",
+      sort = "Id",
+      textFilter = null,
       numberFilter = null,
       stateFilter = 1,
       startDate = null,
-      endDate = null
+      endDate = null,
     } = {}
   ) {
     commit("SET_LOADING", true);
     commit("SET_ROLES", []);
+
+    const filterParams = {
+      pageNumber,
+      pageSize,
+      order,
+      sort,
+      textFilter,
+      numberFilter,
+      stateFilter,
+      startDate,
+      endDate,
+    };
+    commit("SET_LAST_FILTER_PARAMS", filterParams);
+
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -112,16 +130,16 @@ const actions = {
 
   async downloadRolesExcel(
     { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
+    {
+      pageNumber = 1,
+      pageSize = 10,
+      order = "desc",
+      sort = "Id",
+      textFilter = null,
       numberFilter = null,
       stateFilter = 1,
       startDate = null,
-      endDate = null
+      endDate = null,
     } = {}
   ) {
     try {
@@ -146,16 +164,19 @@ const actions = {
       );
 
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `Roles_${new Date().toISOString().split('T')[0]}.xlsx`);
+      link.setAttribute(
+        "download",
+        `Roles_${new Date().toISOString().split("T")[0]}.xlsx`
+      );
       document.body.appendChild(link);
       link.click();
-      
+
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
-      console.error('Error al descargar Excel:', error);
+      console.error("Error al descargar Excel:", error);
       throw error;
     }
   },
@@ -205,7 +226,7 @@ const actions = {
     }
   },
 
-  async registerRole({ commit, dispatch, rootState }: any, role: Role) {
+  async registerRole({ commit, dispatch, rootState, state }: any, role: Role) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -215,16 +236,22 @@ const actions = {
 
       const result: BaseResponse = await registerRoleService(role, token);
       if (result.isSuccess) {
-        dispatch("fetchRoles", {});
+        dispatch("fetchRoles", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editRole({ commit, dispatch, rootState }: any, { id, role }: { id: number; role: Role }) {
+  async editRole(
+    { commit, dispatch, rootState, state }: any,
+    { id, role }: { id: number; role: Role }
+  ) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -234,16 +261,19 @@ const actions = {
 
       const result: BaseResponse = await editRoleService(id, role, token);
       if (result.isSuccess) {
-        dispatch("fetchRoles", {});
+        dispatch("fetchRoles", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableRole({ commit, dispatch, rootState }: any, id: number) {
+  async enableRole({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -253,15 +283,19 @@ const actions = {
 
       const result: BaseResponse = await enableRoleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchRoles", {});
+        dispatch("fetchRoles", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
-  async disableRole({ commit, dispatch, rootState }: any, id: number) {
+
+  async disableRole({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
@@ -271,32 +305,38 @@ const actions = {
 
       const result: BaseResponse = await disableRoleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchRoles", {});
+        dispatch("fetchRoles", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeRole({ commit, dispatch, rootState }: any, id: number) {
+  async removeRole({ commit, dispatch, rootState, state }: any, id: number) {
     try {
       const token = rootState.token;
       if (isExpired(token)) {
         await mainStore.dispatch("logout");
         return;
       }
+
       const result: BaseResponse = await removeRoleService(id, token);
       if (result.isSuccess) {
-        dispatch("fetchRoles", {});
+        dispatch("fetchRoles", state.lastFilterParams || {});
+        return result;
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
     }
-
   },
 };
 
@@ -315,5 +355,3 @@ export default {
   actions,
   getters,
 };
-
-export type { Role };

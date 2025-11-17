@@ -75,35 +75,71 @@ export default defineComponent({
         },
         async remove() {
             try {
-                await this.$store.dispatch('module/removeModule', this.localModule.idModule);
-                this.toast.success('Módulo eliminado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al eliminar el módulo.');
+                const result = await this.$store.dispatch('module/removeModule', this.localModule.idModule);
+                if (result.isSuccess) {
+                    this.toast.success('Módulo eliminado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en eliminar el módulo';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async enabled() {
             try {
-                await this.$store.dispatch('module/enableModule', this.localModule.idModule);
-                this.toast.success('Módulo habilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al habilitar el módulo.');
+                const result = await this.$store.dispatch('module/enableModule', this.localModule.idModule);
+                if (result.isSuccess) {
+                    this.toast.success('Módulo habilitado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en habilitar el módulo';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
         async disabled() {
             try {
-                await this.$store.dispatch('module/disableModule', this.localModule.idModule);
-                this.toast.success('Módulo deshabilitado con éxito!');
-                this.close();
-            } catch (error: any) {
-                if (error.response) {
-                    this.toast.error('Error al deshabilitar el módulo.');
+                const result = await this.$store.dispatch('module/disableModule', this.localModule.idModule);
+                if (result.isSuccess) {
+                    this.toast.success('Módulo deshabilitado con éxito!');
+                    this.close();
                 }
+            } catch (error: any) {
+                let errorMsg = 'Error en deshabilitar el módulo';
+
+                if (error?.response?.status) {
+                    errorMsg += `: Error ${error.response.status}`;
+                } else if (error?.response?.data?.message) {
+                    errorMsg += `: ${error.response.data.message}`;
+                } else if (error?.message) {
+                    errorMsg += `: ${error.message}`;
+                } else {
+                    errorMsg += '.';
+                }
+
+                this.toast.error(errorMsg);
             }
         },
     },

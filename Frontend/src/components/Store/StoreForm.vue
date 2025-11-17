@@ -125,22 +125,45 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localStore.idStore) {
-            await this.$store.dispatch('store/editStore', {
+          const isEditing = !!this.localStore.idStore;
+          let result;
+
+          if (isEditing) {
+            result = await this.$store.dispatch('store/editStore', {
               id: this.localStore.idStore,
               store: { ...this.localStore }
             });
-            this.toast.success('Tienda actualizada con éxito!');
           } else {
-            await this.$store.dispatch('store/registerStore', { ...this.localStore });
-            this.toast.success('Tienda agregada con éxito!');
+            result = await this.$store.dispatch('store/registerStore', { ...this.localStore });
           }
-          this.$emit('saved', { ...this.localStore });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing
+              ? 'Tienda actualizada con éxito!'
+              : 'Tienda registrada con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localStore });
+            this.close();
+          }
+          
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar la tienda.');
+          const isEditing = !!this.localStore.idStore;
+          let errorMsg = isEditing
+            ? 'Error en actualizar la tienda'
+            : 'Error en guardar la tienda';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

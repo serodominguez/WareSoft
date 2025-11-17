@@ -90,22 +90,45 @@ export default defineComponent({
       const form = this.$refs.form as FormRef;
       if (form.validate()) {
         try {
-          if (this.localBrand.idBrand) {
-            await this.$store.dispatch('brand/editBrand', {
+          const isEditing = !!this.localBrand.idBrand;
+          let result;
+
+          if (isEditing) {
+            result = await this.$store.dispatch('brand/editBrand', {
               id: this.localBrand.idBrand,
               brand: { ...this.localBrand }
             });
-            this.toast.success('Marca actualizada con éxito!');
           } else {
-            await this.$store.dispatch('brand/registerBrand', { ...this.localBrand });
-            this.toast.success('Marca agregada con éxito!');
+            result = await this.$store.dispatch('brand/registerBrand', { ...this.localBrand });
           }
-          this.$emit('saved', { ...this.localBrand });
-          this.close();
+
+          if (result.isSuccess) {
+            const successMsg = isEditing 
+              ? 'Marca actualizada con éxito!'
+              : 'Marca registrada con éxito!';
+
+            this.toast.success(successMsg);
+            this.$emit('saved', { ...this.localBrand });
+            this.close();
+          }
+          
         } catch (error: any) {
-          if (error.response) {
-            this.toast.error('Error en generar la marca.');
+          const isEditing = !!this.localBrand.idBrand;
+          let errorMsg = isEditing 
+            ? 'Error en actualizar la marca'
+            : 'Error en guardar la marca';
+
+          if (error?.response?.status) {
+            errorMsg += `: Error ${error.response.status}`;
+          } else if (error?.response?.data?.message) {
+            errorMsg += `: ${error.response.data.message}`;
+          } else if (error?.message) {
+            errorMsg += `: ${error.message}`;
+          } else {
+            errorMsg += '.';
           }
+
+          this.toast.error(errorMsg);
         }
       }
     },

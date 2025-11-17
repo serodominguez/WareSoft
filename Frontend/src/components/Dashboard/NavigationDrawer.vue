@@ -87,15 +87,15 @@ export default defineComponent({
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/category', module: 'categorias' },
         { icon: 'copyright', text: 'Marcas', route: '/brand', module: 'marcas' },
+        { icon: 'store', text: 'Tiendas', route: '/store', module: 'tiendas' },
       ] as Link[],
       linkAccess: [
-        { icon: 'widgets', text: 'Módulos', route: '/module', module: 'modulos' },
         { icon: 'supervisor_account', text: 'Permisos', route: '/permission', module: 'permisos' },
         { icon: 'manage_accounts', text: 'Roles', route: '/role', module: 'roles' },
         { icon: 'person', text: 'Usuarios', route: '/user', module: 'usuarios' },
       ] as Link[],
       linkConfiguration: [
-        { icon: 'store', text: 'Tiendas', route: '/store', module: 'tiendas' },
+        { icon: 'widgets', text: 'Módulos', route: '/module', module: 'modulos' },
       ] as Link[],
     };
   },
