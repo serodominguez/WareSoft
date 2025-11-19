@@ -43,7 +43,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <RoleFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <RoleFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchRoles" />
   <RoleForm v-model="form" :role="selectedRole" @saved="fetchRoles" />
   <RoleModal v-model="modal" :role="selectedRole" :action="action" @update:modelValue="modal = $event" />
 </template>

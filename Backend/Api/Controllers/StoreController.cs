@@ -13,9 +13,9 @@ namespace Api.Controllers
         private readonly IStoreService _storeService;
         private readonly IGenerateExcelService _generateExcelService;
 
-        public StoreController(IStoreService storesService, IGenerateExcelService generateExcelService)
+        public StoreController(IStoreService storeService, IGenerateExcelService generateExcelService)
         {
-            _storeService = storesService;
+            _storeService = storeService;
             _generateExcelService = generateExcelService;
         }
 

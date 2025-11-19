@@ -10,6 +10,7 @@ namespace Infrastructure.Persistences.Interfaces
         IGenericRepository<StoreEntity> Store { get; }
         IModuleRepository Module { get; }
         IPermissionRepository Permission { get; }
+        IProductRepository Product { get; }
         IRoleRepository Role { get; }
         IUserRepository User { get; }
 

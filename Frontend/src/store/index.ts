@@ -7,6 +7,7 @@ import Brand from '@/store/modules/Brand'
 import Category from '@/store/modules/Category'
 import Module from '@/store/modules/Module'
 import Permission from '@/store/modules/Permission'
+import Product from './modules/Product'
 import Role from '@/store/modules/Role'
 import Store from '@/store/modules/Store'
 import User from '@/store/modules/User'
@@ -193,6 +194,7 @@ const store = createStore({
     role: Role,
     module: Module,
     permission: Permission,
+    product: Product,
     store: Store,
     user: User
   },

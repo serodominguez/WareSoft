@@ -36,6 +36,7 @@ namespace Application.Extensions
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IModuleService, ModuleService>();
             services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IStoreService, StoreService>();
             services.AddScoped<IUserService, UserService>();

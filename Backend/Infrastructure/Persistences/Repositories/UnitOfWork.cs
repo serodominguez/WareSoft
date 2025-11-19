@@ -15,6 +15,7 @@ namespace Infrastructure.Persistences.Repositories
         public IGenericRepository<StoreEntity> _store = null!;
         public IModuleRepository _module = null!;
         public IPermissionRepository _permission = null!;
+        public IProductRepository _product = null!;
         public IRoleRepository _role = null!;
         public IUserRepository _user = null!;
 
@@ -28,6 +29,7 @@ namespace Infrastructure.Persistences.Repositories
         public IGenericRepository<StoreEntity> Store => _store ?? new GenericRepository<StoreEntity>(_context);
         public IModuleRepository Module => _module ?? new ModuleRepository(_context);
         public IPermissionRepository Permission => _permission ?? new PermissionRepository(_context);
+        public IProductRepository Product => _product ?? new ProductRepository(_context);   
         public IRoleRepository Role => _role ?? new RoleRepository(_context);
         public IUserRepository User => _user ?? new UserRepository(_context);
 

@@ -43,7 +43,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <ModuleFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <ModuleFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchModules" />
   <ModuleForm v-model="form" :module="selectedModule" @saved="fetchModules" />
   <ModuleModal v-model="modal" :module="selectedModule" :action="action" @update:modelValue="modal = $event" />
 </template>

@@ -33,8 +33,8 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasColumnName("COLOR")
                 .HasMaxLength(20);
 
-            builder.Property(p => p.Measurement)
-                .HasColumnName("MEASUREMENT")
+            builder.Property(p => p.UnitMeasure)
+                .HasColumnName("UNIT_MEASURE")
                 .HasMaxLength(15)
                 .IsRequired();
 

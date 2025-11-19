@@ -7,6 +7,7 @@ import CategoryView from '@/views/CategoryView.vue'
 import LoginView from '@/views/LoginView.vue';
 import ModuleView from '@/views/ModuleView.vue';
 import PermissionView from '@/views/PermissionView.vue';
+import ProductView from '@/views/ProductView.vue';
 import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
 import UserView from '@/views/UserView.vue'
@@ -22,97 +23,107 @@ declare module 'vue-router' {
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    name: 'home',
+    path: "/",
+    name: "home",
     component: HomeView,
     meta: {
       requiresAuth: true,
-    }
+    },
   },
 
   {
-    path: '/about',
-    name: 'about',
+    path: "/about",
+    name: "about",
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
     meta: {
       requiresAuth: true,
-    }
+    },
   },
   {
-    path: '/brand',
-    name: 'brand',
+    path: "/marcas",
+    name: "brand",
     component: BrandView,
     meta: {
       requiresAuth: true,
-      module: 'marcas'
-    }
+      module: "marcas",
+    },
   },
-    {
-    path: '/category',
-    name: 'category',
+  {
+    path: "/categorias",
+    name: "category",
     component: CategoryView,
     meta: {
       requiresAuth: true,
-      module: 'categorias'
-    }
+      module: "categorias",
+    },
   },
   {
-    path: '/login',
-    name: 'login',
+    path: "/inicio",
+    name: "login",
     component: LoginView,
     meta: {
-      free: true 
-    }
+      free: true,
+    },
   },
   {
-    path: '/module',
-    name: 'module',
+    path: "/modulos",
+    name: "module",
     component: ModuleView,
     meta: {
       requiresAuth: true,
-      module: 'modulos'
-    }
+      module: "modulos",
+    },
   },
   {
-    path: '/permission',
-    name: 'permission',
+    path: "/permisos",
+    name: "permission",
     component: PermissionView,
     meta: {
       requiresAuth: true,
-      module: 'permisos'
-    }
+      module: "permisos",
+    },
   },
   {
-    path: '/role',
-    name: 'role',
-    component: RoleView,
-  meta: {
+    path: "/productos",
+    name: "product",
+    component: ProductView,
+    meta: {
       requiresAuth: true,
-      module: 'roles'
-    }
+      module: "productos",
+    },
   },
   {
-    path: '/store',
-    name: 'store',
+    path: "/roles",
+    name: "role",
+    component: RoleView,
+    meta: {
+      requiresAuth: true,
+      module: "roles",
+    },
+  },
+  {
+    path: "/tiendas",
+    name: "store",
     component: StoreView,
     meta: {
       requiresAuth: true,
-      module: 'tiendas'
-    }
+      module: "tiendas",
+    },
   },
   {
-    path: '/user',
-    name: 'user',
+    path: "/usuarios",
+    name: "user",
     component: UserView,
     meta: {
       requiresAuth: true,
-      module: 'usuarios'
-    }
+      module: "usuarios",
+    },
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

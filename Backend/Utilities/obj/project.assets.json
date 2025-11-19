@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj",
+      "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj",
       "projectName": "Utilities",
-      "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj",
+      "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj",
       "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-      "outputPath": "D:\\Backend\\Backend\\Utilities\\obj\\",
+      "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

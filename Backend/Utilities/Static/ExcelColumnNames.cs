@@ -63,6 +63,26 @@
         }
         #endregion
 
+        #region ColumnsProduct
+        public static List<(string ColumnName, string PropertyName)> GetColumnsProducts()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("CÓDIGO", "Code"),
+                ("DESCRIPCIÓN", "Description"),
+                ("MATERIAL", "Material"),
+                ("COLOR", "Color"),
+                ("UNIDAD DE MEDIDA", "UnitMeasure"),
+                ("CATEGORÍA", "CategoryName"),
+                ("MARCA", "BrandName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusProduct")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
         #region ColumnsRole
         public static List<(string ColumnName, string PropertyName)> GetColumnsRoles()
         {

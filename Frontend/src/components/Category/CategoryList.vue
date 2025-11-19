@@ -44,7 +44,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <CategoryFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <CategoryFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchCategories" />
   <CategoryForm v-model="form" :category="selectedCategory" @saved="fetchCategories" />
   <CategoryModal v-model="modal" :category="selectedCategory" :action="action" @update:modelValue="modal = $event" />
 </template>

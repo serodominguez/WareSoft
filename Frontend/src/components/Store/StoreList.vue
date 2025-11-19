@@ -46,7 +46,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <StoreFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <StoreFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchStores" />
   <StoreForm v-model="form" :store="selectedStore" @saved="fetchStores" />
   <StoreModal v-model="modal" :store="selectedStore" :action="action" @update:modelValue="modal = $event" />
 </template>

@@ -26,6 +26,7 @@ namespace Infrastructure.Extensions
             services.AddScoped<IActionRepository, ActionRepository>();
             services.AddScoped<IModuleRepository, ModuleRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 

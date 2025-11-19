@@ -43,7 +43,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <BrandFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <BrandFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchBrands" />
   <BrandForm v-model="form" :brand="selectedBrand" @saved="fetchBrands" />
   <BrandModal v-model="modal" :brand="selectedBrand" :action="action" @update:modelValue="modal = $event" />
 </template>

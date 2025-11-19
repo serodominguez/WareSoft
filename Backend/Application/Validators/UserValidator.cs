@@ -8,23 +8,26 @@ namespace Application.Validators
         public UserValidator()
         {
             RuleFor(x => x.UserName)
-                .NotNull().WithMessage("El campo nombre de usuario no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo nombre de usuario no puede estar vacio!")
-                .MaximumLength(20).WithMessage("El campo nombre de usuario no puede tener más de 20 caracteres!");
+                .NotEmpty().WithMessage("El nombre de usuario es requerido!")
+                .MaximumLength(20).WithMessage("El campo nombre de usuario no puede tener más de 20 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.Password)
-                .NotNull().WithMessage("La contraseña no puede ser nulo!")
-                .NotEmpty().WithMessage("La contraseña no puede estar vacio!");
+                .NotEmpty().WithMessage("La contraseña es requerida!");
 
             RuleFor(x => x.Names)
-                .NotNull().WithMessage("El campo nombre no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo nombre no puede estar vacio!")
-                .MaximumLength(30).WithMessage("El campo nombre no puede tener más de 30 caracteres!");
+                .NotEmpty().WithMessage("El nombre es requerido!")
+                .MaximumLength(30).WithMessage("El nombre no puede tener más de 30 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.LastNames)
-                .NotNull().WithMessage("El campo apellidos no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo apellidos no puede estar vacio!")
-                .MaximumLength(50).WithMessage("El campo apellidos no puede tener más de 50 caracteres!");
+                .NotEmpty().WithMessage("Los apellidos son requeridos!")
+                .MaximumLength(50).WithMessage("Los apellidos no puede tener más de 50 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
+
+            RuleFor(x => x.IdentificationNumber)
+                .MaximumLength(10).WithMessage("El número de identificación no puede tener más de 10 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.IdRole)
                 .NotNull().WithMessage("El identificador del rol no puede ser nulo!");

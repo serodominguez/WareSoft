@@ -30,14 +30,14 @@
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.city" counter="15"
-                  :rules="[rules.onlyLetters]" :maxlength="15" label="Ciudad" />
+                  :rules="[rules.required, rules.onlyLetters]" :maxlength="15" label="Ciudad" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.email" counter="50"
                   :rules="[rules.email]" :maxlength="50" label="Correo" />
               </v-col>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-select color="primary" variant="underlined" v-model="localStore.type" :items="types" label="Tipo" />
+                <v-select color="primary" variant="underlined" :rules="[rules.required]" v-model="localStore.type" :items="types" label="Tipo" required />
               </v-col>
             </v-row>
           </v-container>

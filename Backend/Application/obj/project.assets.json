@@ -3197,11 +3197,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Backend\\Backend\\Application\\Application.csproj",
+      "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj",
       "projectName": "Application",
-      "projectPath": "D:\\Backend\\Backend\\Application\\Application.csproj",
+      "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj",
       "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-      "outputPath": "D:\\Backend\\Backend\\Application\\obj\\",
+      "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3222,14 +3222,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\Backend\\Backend\\Domain\\Domain.csproj": {
-              "projectPath": "D:\\Backend\\Backend\\Domain\\Domain.csproj"
+            "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj": {
+              "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj"
             },
-            "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj": {
-              "projectPath": "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj"
+            "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj": {
+              "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj"
             },
-            "D:\\Backend\\Backend\\Utilities\\Utilities.csproj": {
-              "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj"
+            "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj": {
+              "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj"
             }
           }
         }

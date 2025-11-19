@@ -22,7 +22,10 @@
       <v-list-item>
         <v-date-input v-model="endDateModel" label="Hasta:" prepend-icon="" variant="underlined"
           persistent-placeholder></v-date-input>
-        <v-btn color="primary" block @click="clearFilters"> Limpiar Filtros </v-btn>
+        <v-btn color="indigo" block @click="$emit('apply-filters')"> Aplicar </v-btn>
+      </v-list-item>
+      <v-list-item>
+        <v-btn color="indigo" block @click="clearFilters"> Limpiar </v-btn>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -55,7 +58,7 @@ export default defineComponent({
       default: null
     }
   },
-  emits: ['update:modelValue', 'update:selectedFilter', 'update:state', 'update:startDate', 'update:endDate'],
+  emits: ['update:modelValue', 'update:selectedFilter', 'update:state', 'update:startDate', 'update:endDate', 'apply-filters'],
   setup(props, { emit }) {
     const filters = ['Rol'];
 

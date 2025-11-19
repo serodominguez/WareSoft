@@ -48,7 +48,7 @@
       </template>
     </v-data-table-server>
   </v-card>
-  <UserFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" />
+  <UserFilters v-model="drawer" v-model:selected-filter="selectedFilter" v-model:state="state" v-model:start-date="startDate" v-model:end-date="endDate" @apply-filters="searchUsers" />
   <UserForm v-model="form" :user="selectedUser" @saved="fetchUsers" />
   <UserModal v-model="modal" :user="selectedUser" :action="action" @update:modelValue="modal = $event" />
 </template>

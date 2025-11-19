@@ -8,32 +8,34 @@ namespace Application.Validators
         public StoreValidator()
         {
             RuleFor(x => x.StoreName)
-                .NotNull().WithMessage("El campo nombre de tienda no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo nombre de tienda no puede estar vacio!")
-                .MaximumLength(50).WithMessage("El campo nombre de tienda no puede tener más de 50 caracteres!");
+                .NotEmpty().WithMessage("El nombre de tienda es requerido!")
+                .MaximumLength(50).WithMessage("El nombre de tienda no puede tener más de 50 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.Manager)
-                .NotNull().WithMessage("El campo encargado no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo encargado no puede estar vacio!")
-                .MaximumLength(30).WithMessage("El encargado no puede tener más de 30 caracteres!");
+                .NotEmpty().WithMessage("El encargado es requerido!")
+                .MaximumLength(30).WithMessage("El encargado no puede tener más de 30 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.Address)
-                .NotNull().WithMessage("El campo dirección no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo dirección no puede estar vacio!")
-                .MaximumLength(60).WithMessage("La dirección no puede tener más de 60 caracteres!");
+                .NotEmpty().WithMessage("La dirección es requerida!")
+                .MaximumLength(60).WithMessage("La dirección no puede tener más de 60 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.City)
-                .NotNull().WithMessage("El campo ciudad no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo ciudad no puede estar vacio!")
-                .MaximumLength(15).WithMessage("La ciudad no puede tener más de 15 caracteres!");
+                .NotEmpty().WithMessage("La ciudad es requerida!")
+                .MaximumLength(15).WithMessage("La ciudad no puede tener más de 15 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
 
             RuleFor(x => x.Email)
-                .MaximumLength(50).WithMessage("EL correo no puede tener más de 50 caracteres!");
+                .EmailAddress().WithMessage("El correo electrónico no tiene un formato válido!")
+                .MaximumLength(50).WithMessage("El correo no puede tener más de 50 caracteres!")
+                .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
             RuleFor(x => x.Type)
-                .NotNull().WithMessage("El campo tipo no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo tipo no puede estar vacio!")
-                .MaximumLength(15).WithMessage("La tipo no puede tener más de 15 caracteres!");
+                .NotEmpty().WithMessage("El tipo es requerido!")
+                .MaximumLength(15).WithMessage("El tipo no puede tener más de 15 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
         }
     }
 }

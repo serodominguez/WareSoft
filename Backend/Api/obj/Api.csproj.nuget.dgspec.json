@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Backend\\Backend\\Api\\Api.csproj": {}
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Api.csproj": {}
   },
   "projects": {
-    "D:\\Backend\\Backend\\Api\\Api.csproj": {
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Backend\\Backend\\Api\\Api.csproj",
+        "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Api.csproj",
         "projectName": "Api",
-        "projectPath": "D:\\Backend\\Backend\\Api\\Api.csproj",
+        "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\Api.csproj",
         "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-        "outputPath": "D:\\Backend\\Backend\\Api\\obj\\",
+        "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,14 +32,14 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\Backend\\Backend\\Application\\Application.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Application\\Application.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj"
               },
-              "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj"
               },
-              "D:\\Backend\\Backend\\Utilities\\Utilities.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj"
               }
             }
           }
@@ -102,14 +102,14 @@
         }
       }
     },
-    "D:\\Backend\\Backend\\Application\\Application.csproj": {
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Backend\\Backend\\Application\\Application.csproj",
+        "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj",
         "projectName": "Application",
-        "projectPath": "D:\\Backend\\Backend\\Application\\Application.csproj",
+        "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\Application.csproj",
         "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-        "outputPath": "D:\\Backend\\Backend\\Application\\obj\\",
+        "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -130,14 +130,14 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\Backend\\Backend\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Domain\\Domain.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj"
               },
-              "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj"
               },
-              "D:\\Backend\\Backend\\Utilities\\Utilities.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj"
               }
             }
           }
@@ -183,14 +183,14 @@
         }
       }
     },
-    "D:\\Backend\\Backend\\Domain\\Domain.csproj": {
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Backend\\Backend\\Domain\\Domain.csproj",
+        "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "D:\\Backend\\Backend\\Domain\\Domain.csproj",
+        "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-        "outputPath": "D:\\Backend\\Backend\\Domain\\obj\\",
+        "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -260,14 +260,14 @@
         }
       }
     },
-    "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj": {
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "D:\\Backend\\Backend\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-        "outputPath": "D:\\Backend\\Backend\\Infrastructure\\obj\\",
+        "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -288,11 +288,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\Backend\\Backend\\Domain\\Domain.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Domain\\Domain.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj"
               },
-              "D:\\Backend\\Backend\\Utilities\\Utilities.csproj": {
-                "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj"
+              "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj": {
+                "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj"
               }
             }
           }
@@ -342,14 +342,14 @@
         }
       }
     },
-    "D:\\Backend\\Backend\\Utilities\\Utilities.csproj": {
+    "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj",
+        "projectUniqueName": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj",
         "projectName": "Utilities",
-        "projectPath": "D:\\Backend\\Backend\\Utilities\\Utilities.csproj",
+        "projectPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\Utilities.csproj",
         "packagesPath": "C:\\Users\\Sergio\\.nuget\\packages\\",
-        "outputPath": "D:\\Backend\\Backend\\Utilities\\obj\\",
+        "outputPath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Utilities\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -7,19 +7,20 @@
       <v-row>
         <v-col cols="4" md="4" lg="2" xl="2">
           <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="selectedRoleId"
-            item-title="roleName" item-value="idRole" no-data-text="No hay datos disponibles" label="Rol" />
+            item-title="roleName" item-value="idRole" no-data-text="No hay datos disponibles" label="Rol" :loading="loadingRoles" />
         </v-col>
         <v-col cols="4" md="4" lg="4" xl="4" class="d-flex align-center">
-          <v-btn color="indigo" @click="loadPermissions" :disabled="!selectedRoleId || loading" :loading="loading"> Cargar </v-btn>
-          <v-btn color="success" @click="savePermissions" :disabled="!hasChanges || saving" :loading="saving" class="ml-2"> Guardar </v-btn>
+          <v-btn color="indigo" @click="loadPermissions" :disabled="!selectedRoleId || loading" :loading="loading">
+            Cargar </v-btn>
+          <v-btn color="success" @click="savePermissions" :disabled="!hasChanges || saving" :loading="saving"
+            class="ml-2"> Guardar </v-btn>
         </v-col>
       </v-row>
       <v-alert v-if="alertMessage" :type="alertType" dismissible class="mt-4" @click:close="alertMessage = ''">
         {{ alertMessage }}
       </v-alert>
       <v-data-table :headers="headers" :items="localPermissions" :loading="loading" loading-text="Cargando permisos..."
-        no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4"
-        :hide-default-footer="true">
+        no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4" :hide-default-footer="true">
         <template v-slot:item.permissions.crear="{ item }">
           <v-checkbox v-model="item.permissions.crear" color="primary" hide-details @change="markAsChanged" />
         </template>
@@ -73,15 +74,15 @@ export default defineComponent({
       const rolesFromStore = this.$store.getters['role/roles'];
       return Array.isArray(rolesFromStore) ? rolesFromStore : [];
     },
-
+    loadingRoles(): boolean {
+      return this.$store.getters['role/loading'];
+    },
     permissionsByModule(): PermissionsByModule[] {
       return this.$store.getters['permission/permissionsByModule'];
     },
-
     permissions() {
       return this.$store.getters['permission/permissions'];
     },
-
     loading(): boolean {
       return this.$store.getters['permission/loading'];
     },

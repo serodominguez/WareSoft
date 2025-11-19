@@ -39,12 +39,12 @@
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="localUser.idRole"
                   item-title="roleName" item-value="idRole" :rules="[rules.required]"
-                  no-data-text="No hay datos disponibles" label="Rol" required />
+                  no-data-text="No hay datos disponibles" label="Rol" required  :loading="loadingRoles" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-autocomplete color="primary" variant="underlined" :items="stores" v-model="localUser.idStore"
                   item-title="storeName" item-value="idStore" :rules="[rules.required]"
-                  no-data-text="No hay datos disponibles" label="Tienda" required />
+                  no-data-text="No hay datos disponibles" label="Tienda" required  :loading="loadingStores" />
               </v-col>
             </v-row>
           </v-container>
@@ -119,9 +119,15 @@ export default defineComponent({
       const rolesFromStore = this.$store.getters['role/roles'];
       return Array.isArray(rolesFromStore) ? rolesFromStore : []; 
     },
+    loadingRoles(): boolean {
+      return this.$store.getters['role/loading'];
+    },
     stores() {
       const storesFromStore = this.$store.getters['store/stores'];
       return Array.isArray(storesFromStore) ? storesFromStore : []; 
+    },
+    loadingStores(): boolean {
+      return this.$store.getters['store/loading'];
     },
   },
   watch: {

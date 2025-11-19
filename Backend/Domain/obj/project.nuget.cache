@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "qmkRw7b9t10=",
+  "dgSpecHash": "bivGdU3o3Dk=",
   "success": true,
-  "projectFilePath": "D:\\Backend\\Backend\\Domain\\Domain.csproj",
+  "projectFilePath": "D:\\Projects\\IT Solutions\\WareSoft\\Backend\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sergio\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Sergio\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

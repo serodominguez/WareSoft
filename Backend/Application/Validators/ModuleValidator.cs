@@ -8,9 +8,9 @@ namespace Application.Validators
         public ModuleValidator()
         {
             RuleFor(x => x.ModuleName)
-                .NotNull().WithMessage("El campo nombre de módulo no puede ser nulo!")
-                .NotEmpty().WithMessage("El campo nombre de módul no puede estar vacio!")
-                .MaximumLength(25).WithMessage("El campo nombre de módul no puede tener más de 25 caracteres!");
+                .NotEmpty().WithMessage("El nombre de módul es requerido!")
+                .MaximumLength(25).WithMessage("El nombre de módul no puede tener más de 25 caracteres!")
+                .Matches("^[a-zA-Z0-9 ]+$");
         }
     }
 }
