@@ -1,122 +1,49 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { Module, ModuleState, BaseResponse, FilterParams } from '@/interfaces/moduleInterface';
-import {
-  fetchModulesService,
-  fetchModuleByIdService,
-  registerModuleService,
-  editModuleService,
-  enableModuleService,
-  disableModuleService,
-  removeModuleService,
-} from '@/services/moduleService';
+import { Module } from '@/interfaces/moduleInterface';
+import { moduleService } from '@/services/moduleService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-};
-
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
-const state: ModuleState = {
-  modules: [] as Module[],
-  selectedModule: null as Module | null,
-  totalModules: 0,
+const state: BaseState<Module> = {
+  items: [] as Module[],
+  selectedItem: null as Module | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_MODULES(state: any, modules: Module[]) {
-    state.modules = modules;
+  SET_ITEMS(state: BaseState<Module>, items: Module[]) {
+    state.items = items;
   },
-  SET_TOTAL_MODULES(state: any, total: number) {
-    state.totalModules = total;
+  SET_TOTAL_ITEMS(state: BaseState<Module>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_MODULE(state: any, module: Module | null) {
-    state.selectedModule = module;
+  SET_SELECTED_ITEMS(state: BaseState<Module>, item: Module | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<Module>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<Module>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<Module>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchModules(
-    { commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  async fetchModules({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_MODULES", []);
-
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
 
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result = await fetchModulesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false,
-        token
-      );
-
+      const result = await moduleService.fetchAll(params);
+      
       if (result.isSuccess) {
-        commit("SET_MODULES", result.data);
-        commit("SET_TOTAL_MODULES", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -127,68 +54,24 @@ const actions = {
     }
   },
 
-  async downloadModulesExcel(
-    { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  async downloadModulesExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchModulesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true,
-        token
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Módulos_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filterParams = params || state.lastFilterParams || {};
+      await moduleService.downloadExcel(filterParams);
     } catch (error: any) {
       console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async fetchModuleById({ commit, rootState }: any, id: number) {
+  async fetchModuleById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await fetchModuleByIdService(id, token);
+      const result = await moduleService.fetchById(id);
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_MODULE", result.data);
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -199,123 +82,83 @@ const actions = {
     }
   },
 
-  async registerModule({ commit, dispatch, rootState, state }: any, module: Module) {
+  async registerModule({ dispatch, state }: any, module: Module) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await registerModuleService(module, token);
+      const result = await moduleService.create(module);
+      
       if (result.isSuccess) {
         dispatch("fetchModules", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editModule({ commit, dispatch, rootState, state }: any, { id, module }: { id: number; module: Module }) {
+  async editModule({ dispatch, state }: any, { id, module }: { id: number; module: Module }) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await editModuleService(id, module, token);
+      const result = await moduleService.update(id, module);
+      
       if (result.isSuccess) {
         dispatch("fetchModules", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableModule({ commit, dispatch, rootState, state }: any, id: number) {
+  async enableModule({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await enableModuleService(id, token);
+      const result = await moduleService.enable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchModules", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-  
-  async disableModule({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await disableModuleService(id, token);
-      if (result.isSuccess) {
-        dispatch("fetchModules", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeModule({ commit, dispatch, rootState, state }: any, id: number) {
+  async disableModule({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-      const result: BaseResponse = await removeModuleService(id, token);
+      const result = await moduleService.disable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchModules", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
+  },
 
+  async removeModule({ dispatch, state }: any, id: number) {
+    try {
+      const result = await moduleService.remove(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchModule", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
   },
 };
 
 const getters = {
-  modules: (state: any) => state.modules,
-  selectedModule: (state: any) => state.selectedModule,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalModules: (state: any) => state.totalModules || 0,
+  modules: (state: BaseState<Module>) => state.items,
+  selectedModule: (state: BaseState<Module>) => state.selectedItem,
+  loading: (state: BaseState<Module>) => state.loading,
+  error: (state: BaseState<Module>) => state.error,
+  totalModules: (state: BaseState<Module>) => state.totalItems || 0,
 };
 
 export default {

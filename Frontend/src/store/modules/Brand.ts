@@ -1,116 +1,50 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { Brand, BrandState, BaseResponse, FilterParams } from '@/interfaces/brandInterface';
-import {
-  fetchBrandsService,
-  selectBrandService,
-  fetchBrandByIdService,
-  registerBrandService,
-  editBrandService,
-  enableBrandService,
-  disableBrandService,
-  removeBrandService,
-} from '@/services/brandService';
+import { Brand } from '@/interfaces/brandInterface';
+import { brandService } from '@/services/brandService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-}
-
-const state: BrandState = {
-  brands: [] as Brand[],
-  selectedBrand: null as Brand | null,
-  totalBrands: 0,
+const state: BaseState<Brand> = {
+  items: [] as Brand[],
+  selectedItem: null as Brand | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_BRANDS(state: any, brands: Brand[]) {
-    state.brands = brands;
+  SET_ITEMS(state: BaseState<Brand>, items: Brand[]) {
+    state.items = items;
   },
-  SET_TOTAL_BRANDS(state: any, total: number) {
-    state.totalBrands = total;
+  SET_TOTAL_ITEMS(state: BaseState<Brand>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_BRAND(state: any, brand: Brand | null) {
-    state.selectedBrand = brand;
+  SET_SELECTED_ITEMS(state: BaseState<Brand>, item: Brand | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<Brand>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<Brand>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<Brand>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchBrands({ commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  // Obtener lista de marcas con filtros
+  async fetchBrands({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_BRANDS", []);
-    
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
-    
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
+
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result = await fetchBrandsService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false
-      );
-
+      const result = await brandService.fetchAll(params);
+      
       if (result.isSuccess) {
-        commit("SET_BRANDS", result.data);
-        commit("SET_TOTAL_BRANDS", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -121,68 +55,28 @@ const actions = {
     }
   },
 
-  async downloadBrandsExcel(
-    { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  // Descargar Excel de marcas
+  async downloadBrandsExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchBrandsService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Marcas_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Usar los últimos parámetros de filtro si no se proporcionan nuevos
+      const filterParams = params || state.lastFilterParams || {};
+      await brandService.downloadExcel(filterParams);
     } catch (error: any) {
       console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async selectBrand({ commit, rootState }: any) {
+  //Obtener lista para select (sin paginación)
+  async selectBrand({ commit }: any) {
     commit("SET_LOADING", true);
-    commit("SET_BRANDS", []);
+    commit("SET_ITEMS", []);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await selectBrandService();
+      const result = await brandService.select();
+      
       if (result.isSuccess) {
-        commit("SET_BRANDS", result.data);
+        commit("SET_ITEMS", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -193,18 +87,15 @@ const actions = {
     }
   },
 
-  async fetchBrandById({ commit, rootState }: any, id: number) {
+  // Obtener marca por ID
+  async fetchBrandById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await fetchBrandByIdService(id);
+      const result = await brandService.fetchById(id);
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_BRAND", result.data);
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -215,124 +106,89 @@ const actions = {
     }
   },
 
-  async registerBrand({ commit, dispatch, rootState, state }: any, brand: Brand) {
+  //Registrar nueva marca
+  async registerBrand({ dispatch, state }: any, brand: Brand) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return { isSuccess: false, message: 'Sesión expirada' };
-      }
-
-      const result: BaseResponse = await registerBrandService(brand);
+      const result = await brandService.create(brand);
+      
       if (result.isSuccess) {
+        // Recargar lista con los últimos filtros
         dispatch("fetchBrands", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-
-  async editBrand({ commit, dispatch, rootState, state }: any, { id, brand }: { id: number; brand: Brand }) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return { isSuccess: false, message: 'Sesión expirada' };
-      }
-
-      const result: BaseResponse = await editBrandService(id, brand);
-      if (result.isSuccess) {
-        dispatch("fetchBrands", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-
-  async enableBrand({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return { isSuccess: false, message: 'Sesión expirada' };
-      }
-
-      const result: BaseResponse = await enableBrandService(id);
-      if (result.isSuccess) {
-        dispatch("fetchBrands", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-
-  async disableBrand({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return { isSuccess: false, message: 'Sesión expirada' };
-      }
-
-      const result: BaseResponse = await disableBrandService(id);
-      if (result.isSuccess) {
-        dispatch("fetchBrands", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-
-  async removeBrand({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return { isSuccess: false, message: 'Sesión expirada' };
       }
       
-      const result: BaseResponse = await removeBrandService(id);
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  //Editar marca existente
+  async editBrand({ dispatch, state }: any, { id, brand }: { id: number; brand: Brand }) {
+    try {
+      const result = await brandService.update(id, brand);
+      
       if (result.isSuccess) {
         dispatch("fetchBrands", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Habilitar marca
+  async enableBrand({ dispatch, state }: any, id: number) {
+    try {
+      const result = await brandService.enable(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchBrands", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Deshabilitar marca
+  async disableBrand({ dispatch, state }: any, id: number) {
+    try {
+      const result = await brandService.disable(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchBrands", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Eliminar marca (soft delete)
+  async removeBrand({ dispatch, state }: any, id: number) {
+    try {
+      const result = await brandService.remove(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchBrands", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
 
 const getters = {
-  brands: (state: any) => state.brands,
-  selectedBrand: (state: any) => state.selectedBrand,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalBrands: (state: any) => state.totalBrands || 0,
-  //lastFilterParams: (state: any) => state.lastFilterParams,
+  brands: (state: BaseState<Brand>) => state.items,
+  selectedBrand: (state: BaseState<Brand>) => state.selectedItem,
+  loading: (state: BaseState<Brand>) => state.loading,
+  error: (state: BaseState<Brand>) => state.error,
+  totalBrands: (state: BaseState<Brand>) => state.totalItems || 0,
 };
 
 export default {

@@ -11,19 +11,49 @@ import permissionsPlugin from './plugins/permissions'
 
 // Externals
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
 // Configuración de Axios
 axios.defaults.baseURL='https://localhost:7145/'
 
-// Interceptor para agregar token dinámicamente a cada petición
+// Interface para el token decodificado
+interface DecodedToken {
+  exp: number;
+  [key: string]: any;
+}
+
+// Función para verificar si el token está expirado
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded = jwtDecode<DecodedToken>(token)
+    const currentTime = Date.now() / 1000
+    return decoded.exp < currentTime
+  } catch {
+    return true
+  }
+}
+
+// Interceptor para agregar token y validar expiración antes de la petición
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
+    
     if (token) {
+      // Verificar si el token está expirado antes de hacer la petición
+      if (isTokenExpired(token)) {
+        // Limpiar token expirado
+        localStorage.removeItem('token')
+        store.dispatch('logout')
+        router.push({ name: 'login' })
+        return Promise.reject(new Error('Token expirado'))
+      }
+      
+      // Si el token es válido, agregarlo a la petición
       config.headers.Authorization = `Bearer ${token}`
     }
+    
     return config
   },
   (error) => {
@@ -31,13 +61,14 @@ axios.interceptors.request.use(
   }
 )
 
-// Interceptor para manejar errores de autorización
+// Interceptor para manejar errores de autorización del servidor
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // 401 Unauthorized - Token inválido o expirado
+      // 401 Unauthorized - Token inválido o expirado según el servidor
       if (error.response.status === 401) {
+        localStorage.removeItem('token')
         store.dispatch('logout')
         router.push({ name: 'login' })
       }

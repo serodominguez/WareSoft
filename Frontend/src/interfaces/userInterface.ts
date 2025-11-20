@@ -15,32 +15,3 @@ export interface User {
   statusUser: string;
   updatePassword: boolean;
 }
-
-export interface FilterParams {
-  pageNumber?: number;
-  pageSize?: number;
-  order?: string;
-  sort?: string;
-  textFilter?: string | null;
-  numberFilter?: number | null;
-  stateFilter?: number;
-  startDate?: string | null;
-  endDate?: string | null;
-}
-
-export interface UserState {
-  users: User[];
-  selectedUser: User | null;
-  totalUsers: number;
-  loading: boolean;
-  error: string | null;
-  lastFilterParams?: FilterParams;
-}
-
-export interface BaseResponse{
-  isSuccess: boolean;
-  data: any;
-  totalRecords: number;
-  message: any;
-  errors: any;
-}

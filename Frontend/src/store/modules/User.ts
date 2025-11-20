@@ -1,143 +1,48 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { User, UserState, BaseResponse, FilterParams } from '@/interfaces/userInterface';
-import {
-  fetchUsersService,
-  fetchUserByIdService,
-  registerUserService,
-  editUserService,
-  enableUserService,
-  disableUserService,
-  removeUserService,
-} from '@/services/userService';
+import { User } from '@/interfaces/userInterface';
+import { userService } from '@/services/userService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-};
-
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
-const state: UserState = {
-  users: [] as User[],
-  selectedUser: null as User | null,
-  totalUsers: 0,
+const state: BaseState<User> = {
+  items: [] as User[],
+  selectedItem: null as User | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_USERS(state: any, users: User[]) {
-    state.users = users;
+  SET_ITEMS(state: BaseState<User>, items: User[]) {
+    state.items = items;
   },
-  SET_TOTAL_USERS(state: any, total: number) {
-    state.totalUsers = total;
+  SET_TOTAL_ITEMS(state: BaseState<User>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_USER(state: any, user: User | null) {
-    state.selectedUser = user;
+  SET_SELECTED_ITEMS(state: BaseState<User>, item: User | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<User>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<User>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<User>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchUsers(
-    { commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  async fetchUsers({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_USERS", []);
-
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
 
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const requestBody: any = {
-        numberPage: pageNumber,
-        numberRecordsPage: pageSize,
-        order,
-        sort,
-        stateFilter
-      };
-
-      if (textFilter && numberFilter) {
-        requestBody.textFilter = textFilter;
-        requestBody.numberFilter = numberFilter;
-      }
-
-      if (startDate) {
-        requestBody.startDate = startDate;
-      }
-    
-      if (endDate) {
-        requestBody.endDate = endDate;
-      }
-
-      const result = await fetchUsersService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false,
-        token
-      );
-
+      const result = await userService.fetchAll(params);
       if (result.isSuccess) {
-        commit("SET_USERS", result.data);
-        commit("SET_TOTAL_USERS", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -148,68 +53,27 @@ const actions = {
     }
   },
 
-async downloadUsersExcel(
-    { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+
+  async downloadUsersExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchUsersService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true,
-        token
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Usuarios_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filterParams = params || state.lastFilterParams || {};
+      await userService.downloadExcel(filterParams);
     } catch (error: any) {
       console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async fetchUserById({ commit, rootState }: any, id: number) {
-    commit("SET_LOADING", true);
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
 
-      const result: BaseResponse = await fetchUserByIdService(id, token);
+  async selectUser({ commit }: any) {
+    commit("SET_LOADING", true);
+    commit("SET_ITEMS", []);
+    
+    try {
+      const result = await userService.select();
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_USER", result.data);
+        commit("SET_ITEMS", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -220,122 +84,101 @@ async downloadUsersExcel(
     }
   },
 
-  async registerUser({ commit, dispatch, rootState, state }: any, user: User) {
+  async fetchUserById({ commit }: any, id: number) {
+    commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await registerUserService(user, token);
+      const result = await userService.fetchById(id);
+      
       if (result.isSuccess) {
-        dispatch("fetchUsers", state.lastFilterParams || {});
-        return result;
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
     } catch (error: any) {
       commit("SET_ERROR", error.message);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
+
+  async registerUser({ dispatch, state }: any, user: User) {
+    try {
+      const result = await userService.create(user);
+      
+      if (result.isSuccess) {
+        dispatch("fetchUsers", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editUser({ commit, dispatch, rootState, state }: any, { id, user }: { id: number; user: User }) {
+  async editUser({ dispatch, state }: any, { id, user }: { id: number; user: User }) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await editUserService(id, user, token);
+      const result = await userService.update(id, user);
+      
       if (result.isSuccess) {
         dispatch("fetchUsers", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableUser({ commit, dispatch, rootState, state }: any, id: number) {
+  async enableUser({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await enableUserService(id, token);
+      const result = await userService.enable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchUsers", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-  async disableUser({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await disableUserService(id, token);
-      if (result.isSuccess) {
-        dispatch("fetchUsers", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeUser({ commit, dispatch, rootState, state }: any, id: number) {
+  async disableUser({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await removeUserService(id, token);
+      const result = await userService.disable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchUsers", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  async removeUser({ dispatch, state }: any, id: number) {
+    try {
+      const result = await userService.remove(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchUsers", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
 
 const getters = {
-  users: (state: any) => state.users,
-  selectedUser: (state: any) => state.selectedUser,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalUsers: (state: any) => state.totalUsers || 0,
+  users: (state: BaseState<User>) => state.items,
+  selectedUser: (state: BaseState<User>) => state.selectedItem,
+  loading: (state: BaseState<User>) => state.loading,
+  error: (state: BaseState<User>) => state.error,
+  totalUsers: (state: BaseState<User>) => state.totalItems || 0,
 };
 
 export default {

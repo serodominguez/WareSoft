@@ -1,123 +1,48 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { Role, RoleState, BaseResponse, FilterParams } from '@/interfaces/roleInterface';
-import {
-  fetchRolesService,
-  selectRoleService,
-  fetchRoleByIdService,
-  registerRoleService,
-  editRoleService,
-  enableRoleService,
-  disableRoleService,
-  removeRoleService,
-} from '@/services/roleService';
+import { Role } from '@/interfaces/roleInterface';
+import { roleService } from '@/services/roleService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-};
-
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
-const state: RoleState = {
-  roles: [] as Role[],
-  selectedRole: null as Role | null,
-  totalRoles: 0,
+const state: BaseState<Role> = {
+  items: [] as Role[],
+  selectedItem: null as Role | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_ROLES(state: any, roles: Role[]) {
-    state.roles = roles;
+  SET_ITEMS(state: BaseState<Role>, items: Role[]) {
+    state.items = items;
   },
-  SET_TOTAL_ROLES(state: any, total: number) {
-    state.totalRoles = total;
+  SET_TOTAL_ITEMS(state: BaseState<Role>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_ROLE(state: any, role: Role | null) {
-    state.selectedRole = role;
+  SET_SELECTED_ITEMS(state: BaseState<Role>, item: Role | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<Role>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<Role>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<Role>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchRoles(
-    { commit, rootState }: any,
-    {
-      pageNumber = 1,
-      pageSize = 10,
-      order = "desc",
-      sort = "Id",
-      textFilter = null,
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null,
-    } = {}
-  ) {
+  async fetchRoles({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_ROLES", []);
-
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate,
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
 
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result = await fetchRolesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false,
-        token
-      );
-
+      const result = await roleService.fetchAll(params);
       if (result.isSuccess) {
-        commit("SET_ROLES", result.data);
-        commit("SET_TOTAL_ROLES", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -128,72 +53,27 @@ const actions = {
     }
   },
 
-  async downloadRolesExcel(
-    { rootState }: any,
-    {
-      pageNumber = 1,
-      pageSize = 10,
-      order = "desc",
-      sort = "Id",
-      textFilter = null,
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null,
-    } = {}
-  ) {
+
+  async downloadRolesExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchRolesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true,
-        token
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `Roles_${new Date().toISOString().split("T")[0]}.xlsx`
-      );
-      document.body.appendChild(link);
-      link.click();
-
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filterParams = params || state.lastFilterParams || {};
+      await roleService.downloadExcel(filterParams);
     } catch (error: any) {
-      console.error("Error al descargar Excel:", error);
+      console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async selectRole({ commit, rootState }: any) {
-    commit("SET_LOADING", true);
-    commit("SET_ROLES", []);
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
 
-      const result: BaseResponse = await selectRoleService(token);
+  async selectRole({ commit }: any) {
+    commit("SET_LOADING", true);
+    commit("SET_ITEMS", []);
+    
+    try {
+      const result = await roleService.select();
+      
       if (result.isSuccess) {
-        commit("SET_ROLES", result.data);
+        commit("SET_ITEMS", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -204,18 +84,14 @@ const actions = {
     }
   },
 
-  async fetchRoleById({ commit, rootState }: any, id: number) {
+  async fetchRoleById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await fetchRoleByIdService(id, token);
+      const result = await roleService.fetchById(id);
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_ROLE", result.data);
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -226,126 +102,83 @@ const actions = {
     }
   },
 
-  async registerRole({ commit, dispatch, rootState, state }: any, role: Role) {
+  async registerRole({ dispatch, state }: any, role: Role) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await registerRoleService(role, token);
+      const result = await roleService.create(role);
+      
       if (result.isSuccess) {
         dispatch("fetchRoles", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editRole(
-    { commit, dispatch, rootState, state }: any,
-    { id, role }: { id: number; role: Role }
-  ) {
+  async editRole({ dispatch, state }: any, { id, role }: { id: number; role: Role }) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await editRoleService(id, role, token);
+      const result = await roleService.update(id, role);
+      
       if (result.isSuccess) {
         dispatch("fetchRoles", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableRole({ commit, dispatch, rootState, state }: any, id: number) {
+  async enableRole({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await enableRoleService(id, token);
+      const result = await roleService.enable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchRoles", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async disableRole({ commit, dispatch, rootState, state }: any, id: number) {
+  async disableRole({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await disableRoleService(id, token);
+      const result = await roleService.disable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchRoles", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeRole({ commit, dispatch, rootState, state }: any, id: number) {
+  async removeRole({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await removeRoleService(id, token);
+      const result = await roleService.remove(id);
+      
       if (result.isSuccess) {
         dispatch("fetchRoles", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
 
 const getters = {
-  roles: (state: any) => state.roles,
-  selectedRole: (state: any) => state.selectedRole,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalRoles: (state: any) => state.totalRoles || 0,
+  roles: (state: BaseState<Role>) => state.items,
+  selectedRole: (state: BaseState<Role>) => state.selectedItem,
+  loading: (state: BaseState<Role>) => state.loading,
+  error: (state: BaseState<Role>) => state.error,
+  totalRoles: (state: BaseState<Role>) => state.totalItems || 0,
 };
 
 export default {

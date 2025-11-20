@@ -1,143 +1,48 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { Product, ProductState, BaseResponse, FilterParams } from '@/interfaces/productInterface';
-import {
-  fetchProductsService,
-  fetchProductByIdService,
-  registerProductService,
-  editProductService,
-  enableProductService,
-  disableProductService,
-  removeProductService,
-} from '@/services/productService';
+import { Product } from '@/interfaces/productInterface';
+import { productService } from '@/services/productService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-};
-
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
-const state: ProductState = {
-  products: [] as Product[],
-  selectedProduct: null as Product | null,
-  totalProducts: 0,
+const state: BaseState<Product> = {
+  items: [] as Product[],
+  selectedItem: null as Product | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_PRODUCTS(state: any, products: Product[]) {
-    state.products = products;
+  SET_ITEMS(state: BaseState<Product>, items: Product[]) {
+    state.items = items;
   },
-  SET_TOTAL_PRODUCTS(state: any, total: number) {
-    state.totalProducts = total;
+  SET_TOTAL_ITEMS(state: BaseState<Product>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_PRODUCT(state: any, product: Product | null) {
-    state.selectedProduct = product;
+  SET_SELECTED_ITEMS(state: BaseState<Product>, item: Product | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<Product>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<Product>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<Product>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchProducts(
-    { commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  async fetchProducts({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_PRODUCTS", []);
-
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
 
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const requestBody: any = {
-        numberPage: pageNumber,
-        numberRecordsPage: pageSize,
-        order,
-        sort,
-        stateFilter
-      };
-
-      if (textFilter && numberFilter) {
-        requestBody.textFilter = textFilter;
-        requestBody.numberFilter = numberFilter;
-      }
-
-      if (startDate) {
-        requestBody.startDate = startDate;
-      }
-    
-      if (endDate) {
-        requestBody.endDate = endDate;
-      }
-
-      const result = await fetchProductsService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false,
-        token
-      );
-
+      const result = await productService.fetchAll(params);
       if (result.isSuccess) {
-        commit("SET_PRODUCTS", result.data);
-        commit("SET_TOTAL_PRODUCTS", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -148,68 +53,25 @@ const actions = {
     }
   },
 
-async downloadProductsExcel(
-    { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+
+  async downloadProductsExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchProductsService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true,
-        token
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Productos_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filterParams = params || state.lastFilterParams || {};
+      await productService.downloadExcel(filterParams);
     } catch (error: any) {
       console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async fetchProductById({ commit, rootState }: any, id: number) {
+  async fetchProductById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await fetchProductByIdService(id, token);
+      const result = await productService.fetchById(id);
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_PRODUCT", result.data);
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -220,122 +82,83 @@ async downloadProductsExcel(
     }
   },
 
-  async registerProduct({ commit, dispatch, rootState, state }: any, product: Product) {
+  async registerProduct({ dispatch, state }: any, product: Product) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await registerProductService(product, token);
+      const result = await productService.create(product);
+      
       if (result.isSuccess) {
         dispatch("fetchProducts", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editProduct({ commit, dispatch, rootState, state }: any, { id, product }: { id: number; product: Product }) {
+  async editProduct({ dispatch, state }: any, { id, product }: { id: number; product: Product }) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await editProductService(id, product, token);
+      const result = await productService.update(id, product);
+      
       if (result.isSuccess) {
         dispatch("fetchProducts", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableProduct({ commit, dispatch, rootState, state }: any, id: number) {
+  async enableProduct({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await enableProductService(id, token);
+      const result = await productService.enable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchProducts", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
-      return { isSuccess: false, message: error.message, errors: error };
-    }
-  },
-  async disableProduct({ commit, dispatch, rootState, state }: any, id: number) {
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await disableProductService(id, token);
-      if (result.isSuccess) {
-        dispatch("fetchProducts", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
-      }
-    } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeProduct({ commit, dispatch, rootState, state }: any, id: number) {
+  async disableProduct({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await removeProductService(id, token);
+      const result = await productService.disable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchProducts", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  async removeProduct({ dispatch, state }: any, id: number) {
+    try {
+      const result = await productService.remove(id);
+      
+      if (result.isSuccess) {
+        dispatch("fetchProducts", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
 
 const getters = {
-  products: (state: any) => state.products,
-  selectedProduct: (state: any) => state.selectedProduct,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalProducts: (state: any) => state.totalProducts || 0,
+  products: (state: BaseState<Product>) => state.items,
+  selectedProduct: (state: BaseState<Product>) => state.selectedItem,
+  loading: (state: BaseState<Product>) => state.loading,
+  error: (state: BaseState<Product>) => state.error,
+  totalProducts: (state: BaseState<Product>) => state.totalItems || 0,
 };
 
 export default {

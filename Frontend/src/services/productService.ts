@@ -1,121 +1,13 @@
-import axios from 'axios';
-import { Product, BaseResponse } from '@/interfaces/productInterface';
+import { BaseService } from './baseService';
+import { Product } from '@/interfaces/productInterface';
 
-export async function fetchProductsService(
-  pageNumber: number,
-  pageSize: number,
-  order: string,
-  sort: string,
-  textFilter: string | null | undefined,
-  numberFilter: number | null | undefined,
-  stateFilter: number,
-  startDate: string | null | undefined,
-  endDate: string | null | undefined,
-  download: true,
-  token?: string
-): Promise<Blob>;
-
-export async function fetchProductsService(
-  pageNumber: number,
-  pageSize: number,
-  order: string,
-  sort: string,
-  textFilter: string | null | undefined,
-  numberFilter: number | null | undefined,
-  stateFilter: number,
-  startDate: string | null | undefined,
-  endDate: string | null | undefined,
-  download?: false,
-  token?: string
-): Promise<BaseResponse>;
-
-export async function fetchProductsService(
-  pageNumber = 1, 
-  pageSize = 10, 
-  order = "desc", 
-  sort = "Id", 
-  textFilter?: string | null, 
-  numberFilter?: number | null,
-  stateFilter: number = 1,
-  startDate?: string | null,
-  endDate?: string | null,
-  download: boolean = false,
-  token?: string
-): Promise<BaseResponse | Blob> {
-  const params: any = {
-    NumberPage: pageNumber,
-    NumberRecordsPage: pageSize,
-    Order: order,
-    Sort: sort,
-    StateFilter: stateFilter,
-    Download: download
-  };
-
-  if (textFilter && numberFilter) {
-    params.textFilter = textFilter;
-    params.numberFilter = numberFilter;
+class ProductService extends BaseService<Product> {
+  constructor() {
+    super({
+      endpoint: 'Product',
+      downloadFileName: 'Productos',
+    });
   }
-
-  if (startDate) {
-    params.startDate = startDate;
-  }
-
-  if (endDate) {
-    params.endDate = endDate;
-  }
-
-    const configuration: any = {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    params: params
-  };
-
-  if (download) {
-    configuration.responseType = 'blob';
-    const response = await axios.get('api/Product', configuration);
-    return response.data;
-  }
-
-  const response = await axios.get<BaseResponse>('api/Product', configuration);
-  return response.data;
 }
 
-export async function fetchProductByIdService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.get<BaseResponse>(`api/Product/${id}`, configuration);
-  return response.data;
-}
-
-export async function registerProductService(product: Product, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.post<BaseResponse>("api/Product/Register", product, configuration);
-  return response.data;
-}
-
-export async function editProductService(id: number, product: Product, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Product/Edit/${id}`, product, configuration);
-  return response.data;
-}
-
-export async function enableProductService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Product/Enable/${id}`, {}, configuration);
-  return response.data;
-}
-export async function disableProductService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Product/Disable/${id}`, {}, configuration);
-  return response.data;
-}
-
-export async function removeProductService(id: number, token: string): Promise<BaseResponse> {
-
-  const configuration = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-  const response = await axios.put<BaseResponse>(`api/Product/Remove/${id}`, {}, configuration);
-  return response.data;
-}
+export const productService = new ProductService();

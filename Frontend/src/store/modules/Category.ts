@@ -1,123 +1,48 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
-import { Category, CategoryState, BaseResponse, FilterParams } from '@/interfaces/categoryInterface';
-import {
-  fetchCategoriesService,
-  selectCategoryService,
-  fetchCategoryByIdService,
-  registerCategoryService,
-  editCategoryService,
-  enableCategoryService,
-  disableCategoryService,
-  removeCategoryService,
-} from '@/services/categoryService';
+import { Category } from '@/interfaces/categoryInterface';
+import { categoryService } from '@/services/categoryService';
+import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-};
-
-interface RootState {
-  token: string;
-  [key: string]: any;
-};
-
-const state: CategoryState = {
-  categories: [] as Category[],
-  selectedCategory: null as Category | null,
-  totalCategories: 0,
+const state: BaseState<Category> = {
+  items: [] as Category[],
+  selectedItem: null as Category | null,
+  totalItems: 0,
   loading: false,
   error: null as string | null,
   lastFilterParams: undefined,
 };
 
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
-};
-
 const mutations = {
-  SET_CATEGORIES(state: any, categories: Category[]) {
-    state.categories = categories;
+  SET_ITEMS(state: BaseState<Category>, items: Category[]) {
+    state.items = items;
   },
-  SET_TOTAL_CATEGORIES(state: any, total: number) {
-    state.totalCategories = total;
+  SET_TOTAL_ITEMS(state: BaseState<Category>, total: number) {
+    state.totalItems = total;
   },
-  SET_SELECTED_CATEGORY(state: any, category: Category | null) {
-    state.selectedCategory = category;
+  SET_SELECTED_ITEMS(state: BaseState<Category>, item: Category | null) {
+    state.selectedItem = item;
   },
-  SET_LOADING(state: any, loading: boolean) {
+  SET_LOADING(state: BaseState<Category>, loading: boolean) {
     state.loading = loading;
   },
-  SET_ERROR(state: any, error: string | null) {
+  SET_ERROR(state: BaseState<Category>, error: string | null) {
     state.error = error;
   },
-  SET_LAST_FILTER_PARAMS(state: any, params: FilterParams) {
+  SET_LAST_FILTER_PARAMS(state: BaseState<Category>, params: FilterParams) {
     state.lastFilterParams = params;
   },
 };
 
 const actions = {
-  async fetchCategories(
-    { commit, rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+  async fetchCategories({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
-    commit("SET_CATEGORIES", []);
-
-    const filterParams = {
-      pageNumber,
-      pageSize,
-      order,
-      sort,
-      textFilter,
-      numberFilter,
-      stateFilter,
-      startDate,
-      endDate
-    };
-    commit("SET_LAST_FILTER_PARAMS", filterParams);
+    commit("SET_ITEMS", []);
+    commit("SET_LAST_FILTER_PARAMS", params);
 
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result = await fetchCategoriesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        false,
-        token
-      );
-
+      const result = await categoryService.fetchAll(params);
       if (result.isSuccess) {
-        commit("SET_CATEGORIES", result.data);
-        commit("SET_TOTAL_CATEGORIES", result.totalRecords);
+        commit("SET_ITEMS", result.data);
+        commit("SET_TOTAL_ITEMS", result.totalRecords);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -128,69 +53,27 @@ const actions = {
     }
   },
 
-  async downloadCategoriesExcel(
-    { rootState }: any,
-    { 
-      pageNumber = 1, 
-      pageSize = 10, 
-      order = "desc", 
-      sort = "Id", 
-      textFilter = null, 
-      numberFilter = null,
-      stateFilter = 1,
-      startDate = null,
-      endDate = null
-    } = {}
-  ) {
+
+  async downloadCategoriesExcel({ state }: any, params?: FilterParams) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const blob = await fetchCategoriesService(
-        pageNumber,
-        pageSize,
-        order,
-        sort,
-        textFilter,
-        numberFilter,
-        stateFilter,
-        startDate,
-        endDate,
-        true,
-        token
-      );
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `Categorias_${new Date().toISOString().split('T')[0]}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const filterParams = params || state.lastFilterParams || {};
+      await categoryService.downloadExcel(filterParams);
     } catch (error: any) {
       console.error('Error al descargar Excel:', error);
       throw error;
     }
   },
 
-  async selectCategory({ commit, rootState }: any) {
-    commit("SET_LOADING", true);
-    commit("SET_CATEGORIES", []);
-    try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
 
-      const result: BaseResponse = await selectCategoryService(token);
+  async selectCategory({ commit }: any) {
+    commit("SET_LOADING", true);
+    commit("SET_ITEMS", []);
+    
+    try {
+      const result = await categoryService.select();
+      
       if (result.isSuccess) {
-        commit("SET_CATEGORIES", result.data);
+        commit("SET_ITEMS", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -201,18 +84,14 @@ const actions = {
     }
   },
 
-  async fetchCategoryById({ commit, rootState }: any, id: number) {
+  async fetchCategoryById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
+    
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await fetchCategoryByIdService(id, token);
+      const result = await categoryService.fetchById(id);
+      
       if (result.isSuccess) {
-        commit("SET_SELECTED_CATEGORY", result.data);
+        commit("SET_SELECTED_ITEM", result.data);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -223,122 +102,83 @@ const actions = {
     }
   },
 
-  async registerCategory({ commit, dispatch, rootState, state }: any, category: Category) {
+  async registerCategory({ dispatch, state }: any, category: Category) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await registerCategoryService(category, token);
+      const result = await categoryService.create(category);
+      
       if (result.isSuccess) {
         dispatch("fetchCategories", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async editCategory({ commit, dispatch, rootState, state }: any, { id, category }: { id: number; category: Category }) {
+  async editCategory({ dispatch, state }: any, { id, category }: { id: number; category: Category }) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await editCategoryService(id, category, token);
+      const result = await categoryService.update(id, category);
+      
       if (result.isSuccess) {
         dispatch("fetchCategories", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async enableCategory({ commit, dispatch, rootState, state }: any, id: number) {
+  async enableCategory({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-      const result: BaseResponse = await enableCategoryService(id, token);
+      const result = await categoryService.enable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchCategories", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async disableCategory({ commit, dispatch, rootState }: any, id: number) {
+  async disableCategory({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
-       const result: BaseResponse = await disableCategoryService(id, token);
+      const result = await categoryService.disable(id);
+      
       if (result.isSuccess) {
         dispatch("fetchCategories", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 
-  async removeCategory({ commit, dispatch, rootState }: any, id: number) {
+  async removeCategory({ dispatch, state }: any, id: number) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-      const result: BaseResponse = await removeCategoryService(id, token);
+      const result = await categoryService.remove(id);
+      
       if (result.isSuccess) {
         dispatch("fetchCategories", state.lastFilterParams || {});
-        return result;
-      } else {
-        commit("SET_ERROR", result.message || result.errors);
-        return result;
       }
+      
+      return result;
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
       return { isSuccess: false, message: error.message, errors: error };
     }
   },
 };
 
 const getters = {
-  categories: (state: any) => state.categories,
-  selectedCategory: (state: any) => state.selectedCategory,
-  loading: (state: any) => state.loading,
-  error: (state: any) => state.error,
-  totalCategories: (state: any) => state.totalCategories || 0,
+  categories: (state: BaseState<Category>) => state.items,
+  selectedCategory: (state: BaseState<Category>) => state.selectedItem,
+  loading: (state: BaseState<Category>) => state.loading,
+  error: (state: BaseState<Category>) => state.error,
+  totalCategories: (state: BaseState<Category>) => state.totalItems || 0,
 };
 
 export default {

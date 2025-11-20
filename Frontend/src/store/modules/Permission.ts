@@ -1,12 +1,5 @@
-import mainStore from "@/store";
-import { jwtDecode } from "jwt-decode";
 import { fetchPermissionsByRole, updatePermissions } from '@/services/permissionService';
 import { Permission, PermissionsByModule } from '@/interfaces/permissionInterface';
-
-interface DecodedToken {
-  exp: number;
-  [key: string]: any;
-}
 
 interface PermissionState {
   permissions: Permission[];
@@ -18,17 +11,6 @@ const state: PermissionState = {
   permissions: [],
   loading: false,
   error: null,
-};
-
-const isExpired = (token: string | null): boolean => {
-  if (!token) return true;
-  try {
-    const decodedToken = jwtDecode<DecodedToken>(token);
-    const currentTime = Date.now() / 1000;
-    return decodedToken.exp < currentTime;
-  } catch {
-    return true;
-  }
 };
 
 const mutations = {
@@ -44,16 +26,10 @@ const mutations = {
 };
 
 const actions = {
-  async fetchPermissionsByRole({ commit, rootState }: any, roleId: number) {
+  async fetchPermissionsByRole({ commit }: any, roleId: number) {
     commit("SET_LOADING", true);
     commit("SET_ERROR", null);
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
       const response = await fetchPermissionsByRole(roleId);
       if (response.isSuccess) {
         commit("SET_PERMISSIONS", response.data);
@@ -67,14 +43,8 @@ const actions = {
     }
   },
 
-  async updatePermissions({ commit, rootState }: any, updatedPermissions: Array<{ idPermission: number; status: boolean }>) {
+  async updatePermissions({ commit }: any, updatedPermissions: Array<{ idPermission: number; status: boolean }>) {
     try {
-      const token = rootState.token;
-      if (isExpired(token)) {
-        await mainStore.dispatch("logout");
-        return;
-      }
-
       const result = await updatePermissions(updatedPermissions);
       if (result.isSuccess) {
         return { success: true, message: result.message };
