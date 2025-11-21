@@ -19,17 +19,15 @@
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.material"
-                  :rules="[rules.onlyLetters]" counter="25" :maxlength="25" label="Material"
-                  required />
+                  :rules="[rules.onlyLetters]" counter="25" :maxlength="25" label="Material" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.color"
-                  :rules="[rules.onlyLetters]" counter="20" :maxlength="20" label="Color"
-                  required />
+                  :rules="[rules.onlyLetters]" counter="20" :maxlength="20" label="Color" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.unitMeasure" counter="15"
-                  :maxlength="15" label="Unidad de Medida" />
+                  :rules="[rules.required]" :maxlength="15" label="Unidad de Medida" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-autocomplete color="indigo" variant="underlined" :items="brands" v-model="localProduct.idBrand"
