@@ -134,7 +134,7 @@ router.beforeEach((to, from, next) => {
   const state = store.state as RootState
   const currentUser = state.currentUser
 
-  // 🔹 Rutas libres (login, etc)
+  // Rutas libres (login, etc)
   if (to.matched.some(record => record.meta.free)) {
     // Si está autenticado y va a login, redirigir a home
     if (currentUser && to.name === 'login') {
@@ -145,19 +145,19 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // 🔹 Verificar autenticación
+  // Verificar autenticación
   if (!currentUser) {
     next({ name: 'login' })
     return
   }
 
-  // 🔹 Rutas que requieren autenticación pero no permisos específicos
+  // Rutas que requieren autenticación pero no permisos específicos
   if (to.matched.some(record => record.meta.requiresAuth && !record.meta.module)) {
     next()
     return
   }
 
-  // 🔹 Verificar permisos del módulo
+  // Verificar permisos del módulo
   const routeWithModule = to.matched.find(record => record.meta.module)
   
   if (routeWithModule && routeWithModule.meta.module) {
