@@ -2,12 +2,9 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 import store from '@/store';
 import router from '@/router';
 import { ErrorHandler } from '@/helpers/errorHandler';
-import { ErrorType } from '@/interfaces/errorInterface';
 
-// Configuración de Axios con interceptores
 export function setupAxiosInterceptors() {
-
-    //Request Interceptor
+  //Request Interceptor
   axios.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       // Agregar token JWT a todas las peticiones
@@ -16,18 +13,9 @@ export function setupAxiosInterceptors() {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
-      // Agregar timestamp para debugging
-/*       if (process.env.NODE_ENV === 'development') {
-        console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-          params: config.params,
-          data: config.data,
-        });
-      } */
-
       return config;
     },
     (error: AxiosError) => {
-      // Error en configuración de request
       console.error('[Request Error]', error);
       return Promise.reject(error);
     }
@@ -36,30 +24,27 @@ export function setupAxiosInterceptors() {
   //Response Interceptor
   axios.interceptors.response.use(
     (response: AxiosResponse) => {
-      // Log de respuestas exitosas en desarrollo
-/*       if (process.env.NODE_ENV === 'development') {
-        console.log(`[API Response] ${response.config.url}`, response.data);
-      } */
-
       return response;
     },
     async (error: AxiosError) => {
       const statusCode = error.response?.status;
 
-      // Error por código
-      // 401 - Sesión expirada
+      // 401 - Token expirado o inválido
       if (statusCode === 401) {
-        // Evitar loops infinitos si ya estamos en login
-        if (router.currentRoute.value.name !== 'login') {
-          // Normalizar error con mensaje personalizado
+        const currentRoute = router.currentRoute.value.name;
+        
+        // Evitar loops infinitos
+        if (currentRoute !== 'login') {
+          console.log('Token inválido/expirado detectado (401)');
+          
+          // Mostrar mensaje al usuario
           ErrorHandler.handle(error, {
             showToast: true,
             customMessage: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente',
           });
 
-          // Limpiar store y redirigir
+          // Limpiar sesión y redirigir
           await store.dispatch('logout');
-          router.push({ name: 'login' });
         }
         return Promise.reject(error);
       }
@@ -75,7 +60,6 @@ export function setupAxiosInterceptors() {
 
       // 404 - Recurso no encontrado
       if (statusCode === 404) {
-        // Solo mostrar toast, no manejar especialmente
         ErrorHandler.handleSilent(error);
         return Promise.reject(error);
       }
@@ -107,16 +91,13 @@ export function setupAxiosInterceptors() {
         return Promise.reject(error);
       }
 
-      // Otros errores
-      // No manejar aquí, dejar que el componente decida
-      // (Permite manejo personalizado en cada componente)
+      // Otros errores - dejar que el componente decida
       return Promise.reject(error);
     }
   );
 }
 
 // Configuración de timeout global
-
 export function configureAxiosDefaults() {
   // Base URL
   axios.defaults.baseURL = process.env.VUE_APP_API_URL || 'https://localhost:7145/';

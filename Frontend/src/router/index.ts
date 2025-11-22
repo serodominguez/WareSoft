@@ -12,12 +12,11 @@ import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
 import UserView from '@/views/UserView.vue'
  
-// Define los meta types para TypeScript
 declare module 'vue-router' {
   interface RouteMeta {
     free?: boolean;
     requiresAuth?: boolean;
-    module?: string; // Solo necesitamos el módulo, no la acción específica
+    module?: string;
   }
 }
 
@@ -30,15 +29,10 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true,
     },
   },
-
   {
     path: "/about",
     name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    component: () => import("../views/AboutView.vue"),
     meta: {
       requiresAuth: true,
     },
@@ -131,12 +125,12 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+
   const state = store.state as RootState
   const currentUser = state.currentUser
 
-  // Rutas libres (login, etc)
+  // Rutas libres
   if (to.matched.some(record => record.meta.free)) {
-    // Si está autenticado y va a login, redirigir a home
     if (currentUser && to.name === 'login') {
       next({ name: 'home' })
       return

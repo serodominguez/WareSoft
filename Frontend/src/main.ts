@@ -41,11 +41,8 @@ const toastOptions = {
   newestOnTop: true,
 }
 
-// Inicialización bloqueada
-async function initializeApp() {
-  // Restaurar sesión ANTES de montar la app
-  await store.dispatch('initializeAuth')
-  
+// Inicialización
+function initializeApp() {
   // Crear la aplicación
   const app = createApp(App)
 
@@ -65,10 +62,15 @@ async function initializeApp() {
     })
   }
 
-  // Montar la app
+  // Esto restaura token + permisos desde localStorage (instantáneo)
+  store.dispatch('initializeAuth').catch((error) => {
+    console.error('Error inicializando autenticación:', error)
+  })
+
+  // Montar la app inmediatamente (no espera a initializeAuth)
   app.mount('#app')
 
-    // Ocultar loading screen
+  // Ocultar loading screen
   document.body.classList.add('app-mounted')
 }
 
