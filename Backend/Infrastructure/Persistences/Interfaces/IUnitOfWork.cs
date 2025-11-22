@@ -7,6 +7,7 @@ namespace Infrastructure.Persistences.Interfaces
     {
         IGenericRepository<BrandEntity> Brand { get; }
         IGenericRepository<CategoryEntity> Category { get; }
+        IGenericRepository<CustomerEntity> Customer { get; }
         IGenericRepository<StoreEntity> Store { get; }
         IModuleRepository Module { get; }
         IPermissionRepository Permission { get; }

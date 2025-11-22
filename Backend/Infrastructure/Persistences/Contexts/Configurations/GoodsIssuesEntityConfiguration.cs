@@ -37,8 +37,8 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasColumnName("ANNOTATIONS")
                 .HasMaxLength(80);
 
-            builder.Property(g => g.IdConsumer)
-                .HasColumnName("PK_CONSUMER")
+            builder.Property(g => g.IdCustomer)
+                .HasColumnName("PK_CUSTOMER")
                 .IsRequired();
 
             builder.Property(g => g.IdStore)
@@ -58,9 +58,9 @@ namespace Infrastructure.Persistences.Contexts.Configurations
             builder.Property(g => g.Status)
                 .HasColumnName("STATUS");
 
-            builder.HasOne(c => c.Consumer)
+            builder.HasOne(c => c.Customer)
                 .WithMany(g => g.GoodsIssue)
-                .HasForeignKey(g => g.IdConsumer);
+                .HasForeignKey(g => g.IdCustomer);
 
             builder.HasOne(s => s.Store)
                 .WithMany(g => g.GoodsIssue)

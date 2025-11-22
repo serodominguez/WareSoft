@@ -12,6 +12,7 @@ namespace Infrastructure.Persistences.Repositories
 
         public IGenericRepository<BrandEntity> _brand = null!;
         public IGenericRepository<CategoryEntity> _category = null!;
+        public IGenericRepository<CustomerEntity> _customer = null!;
         public IGenericRepository<StoreEntity> _store = null!;
         public IModuleRepository _module = null!;
         public IPermissionRepository _permission = null!;
@@ -26,6 +27,7 @@ namespace Infrastructure.Persistences.Repositories
 
         public IGenericRepository<BrandEntity> Brand => _brand ?? new GenericRepository<BrandEntity>(_context);
         public IGenericRepository<CategoryEntity> Category => _category ?? new GenericRepository<CategoryEntity>(_context);
+        public IGenericRepository<CustomerEntity> Customer => _customer ?? new GenericRepository<CustomerEntity>(_context);
         public IGenericRepository<StoreEntity> Store => _store ?? new GenericRepository<StoreEntity>(_context);
         public IModuleRepository Module => _module ?? new ModuleRepository(_context);
         public IPermissionRepository Permission => _permission ?? new PermissionRepository(_context);

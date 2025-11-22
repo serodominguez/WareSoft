@@ -11,7 +11,7 @@ namespace Infrastructure.Persistences.Contexts
         public virtual DbSet<ActionEntity> Action { get; set; }
         public virtual DbSet<BrandEntity> Brand { get; set; }
         public virtual DbSet<CategoryEntity> Category { get; set; }
-        public virtual DbSet<ConsumerEntity> Consumer { get; set; }
+        public virtual DbSet<CustomerEntity> Customer { get; set; }
         public virtual DbSet<GoodsIssueEntity> GoodsIssues { get; set; } = null!;
         public virtual DbSet<GoodsIssueDetailsEntity> GoodsIssuesDetails { get; set; }
         public virtual DbSet<GoodsReceiptEntity> GoodsReceipt { get; set; }
