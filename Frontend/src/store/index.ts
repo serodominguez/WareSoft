@@ -138,7 +138,6 @@ const store = createStore<RootState>({
       state.currentUser = user;
 
       if (user) {
-        // Guardar usuario con permisos en localStorage
         localStorage.setItem("user", JSON.stringify(user));
       } else {
         localStorage.removeItem("user");
@@ -153,9 +152,6 @@ const store = createStore<RootState>({
   actions: {
     /**
      * Inicializa la autenticación al cargar la app
-     * - Si hay token válido, restaura usuario desde localStorage
-     * - Si token expiró, limpia todo
-     * - NO consulta al servidor
      */
     async initializeAuth({ commit }) {
       try {
@@ -169,7 +165,7 @@ const store = createStore<RootState>({
 
         // Token expirado → limpiar todo
         if (isTokenExpired(token)) {
-          console.log('Token expirado, limpiando sesión');
+          console.log('Token expirado en inicialización, limpiando sesión');
           commit("SET_TOKEN", null);
           commit("SET_USER", null);
           commit("SET_AUTH_INITIALIZED", true);
@@ -182,12 +178,9 @@ const store = createStore<RootState>({
         const cachedUser = getCachedUser();
         
         if (cachedUser) {
-          // Restaurar usuario con permisos cacheados
           commit("SET_USER", cachedUser);
           console.log('Sesión restaurada desde caché');
         } else {
-          // Token válido pero sin usuario cacheado (caso raro)
-          // Decodificar token para crear usuario básico sin permisos
           const decoded = jwtDecode<JwtPayload>(token);
           const userId = parseInt(decoded.userId, 10);
           const userWithoutPermissions = createUserFromToken(decoded, userId, []);
@@ -198,14 +191,15 @@ const store = createStore<RootState>({
         commit("SET_AUTH_INITIALIZED", true);
       } catch (error) {
         console.error("Error inicializando auth:", error);
-        // En caso de error, limpiar todo por seguridad
         commit("SET_TOKEN", null);
         commit("SET_USER", null);
         commit("SET_AUTH_INITIALIZED", true);
       }
     },
 
-    // Guarda el token y carga permisos del servidor (solo en LOGIN)
+    /**
+     * Guarda el token y carga permisos del servidor (solo en LOGIN)
+     */
     async saveToken({ commit, dispatch }, token: string) {
       try {
         commit("SET_TOKEN", token);
@@ -222,7 +216,9 @@ const store = createStore<RootState>({
       }
     },
 
-    // Solo se llama en LOGIN o cuando se necesita refrescar manualmente
+    /**
+     * Solo se llama en LOGIN o cuando se necesita refrescar manualmente
+     */
     async loadUserPermissions(
       { commit },
       { decoded, userId }: { decoded: JwtPayload; userId: number }
@@ -235,8 +231,6 @@ const store = createStore<RootState>({
           : [];
 
         const user = createUserFromToken(decoded, userId, permissions);
-        
-        // Guardar usuario con permisos (se guarda en localStorage automáticamente)
         commit("SET_USER", user);
 
         if (!response.data.isSuccess) {
@@ -247,13 +241,14 @@ const store = createStore<RootState>({
       } catch (error) {
         console.error("Error cargando permisos:", error);
 
-        // Si falla, crear usuario sin permisos
         const user = createUserFromToken(decoded, userId, []);
         commit("SET_USER", user);
       }
     },
 
-    // Cierra sesión y limpia todo
+    /**
+     * Cierra sesión y limpia todo
+     */
     logout({ commit }) {
       console.log('Cerrando sesión...');
       commit("SET_TOKEN", null);

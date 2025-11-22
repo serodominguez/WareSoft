@@ -1,16 +1,51 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { jwtDecode } from 'jwt-decode';
 import store from '@/store';
 import router from '@/router';
 import { ErrorHandler } from '@/helpers/errorHandler';
+
+// Interface para el payload del JWT
+interface JwtPayload {
+  exp: number;
+  [key: string]: any;
+}
+
+// Función para verificar si el token expiró
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded.exp < Date.now() / 1000;
+  } catch {
+    return true;
+  }
+};
 
 export function setupAxiosInterceptors() {
   //Request Interceptor
   axios.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-      // Agregar token JWT a todas las peticiones
+      // Obtener token del localStorage
       const token = localStorage.getItem('token');
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      
+      if (token) {
+        // ✨ VERIFICAR SI EL TOKEN EXPIRÓ ANTES DE ENVIAR LA PETICIÓN
+        if (isTokenExpired(token)) {
+          console.log('🔴 Token expirado detectado antes de la petición, cerrando sesión...');
+          
+          // Limpiar sesión
+          store.dispatch('logout');
+          
+          // Cancelar la petición actual
+          return Promise.reject({
+            message: 'Token expirado',
+            isTokenExpired: true,
+          });
+        }
+        
+        // Token válido → agregarlo a los headers
+        if (config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
 
       return config;
@@ -29,13 +64,13 @@ export function setupAxiosInterceptors() {
     async (error: AxiosError) => {
       const statusCode = error.response?.status;
 
-      // 401 - Token expirado o inválido
+      // 401 - Token expirado o inválido (respuesta del servidor)
       if (statusCode === 401) {
         const currentRoute = router.currentRoute.value.name;
         
         // Evitar loops infinitos
         if (currentRoute !== 'login') {
-          console.log('Token inválido/expirado detectado (401)');
+          console.log('🔴 Token inválido/expirado detectado por el servidor (401)');
           
           // Mostrar mensaje al usuario
           ErrorHandler.handle(error, {
