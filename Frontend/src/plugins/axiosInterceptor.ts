@@ -25,23 +25,22 @@ export function setupAxiosInterceptors() {
   axios.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       // Obtener token del localStorage
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       if (token) {
-        // ✨ VERIFICAR SI EL TOKEN EXPIRÓ ANTES DE ENVIAR LA PETICIÓN
+        // verificar si el token expiró antes de enviar la petición
         if (isTokenExpired(token)) {
-          console.log('🔴 Token expirado detectado antes de la petición, cerrando sesión...');
-          
+
           // Limpiar sesión
-          store.dispatch('logout');
-          
+          store.dispatch("logout");
+
           // Cancelar la petición actual
           return Promise.reject({
-            message: 'Token expirado',
+            message: "Token expirado",
             isTokenExpired: true,
           });
         }
-        
+
         // Token válido → agregarlo a los headers
         if (config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -51,7 +50,7 @@ export function setupAxiosInterceptors() {
       return config;
     },
     (error: AxiosError) => {
-      console.error('[Request Error]', error);
+      console.error("[Request Error]", error);
       return Promise.reject(error);
     }
   );
@@ -61,25 +60,38 @@ export function setupAxiosInterceptors() {
     (response: AxiosResponse) => {
       return response;
     },
-    async (error: AxiosError) => {
+    async (error: AxiosError | any) => {
+      if (error.isTokenExpired) {
+        const currentRoute = router.currentRoute.value.name;
+
+        // Evitar loops infinitos
+        if (currentRoute !== "login") {
+          ErrorHandler.handle(error, {
+            showToast: true,
+            customMessage:
+              "Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
+          });
+          // Limpiar sesión y redirigir (sin await, ya que logout es síncrono)
+          store.dispatch("logout");
+        }
+        return Promise.reject(error);
+      }
+
       const statusCode = error.response?.status;
 
       // 401 - Token expirado o inválido (respuesta del servidor)
       if (statusCode === 401) {
         const currentRoute = router.currentRoute.value.name;
-        
+
         // Evitar loops infinitos
-        if (currentRoute !== 'login') {
-          console.log('🔴 Token inválido/expirado detectado por el servidor (401)');
-          
-          // Mostrar mensaje al usuario
+        if (currentRoute !== "login") {
           ErrorHandler.handle(error, {
             showToast: true,
-            customMessage: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente',
+            customMessage:"Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
           });
 
           // Limpiar sesión y redirigir
-          await store.dispatch('logout');
+          await store.dispatch("logout");
         }
         return Promise.reject(error);
       }
@@ -88,7 +100,7 @@ export function setupAxiosInterceptors() {
       if (statusCode === 403) {
         ErrorHandler.handle(error, {
           showToast: true,
-          customMessage: 'No tienes permisos para realizar esta acción',
+          customMessage: "No tienes permisos para realizar esta acción",
         });
         return Promise.reject(error);
       }
@@ -103,25 +115,25 @@ export function setupAxiosInterceptors() {
       if (statusCode && statusCode >= 500) {
         ErrorHandler.handle(error, {
           showToast: true,
-          customMessage: 'Error del servidor. Intenta nuevamente en unos momentos',
+          customMessage: "Error del servidor. Intenta nuevamente en unos momentos",
         });
         return Promise.reject(error);
       }
 
       // Errores de red
-      if (error.message === 'Network Error' || !error.response) {
+      if (error.message === "Network Error" || !error.response) {
         ErrorHandler.handle(error, {
           showToast: true,
-          customMessage: 'Sin conexión a internet. Verifica tu conexión',
+          customMessage: "Sin conexión a internet. Verifica tu conexión",
         });
         return Promise.reject(error);
       }
 
       // Timeout
-      if (error.code === 'ECONNABORTED') {
+      if (error.code === "ECONNABORTED") {
         ErrorHandler.handle(error, {
           showToast: true,
-          customMessage: 'La solicitud tardó demasiado. Intenta nuevamente',
+          customMessage: "La solicitud tardó demasiado. Intenta nuevamente",
         });
         return Promise.reject(error);
       }

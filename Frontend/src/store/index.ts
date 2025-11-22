@@ -165,7 +165,6 @@ const store = createStore<RootState>({
 
         // Token expirado → limpiar todo
         if (isTokenExpired(token)) {
-          console.log('Token expirado en inicialización, limpiando sesión');
           commit("SET_TOKEN", null);
           commit("SET_USER", null);
           commit("SET_AUTH_INITIALIZED", true);
@@ -179,7 +178,6 @@ const store = createStore<RootState>({
         
         if (cachedUser) {
           commit("SET_USER", cachedUser);
-          console.log('Sesión restaurada desde caché');
         } else {
           const decoded = jwtDecode<JwtPayload>(token);
           const userId = parseInt(decoded.userId, 10);
@@ -232,12 +230,6 @@ const store = createStore<RootState>({
 
         const user = createUserFromToken(decoded, userId, permissions);
         commit("SET_USER", user);
-
-        if (!response.data.isSuccess) {
-          console.warn("Permisos no disponibles:", response.data.message);
-        } else {
-          console.log('Permisos cargados desde el servidor');
-        }
       } catch (error) {
         console.error("Error cargando permisos:", error);
 
@@ -250,7 +242,6 @@ const store = createStore<RootState>({
      * Cierra sesión y limpia todo
      */
     logout({ commit }) {
-      console.log('Cerrando sesión...');
       commit("SET_TOKEN", null);
       commit("SET_USER", null);
       router.push({ name: "login" });
