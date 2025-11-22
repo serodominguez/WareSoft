@@ -1,5 +1,6 @@
 import { fetchPermissionsByRole, updatePermissions } from '@/services/permissionService';
 import { Permission, PermissionsByModule } from '@/interfaces/permissionInterface';
+import { handleSilentError } from '@/helpers/errorHandler';
 
 interface PermissionState {
   permissions: Permission[];
@@ -37,7 +38,9 @@ const actions = {
         commit("SET_ERROR", response.message);
       }
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
+      const appError = handleSilentError(error);
+      commit("SET_ERROR", appError.message);
+      throw error;
     } finally {
       commit("SET_LOADING", false);
     }
@@ -50,9 +53,15 @@ const actions = {
         return { success: true, message: result.message };
       } else {
         commit("SET_ERROR", result.message || result.errors);
+        return {
+          success: false,
+          message: result.message || "Error al actualizar permisos",
+        };
       }
     } catch (error: any) {
-      commit("SET_ERROR", error.message);
+      const appError = handleSilentError(error);
+      commit("SET_ERROR", appError.message);
+      throw error;
     }
   },
 };

@@ -131,50 +131,51 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const state = store.state as RootState;
-  const currentUser = state.currentUser;
+  const state = store.state as RootState
+  const currentUser = state.currentUser
 
-  // Rutas libres (login, etc)
+  // 🔹 Rutas libres (login, etc)
   if (to.matched.some(record => record.meta.free)) {
-    next();
-    return;
+    // Si está autenticado y va a login, redirigir a home
+    if (currentUser && to.name === 'login') {
+      next({ name: 'home' })
+      return
+    }
+    next()
+    return
   }
 
-  // Verificar autenticación
+  // 🔹 Verificar autenticación
   if (!currentUser) {
-    next({ name: 'login' });
-    return;
+    next({ name: 'login' })
+    return
   }
 
-  // Rutas que requieren autenticación pero no permisos específicos (home, about)
+  // 🔹 Rutas que requieren autenticación pero no permisos específicos
   if (to.matched.some(record => record.meta.requiresAuth && !record.meta.module)) {
-    next();
-    return;
+    next()
+    return
   }
 
-  // Verificar permisos del módulo (solo verifica si tiene ALGÚN permiso en el módulo)
-  const routeWithModule = to.matched.find(record => record.meta.module);
+  // 🔹 Verificar permisos del módulo
+  const routeWithModule = to.matched.find(record => record.meta.module)
   
   if (routeWithModule && routeWithModule.meta.module) {
-    const module = routeWithModule.meta.module;
+    const module = routeWithModule.meta.module
+    const normalizedRouteModule = normalize(module)
     
-    // Normalizar el módulo de la ruta
-    const normalizedRouteModule = normalize(module);
-    
-    // Verificar si el usuario tiene ALGÚN permiso en este módulo
     const hasModuleAccess = currentUser.permissions.some(
       (p: { module: string; action: string }) => 
         normalize(p.module) === normalizedRouteModule
-    );
+    )
     
     if (hasModuleAccess) {
-      next();
+      next()
     } else {
-      // Redirigir a home si no tiene ningún permiso en el módulo
-      next({ name: 'home' });
+      next({ name: 'home' })
     }
   } else {
-    next();
+    next()
   }
 });
 

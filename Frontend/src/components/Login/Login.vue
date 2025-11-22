@@ -57,21 +57,21 @@ const uppercase = () => {
 };
 
 const validateFields = (): boolean => {
-  let isValid = true;
+  errorMessage.value = '';
 
   errorMessage.value = '';
 
   if (!user.value.trim()) {
     errorMessage.value = 'El usuario es requerido';
-    isValid = false;
+    return false;
   }
 
   if (!password.value.trim()) {
     errorMessage.value = 'La contraseña es requerida';
-    isValid = false;
+    return false;
   }
 
-  return isValid;
+  return true;
 };
 
 const login = async () => {
@@ -108,7 +108,7 @@ const login = async () => {
       loading.value = false; // ← Desactiva loading (hubo error)
     }
   } catch (error) {
-    // PASO 7: Manejo de errore
+    // PASO 7: Manejo de errores
     const axiosError = error as AxiosError<ErrorResponse>;
     if (axiosError.response?.data?.message) {
       errorMessage.value = axiosError.response.data.message;

@@ -75,127 +75,131 @@ const store = createStore<RootState>({
     isAuthenticated(state): boolean {
       return !!state.token;
     },
-    
+
     getCurrentUser(state): CurrentUser | null {
       return state.currentUser;
     },
-    
-    hasPermission: (state) => (module: string, action: string): boolean => {
-      if (!state.currentUser?.permissions) return false;
 
-      const normalizedModule = normalize(module);
-      const normalizedAction = normalize(action);
+    hasPermission:
+      (state) =>
+      (module: string, action: string): boolean => {
+        if (!state.currentUser?.permissions) return false;
 
-      return state.currentUser.permissions.some(
-        (p) =>
-          normalize(p.module) === normalizedModule &&
-          normalize(p.action) === normalizedAction
-      );
-    },
+        const normalizedModule = normalize(module);
+        const normalizedAction = normalize(action);
+
+        return state.currentUser.permissions.some(
+          (p) =>
+            normalize(p.module) === normalizedModule &&
+            normalize(p.action) === normalizedAction
+        );
+      },
   },
 
   mutations: {
     SET_TOKEN(state, token: string | null) {
       state.token = token;
-      
+
       if (token) {
-        localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        localStorage.setItem("token", token);
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       } else {
-        localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
       }
     },
-    
+
     SET_USER(state, user: CurrentUser | null) {
       state.currentUser = user;
-      
+
       if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
       } else {
-        localStorage.removeItem('user');
+        localStorage.removeItem("user");
       }
     },
   },
 
   actions: {
-    // Refactorizado con manejo de errores
-    async saveToken({ commit, dispatch }, token: string) {
+    // Inicialización bloqueante
+    async initializeAuth({ commit, dispatch }) {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return; // No hay token, continuar sin usuario
+      }
+
+      if (isTokenExpired(token)) {
+        // Token expirado, limpiar
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        return;
+      }
+
       try {
-        commit('SET_TOKEN', token);
-        
+        // Restaurar token
+        commit("SET_TOKEN", token);
+
         const decoded = jwtDecode<JwtPayload>(token);
         const userId = parseInt(decoded.userId, 10);
 
-        await dispatch('loadUserPermissions', { decoded, userId });
+        // Cargar permisos de forma síncrona
+        await dispatch("loadUserPermissions", { decoded, userId });
       } catch (error) {
-        console.error('Error al guardar token:', error);
-        commit('SET_TOKEN', null);
+        console.error("Error inicializando auth:", error);
+        // Si falla, limpiar todo
+        commit("SET_TOKEN", null);
+        commit("SET_USER", null);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+    },
+
+    async saveToken({ commit, dispatch }, token: string) {
+      try {
+        commit("SET_TOKEN", token);
+
+        const decoded = jwtDecode<JwtPayload>(token);
+        const userId = parseInt(decoded.userId, 10);
+
+        await dispatch("loadUserPermissions", { decoded, userId });
+      } catch (error) {
+        console.error("Error al guardar token:", error);
+        commit("SET_TOKEN", null);
         throw error;
       }
     },
 
-    // Simplificado sin código duplicado
-    async loadUserPermissions({ commit }, { decoded, userId }: { 
-      decoded: JwtPayload; 
-      userId: number;
-    }) {
+    async loadUserPermissions(
+      { commit },
+      { decoded, userId }: { decoded: JwtPayload; userId: number }
+    ) {
       try {
-        const response = await axios.get('/api/Permission/User');
-        
+        const response = await axios.get("/api/Permission/User");
+
         const permissions = response.data.isSuccess
           ? response.data.data || []
           : [];
 
         const user = createUserFromToken(decoded, userId, permissions);
-        commit('SET_USER', user);
+        commit("SET_USER", user);
 
         if (!response.data.isSuccess) {
-          console.warn('Permisos no disponibles:', response.data.message);
+          console.warn("Permisos no disponibles:", response.data.message);
         }
       } catch (error) {
-        console.error('Error cargando permisos:', error);
-        
+        console.error("Error cargando permisos:", error);
+
         // Usuario sin permisos en caso de error
         const user = createUserFromToken(decoded, userId);
-        commit('SET_USER', user);
-      }
-    },
-
-    // Refactorizado - siempre recarga permisos
-    async auto({ commit, dispatch }) {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        router.push({ name: 'login' });
-        return;
-      }
-
-      if (isTokenExpired(token)) {
-        dispatch('logout');
-        return;
-      }
-
-      try {
-        commit('SET_TOKEN', token);
-        
-        const decoded = jwtDecode<JwtPayload>(token);
-        const userId = parseInt(decoded.userId, 10);
-
-        // Siempre recargar permisos para tener data actualizada
-        await dispatch('loadUserPermissions', { decoded, userId });
-        
-        router.push({ name: 'home' });
-      } catch (error) {
-        console.error('Error en auto-login:', error);
-        dispatch('logout');
+        commit("SET_USER", user);
       }
     },
 
     logout({ commit }) {
-      commit('SET_TOKEN', null);
-      commit('SET_USER', null);
-      router.push({ name: 'login' });
+      commit("SET_TOKEN", null);
+      commit("SET_USER", null);
+      router.push({ name: "login" });
     },
   },
 

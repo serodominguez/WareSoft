@@ -36,9 +36,6 @@ export default defineComponent({
       return this.$store.state.currentUser;
     },
   },
-  created(){
-    this.$store.dispatch("auto");
-  },
   methods: {
     logout(): void {
       this.$store.dispatch("logout");

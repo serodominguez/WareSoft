@@ -15,12 +15,12 @@
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
                     <v-btn v-if="action === 0" color="indigo" dark class="mr-2" elevation="4"
-                        @click="remove">Eliminar</v-btn>
+                        @click="remove" :loading="processing">Eliminar</v-btn>
                     <v-btn v-if="action === 1" color="indigo" dark class="mr-2" elevation="4"
-                        @click="enabled">Activar</v-btn>
+                        @click="enabled" :loading="processing">Activar</v-btn>
                     <v-btn v-if="action === 2" color="indigo" dark class="mr-2" elevation="4"
-                        @click="disabled">Desactivar</v-btn>
-                    <v-btn color="red" elevation="4" @click="close">Cancelar</v-btn>
+                        @click="disabled" :loading="processing">Desactivar</v-btn>
+                    <v-btn color="red" elevation="4" @click="close" :disabled="processing">Cancelar</v-btn>
                 </div>
             </v-card-actions>
         </v-card>
@@ -30,6 +30,7 @@
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
 import { Store } from '@/interfaces/storeInterface';
+import { handleApiError } from '@/helpers/errorHandler';
 
 export default defineComponent({
     props: {
@@ -52,7 +53,7 @@ export default defineComponent({
     data() {
         return {
             isOpen: this.modelValue,
-            valid: false,
+            processing: false,
             toast: useToast(),
             localStore: { ...this.store } as Store,
         };
@@ -74,6 +75,7 @@ export default defineComponent({
             this.$emit('update:modelValue', false);
         },
         async remove() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('store/removeStore', this.localStore.idStore);
                 if (result.isSuccess) {
@@ -81,22 +83,13 @@ export default defineComponent({
                     this.close();
                 }
             } catch (error: any) {
-                let errorMsg = 'Error en eliminar la tienda';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al eliminar la tienda');
+            } finally {
+                this.processing = false;
             }
         },
         async enabled() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('store/enableStore', this.localStore.idStore);
                 if (result.isSuccess) {
@@ -104,22 +97,13 @@ export default defineComponent({
                     this.close();
                 }
             } catch (error: any) {
-                let errorMsg = 'Error en habilitar la tienda';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al habilitar la tienda');
+            } finally {
+                this.processing = false;
             }
         },
         async disabled() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('store/disableStore', this.localStore.idStore);
                 if (result.isSuccess) {
@@ -128,19 +112,9 @@ export default defineComponent({
                 }
 
             } catch (error: any) {
-                let errorMsg = 'Error en deshabilitar la tienda';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al deshabilitar la tienda');
+            } finally {
+                this.processing = false;
             }
         },
     },

@@ -55,7 +55,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { useToast } from 'vue-toastification';
 import { User } from '@/interfaces/userInterface';
+import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import UserForm from './UserForm.vue';
 import UserModal from './UserModal.vue';
 import UserFilters from './UserFilters.vue';
@@ -83,6 +85,7 @@ export default defineComponent({
       startDate: null,
       endDate: null,
       downloadingExcel: false,
+      toast: useToast()
     };
   },
   computed: {
@@ -157,11 +160,15 @@ export default defineComponent({
       this.form = true;
     },
     async fetchUsers() {
-      await this.store.dispatch('user/fetchUsers', {
-        pageNumber: this.currentPage,
-        pageSize: this.itemsPerPage,
-        stateFilter: this.stateFilter
-      });
+      try {
+        await this.store.dispatch('user/fetchUsers', {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          stateFilter: this.stateFilter
+        });
+      } catch (error) {
+        handleSilentError(error);
+      }
     },
     async searchUsers() {
       let numberFilterValue: number | null = null;
@@ -178,16 +185,20 @@ export default defineComponent({
       const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
       const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
 
-      await this.store.dispatch("user/fetchUsers", {
-        pageNumber: 1,
-        pageSize: this.itemsPerPage,
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      });
-      this.currentPage = 1;
+      try {
+        await this.store.dispatch("user/fetchUsers", {
+          pageNumber: 1,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        this.currentPage = 1;
+      } catch (error) {
+        handleApiError(error, 'Error al buscar usuarios');
+      }
     },
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
@@ -239,7 +250,8 @@ export default defineComponent({
           endDate: endDateStr
         });
       } catch (error) {
-        console.error('Error al descargar el archivo:', error);
+        this.toast.success('Archivo descargado correctamente');
+        handleApiError(error, 'Error al descargar el archivo Excel');
       } finally {
         this.downloadingExcel = false;
       }

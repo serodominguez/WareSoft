@@ -26,7 +26,7 @@ loadFonts()
 // Opciones para Toast
 const toastOptions = {
   position: 'top-center',
-  timeout: 3000,
+  timeout: 2000,
   closeOnClick: true,
   pauseOnFocusLoss: true,
   pauseOnHover: true,
@@ -41,27 +41,36 @@ const toastOptions = {
   newestOnTop: true,
 }
 
-// Crear la aplicación Vue
-const app = createApp(App)
+// Inicialización bloqueada
+async function initializeApp() {
+  // Restaurar sesión ANTES de montar la app
+  await store.dispatch('initializeAuth')
+  
+  // Crear la aplicación
+  const app = createApp(App)
 
-app.use(router)
-app.use(store)
-app.use(vuetify)
-app.use(i18n)
-app.use(Toast, toastOptions)
-app.use(permissionsPlugin)
+  app.use(router)
+  app.use(store)
+  app.use(vuetify)
+  app.use(i18n)
+  app.use(Toast, toastOptions)
+  app.use(permissionsPlugin)
 
-// =Global error handles
-app.config.errorHandler = (err, instance, info) => {
-  console.error('[Vue Error Handler]', {
-    error: err,
-    instance,
-    info,
-  })
+  // Global error handler
+  app.config.errorHandler = (err, instance, info) => {
+    console.error('[Vue Error Handler]', {
+      error: err,
+      instance,
+      info,
+    })
+  }
 
-  // Puedes usar ErrorHandler aquí también
-  // ErrorHandler.handle(err, { customMessage: 'Error en la aplicación' })
+  // Montar la app
+  app.mount('#app')
+
+    // Ocultar loading screen
+  document.body.classList.add('app-mounted')
 }
 
-// Montar la aplicación
-app.mount('#app')
+// Inicializar la app
+initializeApp()

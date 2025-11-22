@@ -20,7 +20,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveRole" :disabled="!valid">Guardar</v-btn>
+          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveRole" :disabled="!valid" :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
       </v-col>
@@ -32,6 +32,7 @@ import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
 import { Role } from '@/interfaces/roleInterface';
+import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
   validate: () => boolean;
@@ -61,6 +62,7 @@ export default defineComponent({
     return {
       isOpen: this.modelValue,
       valid: false,
+      saving: false,
       localRole: { ...this.role } as Role,
       toast: useToast(),
       rules: {
@@ -89,7 +91,10 @@ export default defineComponent({
     },
     async saveRole() {
       const form = this.$refs.form as FormRef;
-      if (form.validate()) {
+      if (!form.validate()) {
+        this.toast.warning('Por favor completa todos los campos requeridos');
+        return;
+      }
         try {
           const isEditing = !!this.localRole.idRole;
           let result;
@@ -115,22 +120,13 @@ export default defineComponent({
 
         } catch (error: any) {
           const isEditing = !!this.localRole.idRole;
-          let errorMsg = isEditing
+          const customMessage = isEditing
             ? 'Error en actualizar el rol'
             : 'Error en guardar el rol';
 
-          if (error?.response?.status) {
-            errorMsg += `: Error ${error.response.status}`;
-          } else if (error?.response?.data?.message) {
-            errorMsg += `: ${error.response.data.message}`;
-          } else if (error?.message) {
-            errorMsg += `: ${error.message}`;
-          } else {
-            errorMsg += '.';
-          }
-
-          this.toast.error(errorMsg);
-        }
+        handleApiError(error, customMessage);
+      } finally {
+        this.saving = false;
       }
     },
   },

@@ -50,7 +50,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { useToast } from 'vue-toastification';
 import { Brand } from '@/interfaces/brandInterface';
+import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import BrandForm from './BrandForm.vue';
 import BrandModal from './BrandModal.vue';
 import BrandFilters from './BrandFilters.vue';
@@ -78,6 +80,7 @@ export default defineComponent({
       startDate: null,
       endDate: null,
       downloadingExcel: false,
+      toast: useToast()
     };
   },
   computed: {
@@ -136,33 +139,44 @@ export default defineComponent({
       this.form = true;
     },
     async fetchBrands() {
-      await this.store.dispatch('brand/fetchBrands', {
-        pageNumber: this.currentPage,
-        pageSize: this.itemsPerPage,
-        stateFilter: this.stateFilter
-      });
+      try {
+        await this.store.dispatch('brand/fetchBrands', {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          stateFilter: this.stateFilter
+        });
+      } catch (error) {
+        handleSilentError(error);
+
+        // Mensaje al usuario
+        // this.toast.error('Error al cargar las marcas');
+      }
     },
     async searchBrands() {
       let numberFilterValue: number | null = null;
       const filterMap: { [key: string]: number } = {
         "Marca": 1,
       }
-        
+
       numberFilterValue = filterMap[this.selectedFilter];
       const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
       const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
       const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
 
-      await this.store.dispatch("brand/fetchBrands", {
-        pageNumber: 1,
-        pageSize: this.itemsPerPage,
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      });
-      this.currentPage = 1;
+      try {
+        await this.store.dispatch("brand/fetchBrands", {
+          pageNumber: 1,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        this.currentPage = 1;
+      } catch (error) {
+        handleApiError(error, 'Error al buscar marcas');
+      }
     },
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
@@ -188,13 +202,18 @@ export default defineComponent({
       this.form = true;
     },
     async downloadExcel() {
+      /*       if (!this.canRead) {
+        this.toast.error('No tienes permiso para descargar el reporte.');
+        return;
+      } */
+
       this.downloadingExcel = true;
       try {
-      let numberFilterValue: number | null = null;
-      const filterMap: { [key: string]: number } = {
-        "Marca": 1,
-      }
-      
+        let numberFilterValue: number | null = null;
+        const filterMap: { [key: string]: number } = {
+          "Marca": 1,
+        }
+
         numberFilterValue = filterMap[this.selectedFilter];
         const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
         const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
@@ -209,15 +228,17 @@ export default defineComponent({
           startDate: startDateStr,
           endDate: endDateStr
         });
+        this.toast.success('Archivo descargado correctamente');
       } catch (error) {
-        console.error('Error al descargar el archivo:', error);
+        handleApiError(error, 'Error al descargar el archivo Excel');
       } finally {
         this.downloadingExcel = false;
       }
     },
     formatDate(date: Date | null): string | null {
       if (!date) return null;
-
+      
+      // Formato ISO: YYYY-MM-DD
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');

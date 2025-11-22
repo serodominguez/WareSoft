@@ -15,11 +15,11 @@
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
                     <v-btn v-if="action === 0" color="indigo" dark class="mr-2" elevation="4"
-                        @click="remove">Eliminar</v-btn>
+                        @click="remove" :loading="processing">Eliminar</v-btn>
                     <v-btn v-if="action === 1" color="indigo" dark class="mr-2" elevation="4"
-                        @click="enabled">Activar</v-btn>
+                        @click="enabled" :loading="processing">Activar</v-btn>
                     <v-btn v-if="action === 2" color="indigo" dark class="mr-2" elevation="4"
-                        @click="disabled">Desactivar</v-btn>
+                        @click="disabled" :loading="processing">Desactivar</v-btn>
                     <v-btn color="red" elevation="4" @click="close">Cancelar</v-btn>
                 </div>
             </v-card-actions>
@@ -30,6 +30,7 @@
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
 import { User } from '@/interfaces/userInterface';
+import { handleApiError } from '@/helpers/errorHandler';
 
 export default defineComponent({
     props: {
@@ -52,7 +53,7 @@ export default defineComponent({
     data() {
         return {
             isOpen: this.modelValue,
-            valid: false,
+            processing: false,
             toast: useToast(),
             localUser: { ...this.user } as User,
         };
@@ -74,6 +75,7 @@ export default defineComponent({
             this.$emit('update:modelValue', false);
         },
         async remove() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('user/removeUser', this.localUser.idUser);
                 if (result.isSuccess) {
@@ -82,22 +84,13 @@ export default defineComponent({
                 }
 
             } catch (error: any) {
-                let errorMsg = 'Error en eliminar el usuario';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al eliminar el usuario');
+            } finally {
+                this.processing = false;
             }
         },
         async enabled() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('user/enableUser', this.localUser.idUser);
                 if (result.isSuccess) {
@@ -105,22 +98,13 @@ export default defineComponent({
                     this.close();
                 }
             } catch (error: any) {
-                let errorMsg = 'Error en habilitar el usuario';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al habilitar el usuario');
+            } finally {
+                this.processing = false;
             }
         },
         async disabled() {
+            this.processing = true;
             try {
                 const result = await this.$store.dispatch('user/disableUser', this.localUser.idUser);
                 if (result.isSuccess) {
@@ -129,19 +113,9 @@ export default defineComponent({
                 }
 
             } catch (error: any) {
-                let errorMsg = 'Error en deshabilitar el usuario';
-
-                if (error?.response?.status) {
-                    errorMsg += `: Error ${error.response.status}`;
-                } else if (error?.response?.data?.message) {
-                    errorMsg += `: ${error.response.data.message}`;
-                } else if (error?.message) {
-                    errorMsg += `: ${error.message}`;
-                } else {
-                    errorMsg += '.';
-                }
-
-                this.toast.error(errorMsg);
+                handleApiError(error, 'Error al deshabilitar el usuario');
+            } finally {
+                this.processing = false;
             }
         },
     },

@@ -51,7 +51,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { useToast } from 'vue-toastification';
 import { Category } from '@/interfaces/categoryInterface';
+import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import CategoryForm from './CategoryForm.vue';
 import CategoryModal from './CategoryModal.vue';
 import CategoryFilters from './CategoryFilters.vue';
@@ -79,6 +81,7 @@ export default defineComponent({
       startDate: null,
       endDate: null,
       downloadingExcel: false,
+      toast: useToast()
     };
   },
   computed: {
@@ -139,11 +142,15 @@ export default defineComponent({
       this.form = true;
     },
     async fetchCategories() {
-      await this.store.dispatch('category/fetchCategories', {
-        pageNumber: this.currentPage,
-        pageSize: this.itemsPerPage,
-        stateFilter: this.stateFilter
-      });
+      try {
+        await this.store.dispatch('category/fetchCategories', {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          stateFilter: this.stateFilter
+        });
+      } catch (error) {
+        handleSilentError(error);
+      }
     },
     async searchCategories() {
       let numberFilterValue: number | null = null;
@@ -157,16 +164,20 @@ export default defineComponent({
       const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
       const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
 
-      await this.store.dispatch("category/fetchCategories", {
-        pageNumber: 1,
-        pageSize: this.itemsPerPage,
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      });
-      this.currentPage = 1;
+      try {
+        await this.store.dispatch("category/fetchCategories", {
+          pageNumber: 1,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        this.currentPage = 1;
+      } catch (error) {
+        handleApiError(error, 'Error al buscar categorías');
+      }
     },
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
@@ -192,18 +203,13 @@ export default defineComponent({
       this.form = true;
     },
     async downloadExcel() {
-/*       if (!this.canRead) {
-        this.toast.error('No tienes permiso para descargar el reporte.');
-        return;
-      } */
-
       this.downloadingExcel = true;
       try {
-      let numberFilterValue: number | null = null;
-      const filterMap: { [key: string]: number } = {
-        "Categoría": 1,
-        "Descripción": 2,
-      }
+        let numberFilterValue: number | null = null;
+        const filterMap: { [key: string]: number } = {
+          "Categoría": 1,
+          "Descripción": 2,
+        }
 
         numberFilterValue = filterMap[this.selectedFilter];
         const textFilterValue = this.search && this.search.trim() !== "" ? this.search.trim() : null;
@@ -219,8 +225,9 @@ export default defineComponent({
           startDate: startDateStr,
           endDate: endDateStr
         });
+        this.toast.success('Archivo descargado correctamente');
       } catch (error) {
-        console.error('Error al descargar el archivo:', error);
+        handleApiError(error, 'Error al descargar el archivo Excel');
       } finally {
         this.downloadingExcel = false;
       }
@@ -228,7 +235,6 @@ export default defineComponent({
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 
-      // Formato ISO: YYYY-MM-DD
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');

@@ -25,7 +25,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveCategory" :disabled="!valid">Guardar</v-btn>
+          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveCategory" :disabled="!valid" :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
       </v-col>
@@ -37,6 +37,7 @@ import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { defineComponent, PropType } from 'vue';
 import { Category } from '@/interfaces/categoryInterface';
+import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
   validate: () => boolean;
@@ -67,6 +68,7 @@ export default defineComponent({
     return {
       isOpen: this.modelValue,
       valid: false,
+      saving: false,
       localCategory: { ...this.category } as Category,
       toast: useToast(),
       rules: {
@@ -95,47 +97,42 @@ export default defineComponent({
     },
     async saveCategory() {
       const form = this.$refs.form as FormRef;
-      if (form.validate()) {
-        try {
-          const isEditing = !!this.localCategory.idCategory;
-          let result;
+      if (!form.validate()) {
+        this.toast.warning('Por favor completa todos los campos requeridos');
+        return;
+      }
+      this.saving = true;
+      try {
+        const isEditing = !!this.localCategory.idCategory;
+        let result;
 
-          if (isEditing) {
-            result = await this.$store.dispatch('category/editCategory', {
-              id: this.localCategory.idCategory,
-              category: { ...this.localCategory }
-            });
-          } else {
-            result = await this.$store.dispatch('category/registerCategory', { ...this.localCategory });
-          }
-
-          if (result.isSuccess) {
-            const successMsg = isEditing
-              ? 'Categoría actualizada con éxito!'
-              : 'Categoría registrada con éxito!';
-
-            this.toast.success(successMsg);
-            this.$emit('saved', { ...this.localCategory });
-            this.close();
-          }
-        } catch (error: any) {
-          const isEditing = !!this.localCategory.idCategory;
-          let errorMsg = isEditing
-            ? 'Error en actualizar la categoría'
-            : 'Error en guardar la categoría';
-
-          if (error?.response?.status) {
-            errorMsg += `: Error ${error.response.status}`;
-          } else if (error?.response?.data?.message) {
-            errorMsg += `: ${error.response.data.message}`;
-          } else if (error?.message) {
-            errorMsg += `: ${error.message}`;
-          } else {
-            errorMsg += '.';
-          }
-
-          this.toast.error(errorMsg);
+        if (isEditing) {
+          result = await this.$store.dispatch('category/editCategory', {
+            id: this.localCategory.idCategory,
+            category: { ...this.localCategory }
+          });
+        } else {
+          result = await this.$store.dispatch('category/registerCategory', { ...this.localCategory });
         }
+
+        if (result.isSuccess) {
+          const successMsg = isEditing
+            ? 'Categoría actualizada con éxito!'
+            : 'Categoría registrada con éxito!';
+
+          this.toast.success(successMsg);
+          this.$emit('saved', { ...this.localCategory });
+          this.close();
+        }
+      } catch (error: any) {
+        const isEditing = !!this.localCategory.idCategory;
+        const customMessage = isEditing
+          ? 'Error en actualizar la categoría'
+          : 'Error en guardar la categoría';
+
+        handleApiError(error, customMessage);
+      } finally {
+        this.saving = false;
       }
     },
   },

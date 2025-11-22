@@ -16,8 +16,7 @@
             class="ml-2"> Guardar </v-btn>
         </v-col>
       </v-row>
-      <v-alert v-if="alertMessage" :type="alertType" dismissible class="mt-4" @click:close="alertMessage = ''">
-        {{ alertMessage }}
+      <v-alert v-if="alertMessage" :type="alertType" dismissible class="mt-4" @click:close="alertMessage = ''">{{ alertMessage }}
       </v-alert>
       <v-data-table :headers="headers" :items="localPermissions" :loading="loading" loading-text="Cargando permisos..."
         no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4" :hide-default-footer="true">
@@ -41,14 +40,15 @@
 <script lang="ts">
 import { Store as VuexStore } from 'vuex';
 import { defineComponent } from 'vue';
+import { useToast } from 'vue-toastification';
 import { PermissionsByModule } from '@/interfaces/permissionInterface';
+import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $store: VuexStore<any>;
   }
 }
-
 export default defineComponent({
   data() {
     return {
@@ -59,6 +59,7 @@ export default defineComponent({
       saving: false,
       alertMessage: '',
       alertType: 'success' as 'success' | 'error' | 'warning' | 'info',
+      toast: useToast(),
       headers: [
         { title: 'Módulo', key: 'module', sortable: false },
         { title: 'Crear', key: 'permissions.crear', sortable: false },
@@ -68,7 +69,6 @@ export default defineComponent({
       ],
     };
   },
-
   computed: {
     roles() {
       const rolesFromStore = this.$store.getters['role/roles'];
@@ -87,7 +87,6 @@ export default defineComponent({
       return this.$store.getters['permission/loading'];
     },
   },
-
   watch: {
     permissionsByModule: {
       handler(newPermissions) {
@@ -98,28 +97,37 @@ export default defineComponent({
       deep: true
     }
   },
-
   methods: {
     async loadPermissions() {
-      if (this.selectedRoleId) {
-        this.hasChanges = false;
-        this.alertMessage = '';
+      if (!this.selectedRoleId) {
+        this.toast.warning('Por favor selecciona un rol');
+        return;
+      }
+
+      this.hasChanges = false;
+      this.alertMessage = '';
+
+      try {
         await this.$store.dispatch('permission/fetchPermissionsByRole', this.selectedRoleId);
+      } catch (error) {
+        handleApiError(error, 'Error al cargar los permisos del rol');
       }
     },
-
     markAsChanged() {
       this.hasChanges = true;
     },
-
     async savePermissions() {
+   if (!this.hasChanges) {
+        this.toast.info('No hay cambios para guardar');
+        return;
+      }
+
       this.saving = true;
       this.alertMessage = '';
 
       try {
-        // Construir el array de permisos actualizados según el formato esperado por el backend
+        // Construir array de permisos actualizados
         const updatedPermissions = this.permissions.map((perm: any) => {
-          // Encontrar el módulo correspondiente en localPermissions
           const localModule = this.localPermissions.find(
             (lp) => lp.module === perm.moduleName
           );
@@ -138,30 +146,38 @@ export default defineComponent({
           };
         });
 
+        // Llamar al store
         const response = await this.$store.dispatch('permission/updatePermissions', updatedPermissions);
 
-        if (response.success) {
-          this.alertType = 'success';
-          this.alertMessage = 'Permisos actualizados correctamente';
+        if (response && response.success) {
+          // Éxito
+          this.toast.success('Permisos actualizados correctamente');
           this.hasChanges = false;
 
-          // Recargar los permisos para asegurar sincronización
+          // Recargar permisos para confirmar
           if (this.selectedRoleId) {
             await this.$store.dispatch('permission/fetchPermissionsByRole', this.selectedRoleId);
           }
         } else {
+          // Respuesta del servidor indica fallo
+          const errorMsg = response?.message || 'Error al actualizar permisos';
+          this.toast.error(errorMsg);
+          
           this.alertType = 'error';
-          this.alertMessage = response.message || 'Error al actualizar permisos';
+          this.alertMessage = errorMsg;
         }
-      } catch (error: any) {
+      } catch (error) {
+        // Error de red/servidor
+        const appError = handleApiError(error, 'Error al guardar los permisos');
+        
+        // Mostrar también en el alert del componente
         this.alertType = 'error';
-        this.alertMessage = error.message || 'Error al guardar los permisos';
+        this.alertMessage = appError.message;
       } finally {
         this.saving = false;
       }
     },
   },
-
   mounted() {
     this.$store.dispatch('role/selectRole');
   },

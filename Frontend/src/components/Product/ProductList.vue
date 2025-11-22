@@ -55,7 +55,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { useToast } from 'vue-toastification';
 import { Product } from '@/interfaces/productInterface';
+import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import ProductForm from './ProductForm.vue';
 import ProductModal from './ProductModal.vue';
 import ProductFilters from './ProductFilters.vue';
@@ -83,6 +85,7 @@ export default defineComponent({
       startDate: null,
       endDate: null,
       downloadingExcel: false,
+      toast: useToast()
     };
   },
   computed: {
@@ -154,11 +157,15 @@ export default defineComponent({
       this.form = true;
     },
     async fetchProducts() {
-      await this.store.dispatch('product/fetchProducts', {
-        pageNumber: this.currentPage,
-        pageSize: this.itemsPerPage,
-        stateFilter: this.stateFilter
-      });
+      try {
+        await this.store.dispatch('product/fetchProducts', {
+          pageNumber: this.currentPage,
+          pageSize: this.itemsPerPage,
+          stateFilter: this.stateFilter
+        });
+      } catch (error) {
+        handleSilentError(error);
+      }
     },
     async searchProducts() {
       let numberFilterValue: number | null = null;
@@ -176,16 +183,20 @@ export default defineComponent({
       const startDateStr = this.startDate ? this.formatDate(this.startDate) : null;
       const endDateStr = this.endDate ? this.formatDate(this.endDate) : null;
 
-      await this.store.dispatch("product/fetchProducts", {
-        pageNumber: 1,
-        pageSize: this.itemsPerPage,
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      });
-      this.currentPage = 1;
+      try {
+        await this.store.dispatch("product/fetchProducts", {
+          pageNumber: 1,
+          pageSize: this.itemsPerPage,
+          textFilter: textFilterValue,
+          numberFilter: numberFilterValue,
+          stateFilter: this.stateFilter,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        this.currentPage = 1;
+      } catch (error) {
+        handleApiError(error, 'Error al buscar productos');
+      }
     },
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
@@ -237,8 +248,9 @@ export default defineComponent({
           startDate: startDateStr,
           endDate: endDateStr
         });
+        this.toast.success('Archivo descargado correctamente');
       } catch (error) {
-        console.error('Error al descargar el archivo:', error);
+        handleApiError(error, 'Error al descargar el archivo Excel');
       } finally {
         this.downloadingExcel = false;
       }
