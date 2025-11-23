@@ -150,9 +150,7 @@ const store = createStore<RootState>({
   },
 
   actions: {
-    /**
-     * Inicializa la autenticación al cargar la app
-     */
+    // Inicializa la autenticación al cargar la app
     async initializeAuth({ commit }) {
       try {
         const token = localStorage.getItem("token");
@@ -195,9 +193,7 @@ const store = createStore<RootState>({
       }
     },
 
-    /**
-     * Guarda el token y carga permisos del servidor (solo en LOGIN)
-     */
+    // Guarda el token y carga permisos del servidor (solo en LOGIN)
     async saveToken({ commit, dispatch }, token: string) {
       try {
         commit("SET_TOKEN", token);
@@ -214,9 +210,7 @@ const store = createStore<RootState>({
       }
     },
 
-    /**
-     * Solo se llama en LOGIN o cuando se necesita refrescar manualmente
-     */
+    // Solo se llama en LOGIN o cuando se necesita refrescar manualmente
     async loadUserPermissions(
       { commit },
       { decoded, userId }: { decoded: JwtPayload; userId: number }
@@ -238,9 +232,7 @@ const store = createStore<RootState>({
       }
     },
 
-    /**
-     * Cierra sesión y limpia todo
-     */
+    // Cierra sesión y limpia todo
     logout({ commit }) {
       commit("SET_TOKEN", null);
       commit("SET_USER", null);

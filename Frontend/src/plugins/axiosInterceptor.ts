@@ -21,20 +21,16 @@ const isTokenExpired = (token: string): boolean => {
 };
 
 export function setupAxiosInterceptors() {
-  //Request Interceptor
+  // Request Interceptor
   axios.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       // Obtener token del localStorage
       const token = localStorage.getItem("token");
 
       if (token) {
-        // verificar si el token expiró antes de enviar la petición
+        // Verificar si el token expiró antes de enviar la petición
         if (isTokenExpired(token)) {
-
-          // Limpiar sesión
-          store.dispatch("logout");
-
-          // Cancelar la petición actual
+          // Cancelar la petición actual con error tipado
           return Promise.reject({
             message: "Token expirado",
             isTokenExpired: true,
@@ -50,28 +46,29 @@ export function setupAxiosInterceptors() {
       return config;
     },
     (error: AxiosError) => {
-      console.error("[Request Error]", error);
       return Promise.reject(error);
     }
   );
 
-  //Response Interceptor
+  // Response Interceptor
   axios.interceptors.response.use(
     (response: AxiosResponse) => {
       return response;
     },
     async (error: AxiosError | any) => {
+      // Token expirado desde el request interceptor
       if (error.isTokenExpired) {
         const currentRoute = router.currentRoute.value.name;
 
         // Evitar loops infinitos
         if (currentRoute !== "login") {
+          // Mostrar toast cuando expire el token
           ErrorHandler.handle(error, {
             showToast: true,
-            customMessage:
-              "Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
+            customMessage: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
           });
-          // Limpiar sesión y redirigir (sin await, ya que logout es síncrono)
+          
+          // Limpiar sesión y redirigir
           store.dispatch("logout");
         }
         return Promise.reject(error);
@@ -87,7 +84,7 @@ export function setupAxiosInterceptors() {
         if (currentRoute !== "login") {
           ErrorHandler.handle(error, {
             showToast: true,
-            customMessage:"Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
+            customMessage: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente",
           });
 
           // Limpiar sesión y redirigir

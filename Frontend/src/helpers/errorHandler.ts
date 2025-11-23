@@ -75,6 +75,15 @@ export class ErrorHandler {
 
   // Normaliza cualquier tipo de error a AppError
   private static normalizeError(error: any): AppError {
+    // NUEVO: Error de token expirado (del interceptor)
+    if (error.isTokenExpired === true) {
+      return {
+        type: ErrorType.TOKEN_EXPIRED,
+        message: ERROR_TYPE_MESSAGES[ErrorType.TOKEN_EXPIRED],
+        originalError: error,
+      };
+    }
+
     // Error de Axios
     if (error.isAxiosError) {
       return this.normalizeAxiosError(error as AxiosError);
@@ -109,7 +118,7 @@ export class ErrorHandler {
   ): AppError {
     const {
       showToast = true,
-      logToConsole = true,
+      logToConsole = process.env.NODE_ENV !== 'production', // Solo en desarrollo
       throwError = false,
       customMessage,
       onError,
@@ -123,7 +132,7 @@ export class ErrorHandler {
       appError.message = customMessage;
     }
 
-    // Loggear en consola
+    // Loggear en consola (solo en desarrollo)
     if (logToConsole) {
       console.error('[ErrorHandler]', {
         type: appError.type,
@@ -159,6 +168,7 @@ export class ErrorHandler {
     };
 
     switch (error.type) {
+      case ErrorType.TOKEN_EXPIRED: // NUEVO
       case ErrorType.AUTHENTICATION:
         this.toast.warning(error.message, options);
         break;
@@ -187,6 +197,7 @@ export class ErrorHandler {
         return 3000;
       case ErrorType.VALIDATION:
         return 5000;
+      case ErrorType.TOKEN_EXPIRED: // NUEVO
       case ErrorType.AUTHENTICATION:
         return 4000;
       default:
@@ -215,7 +226,6 @@ export class ErrorHandler {
   }
 
   // Método helper para errores críticos (con re-throw)
-
   public static handleCritical(error: any, customMessage?: string): never {
     this.handle(error, {
       showToast: true,

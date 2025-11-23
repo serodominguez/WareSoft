@@ -9,6 +9,7 @@ export enum ErrorType {
   VALIDATION = 'VALIDATION',     // 400
   SERVER = 'SERVER',             // 500
   TIMEOUT = 'TIMEOUT',           // Timeout
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED', // Token
   UNKNOWN = 'UNKNOWN',           // Otros
 }
 
@@ -21,7 +22,11 @@ export interface AppError {
   originalError?: any;
 }
 
-// Respuesta de error del API
+export interface TokenExpiredError {
+  message: string;
+  isTokenExpired: true;
+}
+
 export interface ApiErrorResponse {
   isSuccess: false;
   message: string;
@@ -63,5 +68,6 @@ export const ERROR_TYPE_MESSAGES: Record<ErrorType, string> = {
   [ErrorType.VALIDATION]: 'Los datos ingresados no son válidos',
   [ErrorType.SERVER]: 'Error del servidor',
   [ErrorType.TIMEOUT]: 'La solicitud tardó demasiado',
+  [ErrorType.TOKEN_EXPIRED]: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente',
   [ErrorType.UNKNOWN]: 'Ha ocurrido un error inesperado',
 };
