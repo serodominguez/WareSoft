@@ -9,8 +9,9 @@
 
     <CategoryForm v-model="form" :category="selectedCategory" @saved="handleSaved" />
 
-    <CategoryModal v-model="modal" :category="selectedCategory" :action="action"
-      @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedCategory?.idCategory || 0"
+      :itemName="selectedCategory?.categoryName || ''" :action="action" moduleName="category" entityName="Category"
+      gender="female" @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -22,14 +23,14 @@ import { Category } from '@/interfaces/categoryInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import CategoryList from '@/components/Category/CategoryList.vue';
 import CategoryForm from '@/components/Category/CategoryForm.vue';
-import CategoryModal from '@/components/Category/CategoryModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'CategoryView',
   components: {
     CategoryList,
     CategoryForm,
-    CategoryModal
+    CommonModal
   },
   setup() {
     const store = useStore();

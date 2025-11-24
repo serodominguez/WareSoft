@@ -9,7 +9,8 @@
 
     <ProductForm v-model="form" :product="selectedProduct" @saved="handleSaved" />
 
-    <ProductModal v-model="modal" :product="selectedProduct" :action="action"
+    <CommonModal v-model="modal" :itemId="selectedProduct?.idProduct || 0" :itemName="selectedProduct?.description || ''"
+      :action="action" moduleName="product" entityName="Product" gender="male"
       @action-completed="handleActionCompleted" />
   </div>
 </template>
@@ -22,14 +23,14 @@ import { Product } from '@/interfaces/productInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import ProductList from '@/components/Product/ProductList.vue';
 import ProductForm from '@/components/Product/ProductForm.vue';
-import ProductModal from '@/components/Product/ProductModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'ProductView',
   components: {
     ProductList,
     ProductForm,
-    ProductModal
+    CommonModal
   },
   setup() {
     const store = useStore();

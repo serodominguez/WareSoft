@@ -9,7 +9,8 @@
 
     <RoleForm v-model="form" :role="selectedRole" @saved="handleSaved" />
 
-    <RoleModal v-model="modal" :role="selectedRole" :action="action" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedRole?.idRole || 0" :itemName="selectedRole?.roleName || ''"
+      :action="action" moduleName="role" entityName="Role" gender="male" @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -21,14 +22,14 @@ import { Role } from '@/interfaces/roleInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import RoleList from '@/components/Role/RoleList.vue';
 import RoleForm from '@/components/Role/RoleForm.vue';
-import RoleModal from '@/components/Role/RoleModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'RoleView',
   components: {
     RoleList,
     RoleForm,
-    RoleModal
+    CommonModal
   },
   setup() {
     const store = useStore();

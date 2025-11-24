@@ -9,7 +9,9 @@
 
     <UserForm v-model="form" :user="selectedUser" @saved="handleSaved" />
 
-    <UserModal v-model="modal" :user="selectedUser" :action="action" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedUser?.idUser || 0" :itemName="selectedUser?.userName || ''"
+      :action="action" moduleName="user" entityName="User" gender="male"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -21,14 +23,14 @@ import { User } from '@/interfaces/userInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import UserList from '@/components/User/UserList.vue';
 import UserForm from '@/components/User/UserForm.vue';
-import UserModal from '@/components/User/UserModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'UserView',
   components: {
     UserList,
     UserForm,
-    UserModal
+    CommonModal
   },
   setup() {
     const store = useStore();

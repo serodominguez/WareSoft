@@ -60,20 +60,21 @@
         </template>
       </v-data-table-server>
     </v-card>
-    <ProductFilters v-model="drawerModel" v-model:selected-filter="selectedFilterModel" v-model:state="stateModel"
-      v-model:start-date="startDateModel" v-model:end-date="endDateModel" @apply-filters="handleSearch" />
+    <CommonFilters v-model="drawerModel" :filters="filterOptions" v-model:selected-filter="selectedFilterModel"
+      v-model:state="stateModel" v-model:start-date="startDateModel" v-model:end-date="endDateModel"
+      @apply-filters="handleSearch" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Product } from '@/interfaces/productInterface';
-import ProductFilters from './ProductFilters.vue';
+import CommonFilters from '@/components/Common/CommonFilters.vue';
 
 export default defineComponent({
   name: 'ProductList',
   components: {
-    ProductFilters
+    CommonFilters
   },
   props: {
     products: {
@@ -148,7 +149,8 @@ export default defineComponent({
     return {
       itemsPerPage: 10,
       pages: "Productos por Página",
-      search: null as string | null
+      search: null as string | null,
+      filterOptions: ['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']
     };
   },
   computed: {

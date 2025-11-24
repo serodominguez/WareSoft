@@ -55,20 +55,21 @@
         </template>
       </v-data-table-server>
     </v-card>
-    <BrandFilters v-model="drawerModel" v-model:selected-filter="selectedFilterModel" v-model:state="stateModel"
-      v-model:start-date="startDateModel" v-model:end-date="endDateModel" @apply-filters="handleSearch" />
+    <CommonFilters v-model="drawerModel" :filters="filterOptions" v-model:selected-filter="selectedFilterModel"
+      v-model:state="stateModel" v-model:start-date="startDateModel" v-model:end-date="endDateModel"
+      @apply-filters="handleSearch" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Brand } from '@/interfaces/brandInterface';
-import BrandFilters from './BrandFilters.vue';
+import CommonFilters from '@/components/Common/CommonFilters.vue';
 
 export default defineComponent({
   name: 'BrandList',
   components: {
-    BrandFilters
+    CommonFilters
   },
   props: {
     brands: {
@@ -143,7 +144,8 @@ export default defineComponent({
     return {
       itemsPerPage: 10,
       pages: "Marcas por Página",
-      search: null as string | null
+      search: null as string | null,
+      filterOptions: ['Marca']
     };
   },
   computed: {

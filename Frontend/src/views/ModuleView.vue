@@ -9,7 +9,9 @@
 
     <ModuleForm v-model="form" :module="selectedModule" @saved="handleSaved" />
 
-    <ModuleModal v-model="modal" :module="selectedModule" :action="action" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedModule?.idModule || 0" :itemName="selectedModule?.moduleName || ''"
+      :action="action" moduleName="module" entityName="Module" gender="male"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -21,14 +23,14 @@ import { Module } from '@/interfaces/moduleInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import ModuleList from '@/components/Module/ModuleList.vue';
 import ModuleForm from '@/components/Module/ModuleForm.vue';
-import ModuleModal from '@/components/Module/ModuleModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'ModuleView',
   components: {
     ModuleList,
     ModuleForm,
-    ModuleModal
+    CommonModal
   },
   setup() {
     const store = useStore();

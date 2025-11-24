@@ -9,7 +9,9 @@
 
     <StoreForm v-model="form" :store="selectedStore" @saved="handleSaved" />
 
-    <StoreModal v-model="modal" :store="selectedStore" :action="action" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedStore?.idStore || 0" :itemName="selectedStore?.storeName || ''"
+      :action="action" moduleName="store" entityName="Store" gender="female"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -21,14 +23,14 @@ import { Store } from '@/interfaces/storeInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import StoreList from '@/components/Store/StoreList.vue';
 import StoreForm from '@/components/Store/StoreForm.vue';
-import StoreModal from '@/components/Store/StoreModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'StoreView',
   components: {
     StoreList,
     StoreForm,
-    StoreModal
+    CommonModal
   },
   setup() {
     const store = useStore();

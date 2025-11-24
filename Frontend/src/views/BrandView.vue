@@ -9,7 +9,9 @@
 
     <BrandForm v-model="form" :brand="selectedBrand" @saved="handleSaved" />
 
-    <BrandModal v-model="modal" :brand="selectedBrand" :action="action" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedBrand?.idBrand || 0" :itemName="selectedBrand?.brandName || ''"
+      :action="action" moduleName="brand" entityName="Brand" gender="female"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -21,14 +23,14 @@ import { Brand } from '@/interfaces/brandInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import BrandList from '@/components/Brand/BrandList.vue';
 import BrandForm from '@/components/Brand/BrandForm.vue';
-import BrandModal from '@/components/Brand/BrandModal.vue';
+import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
   name: 'BrandView',
   components: {
     BrandList,
     BrandForm,
-    BrandModal
+    CommonModal
   },
   setup() {
     const store = useStore();
