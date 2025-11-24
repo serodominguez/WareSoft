@@ -1,41 +1,16 @@
 <template>
   <div>
-    <ProductList 
-      :products="products"
-      :loading="loading"
-      :totalProducts="totalProducts"
-      :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate"
-      :canRead="canRead"
-      :canEdit="canEdit"
-      :canDelete="canDelete"
-      v-model:drawer="drawer"
-      v-model:selectedFilter="selectedFilter"
-      v-model:state="state"
-      v-model:startDate="startDate"
-      v-model:endDate="endDate"
-      @open-form="openForm"
-      @open-modal="openModal"
-      @edit-product="openForm"
-      @fetch-products="fetchProducts"
-      @search-products="searchProducts"
-      @update-items-per-page="updateItemsPerPage"
-      @change-page="changePage"
-      @download-excel="downloadExcel"
-    />
-    
-    <ProductForm 
-      v-model="form" 
-      :product="selectedProduct" 
-      @saved="handleSaved" 
-    />
-    
-    <ProductModal 
-      v-model="modal" 
-      :product="selectedProduct" 
-      :action="action" 
-      @action-completed="handleActionCompleted"
-    />
+    <ProductList :products="products" :loading="loading" :totalProducts="totalProducts"
+      :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
+      :canDelete="canDelete" v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @edit-product="openForm" @fetch-products="fetchProducts" @search-products="searchProducts"
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
+
+    <ProductForm v-model="form" :product="selectedProduct" @saved="handleSaved" />
+
+    <ProductModal v-model="modal" :product="selectedProduct" :action="action"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -110,7 +85,7 @@ export default defineComponent({
       this.action = payload.action;
       this.modal = true;
     },
-    
+
     openForm(product?: Product) {
       this.selectedProduct = product ? { ...product } : {
         idProduct: null,
@@ -128,7 +103,7 @@ export default defineComponent({
       };
       this.form = true;
     },
-    
+
     async fetchProducts(params?: any) {
       try {
         await this.store.dispatch('product/fetchProducts', params || {
@@ -140,7 +115,7 @@ export default defineComponent({
         handleSilentError(error);
       }
     },
-    
+
     getFilterParams(params: any) {
       const filterMap: { [key: string]: number } = {
         "Código": 1,
@@ -154,7 +129,7 @@ export default defineComponent({
       const textFilterValue = params.search?.trim() || null;
       const startDateStr = params.startDate ? this.formatDate(params.startDate) : null;
       const endDateStr = params.endDate ? this.formatDate(params.endDate) : null;
-      const stateFilter = typeof params.stateFilter === 'string' 
+      const stateFilter = typeof params.stateFilter === 'string'
         ? (params.stateFilter === 'Activos' ? 1 : 0)
         : (params.state === 'Activos' ? 1 : 0);
 
@@ -166,7 +141,7 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
-    
+
     async searchProducts(params: any) {
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
@@ -185,7 +160,7 @@ export default defineComponent({
         handleApiError(error, 'Error al buscar productos');
       }
     },
-    
+
     refreshProducts() {
       if (this.search?.trim()) {
         this.searchProducts({
@@ -199,18 +174,18 @@ export default defineComponent({
         this.fetchProducts();
       }
     },
-    
+
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
       this.currentPage = 1;
       this.refreshProducts();
     },
-    
+
     changePage(page: number) {
       this.currentPage = page;
       this.refreshProducts();
     },
-    
+
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
@@ -226,21 +201,21 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
-    
+
     formatDate(date: Date | null): string | null {
       if (!date) return null;
-      
+
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
 
       return `${year}-${month}-${day}`;
     },
-    
+
     handleSaved() {
       this.fetchProducts();
     },
-    
+
     handleActionCompleted() {
       this.fetchProducts();
     }

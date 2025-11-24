@@ -206,7 +206,7 @@ export default defineComponent({
         endDate: this.endDateModel
       });
     },
-    
+
     handleDownloadExcel() {
       this.$emit('download-excel', {
         search: this.search,

@@ -11,8 +11,7 @@
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.storeName"
-                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" label="Tienda"
-                  required />
+                  :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" label="Tienda" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.manager"
@@ -21,8 +20,7 @@
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.address"
-                  :rules="[rules.required]" counter="60" :maxlength="60" label="Dirección"
-                  required />
+                  :rules="[rules.required]" counter="60" :maxlength="60" label="Dirección" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localStore.phoneNumber" counter="8"
@@ -37,7 +35,8 @@
                   :rules="[rules.email]" :maxlength="50" label="Correo" />
               </v-col>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-select color="primary" variant="underlined" :rules="[rules.required]" v-model="localStore.type" :items="types" label="Tipo" required />
+                <v-select color="primary" variant="underlined" :rules="[rules.required]" v-model="localStore.type"
+                  :items="types" label="Tipo" required />
               </v-col>
             </v-row>
           </v-container>
@@ -45,13 +44,15 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveStore" :disabled="!valid" :loading="saving">Guardar</v-btn>
+          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveStore" :disabled="!valid"
+            :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
       </v-col>
     </v-card>
   </v-dialog>
 </template>
+
 <script lang="ts">
 import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';

@@ -1,41 +1,16 @@
 <template>
   <div>
-    <CategoryList 
-      :categories="categories"
-      :loading="loading"
-      :totalCategories="totalCategories"
-      :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate"
-      :canRead="canRead"
-      :canEdit="canEdit"
-      :canDelete="canDelete"
-      v-model:drawer="drawer"
-      v-model:selectedFilter="selectedFilter"
-      v-model:state="state"
-      v-model:startDate="startDate"
-      v-model:endDate="endDate"
-      @open-form="openForm"
-      @open-modal="openModal"
-      @edit-category="openForm"
-      @fetch-categories="fetchCategories"
-      @search-categories="searchCategories"
-      @update-items-per-page="updateItemsPerPage"
-      @change-page="changePage"
-      @download-excel="downloadExcel"
-    />
-    
-    <CategoryForm 
-      v-model="form" 
-      :category="selectedCategory" 
-      @saved="handleSaved" 
-    />
-    
-    <CategoryModal 
-      v-model="modal" 
-      :category="selectedCategory" 
-      :action="action" 
-      @action-completed="handleActionCompleted"
-    />
+    <CategoryList :categories="categories" :loading="loading" :totalCategories="totalCategories"
+      :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
+      :canDelete="canDelete" v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @edit-category="openForm" @fetch-categories="fetchCategories" @search-categories="searchCategories"
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
+
+    <CategoryForm v-model="form" :category="selectedCategory" @saved="handleSaved" />
+
+    <CategoryModal v-model="modal" :category="selectedCategory" :action="action"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -110,7 +85,7 @@ export default defineComponent({
       this.action = payload.action;
       this.modal = true;
     },
-    
+
     openForm(category?: Category) {
       this.selectedCategory = category ? { ...category } : {
         idCategory: null,
@@ -121,7 +96,7 @@ export default defineComponent({
       };
       this.form = true;
     },
-    
+
     async fetchCategories(params?: any) {
       try {
         await this.store.dispatch('category/fetchCategories', params || {
@@ -133,17 +108,17 @@ export default defineComponent({
         handleSilentError(error);
       }
     },
-    
+
     getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = { 
+      const filterMap: { [key: string]: number } = {
         "Categoría": 1,
-        "Descripción": 2 
+        "Descripción": 2
       };
       const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
       const textFilterValue = params.search?.trim() || null;
       const startDateStr = params.startDate ? this.formatDate(params.startDate) : null;
       const endDateStr = params.endDate ? this.formatDate(params.endDate) : null;
-      const stateFilter = typeof params.stateFilter === 'string' 
+      const stateFilter = typeof params.stateFilter === 'string'
         ? (params.stateFilter === 'Activos' ? 1 : 0)
         : (params.state === 'Activos' ? 1 : 0);
 
@@ -155,7 +130,7 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
-    
+
     async searchCategories(params: any) {
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
@@ -174,7 +149,7 @@ export default defineComponent({
         handleApiError(error, 'Error al buscar categorías');
       }
     },
-    
+
     refreshCategories() {
       if (this.search?.trim()) {
         this.searchCategories({
@@ -188,18 +163,18 @@ export default defineComponent({
         this.fetchCategories();
       }
     },
-    
+
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
       this.currentPage = 1;
       this.refreshCategories();
     },
-    
+
     changePage(page: number) {
       this.currentPage = page;
       this.refreshCategories();
     },
-    
+
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
@@ -215,21 +190,21 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
-    
+
     formatDate(date: Date | null): string | null {
       if (!date) return null;
-      
+
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
 
       return `${year}-${month}-${day}`;
     },
-    
+
     handleSaved() {
       this.fetchCategories();
     },
-    
+
     handleActionCompleted() {
       this.fetchCategories();
     }

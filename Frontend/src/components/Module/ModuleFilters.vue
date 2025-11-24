@@ -2,7 +2,7 @@
   <v-navigation-drawer v-model="drawerModel" temporary>
     <v-list>
       <v-list-item>
-      <div class="d-flex justify-space-between align-center w-100">
+        <div class="d-flex justify-space-between align-center w-100">
           <v-list-item-title class="text-h6">Filtros</v-list-item-title>
           <v-btn icon="close" variant="text" size="small" @click="drawerModel = false"></v-btn>
         </div>

@@ -5,7 +5,6 @@
       <v-card-title class="bg-surface-light pt-4" v-if="action === 1">Activar Item?</v-card-title>
       <v-card-title class="bg-surface-light pt-4" v-if="action === 2">Desactivar Item?</v-card-title>
       <v-divider></v-divider>
-
       <v-card-text>
         Estás a punto de
         <span v-if="action === 0">eliminar</span>
@@ -13,24 +12,20 @@
         <span v-if="action === 2">desactivar</span>
         el ítem: {{ localCategory.categoryName }}.
       </v-card-text>
-
       <v-card-actions class="d-flex justify-space-between">
         <div class="d-flex">
           <v-btn v-if="action === 0" color="indigo" dark class="mr-2" elevation="4" @click="remove"
             :loading="processing">
             Eliminar
           </v-btn>
-
           <v-btn v-if="action === 1" color="indigo" dark class="mr-2" elevation="4" @click="enabled"
             :loading="processing">
             Activar
           </v-btn>
-
           <v-btn v-if="action === 2" color="indigo" dark class="mr-2" elevation="4" @click="disabled"
             :loading="processing">
             Desactivar
           </v-btn>
-
           <v-btn color="red" elevation="4" @click="close" :disabled="processing">
             Cancelar
           </v-btn>
@@ -90,7 +85,7 @@ export default defineComponent({
       this.isOpen = false;
       this.$emit('update:modelValue', false);
     },
-    
+
     async remove() {
       this.processing = true;
       try {
@@ -106,7 +101,7 @@ export default defineComponent({
         this.processing = false;
       }
     },
-    
+
     async enabled() {
       this.processing = true;
       try {
@@ -122,7 +117,7 @@ export default defineComponent({
         this.processing = false;
       }
     },
-    
+
     async disabled() {
       this.processing = true;
       try {

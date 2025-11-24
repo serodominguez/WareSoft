@@ -11,8 +11,8 @@
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localUser.userName"
-                  :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase" label="Usuario"
-                  required />
+                  :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase"
+                  label="Usuario" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localUser.passwordHash" type="password"
@@ -20,8 +20,7 @@
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localUser.names"
-                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" label="Nombres"
-                  required />
+                  :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" label="Nombres" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="primary" variant="underlined" v-model="localUser.lastNames"
@@ -39,12 +38,12 @@
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="localUser.idRole"
                   item-title="roleName" item-value="idRole" :rules="[rules.required]"
-                  no-data-text="No hay datos disponibles" label="Rol" required  :loading="loadingRoles" />
+                  no-data-text="No hay datos disponibles" label="Rol" required :loading="loadingRoles" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-autocomplete color="primary" variant="underlined" :items="stores" v-model="localUser.idStore"
                   item-title="storeName" item-value="idStore" :rules="[rules.required]"
-                  no-data-text="No hay datos disponibles" label="Tienda" required  :loading="loadingStores" />
+                  no-data-text="No hay datos disponibles" label="Tienda" required :loading="loadingStores" />
               </v-col>
             </v-row>
           </v-container>
@@ -52,13 +51,15 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveUser" :disabled="!valid" :loading="saving">Guardar</v-btn>
+          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveUser" :disabled="!valid"
+            :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
       </v-col>
     </v-card>
   </v-dialog>
 </template>
+
 <script lang="ts">
 import { Store as VuexStore } from 'vuex';
 import { useToast } from 'vue-toastification';
@@ -119,14 +120,14 @@ export default defineComponent({
   computed: {
     roles() {
       const rolesFromStore = this.$store.getters['role/roles'];
-      return Array.isArray(rolesFromStore) ? rolesFromStore : []; 
+      return Array.isArray(rolesFromStore) ? rolesFromStore : [];
     },
     loadingRoles(): boolean {
       return this.$store.getters['role/loading'];
     },
     stores() {
       const storesFromStore = this.$store.getters['store/stores'];
-      return Array.isArray(storesFromStore) ? storesFromStore : []; 
+      return Array.isArray(storesFromStore) ? storesFromStore : [];
     },
     loadingStores(): boolean {
       return this.$store.getters['store/loading'];
@@ -135,9 +136,9 @@ export default defineComponent({
   watch: {
     modelValue(newValue: boolean) {
       this.isOpen = newValue;
-         if (newValue) {
-        this.$store.dispatch('role/selectRole'); 
-        this.$store.dispatch('store/selectStore'); 
+      if (newValue) {
+        this.$store.dispatch('role/selectRole');
+        this.$store.dispatch('store/selectStore');
       }
     },
     isOpen(newValue: boolean) {

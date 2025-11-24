@@ -7,6 +7,7 @@
         </v-card>
     </v-footer>
 </template>
+
 <style scoped>
 .footer-custom {
   background-color: rgb(26, 32, 44);

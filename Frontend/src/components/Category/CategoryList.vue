@@ -1,19 +1,10 @@
 <template>
   <div>
     <v-card elevation="2">
-      <v-data-table-server 
-        :headers="headers" 
-        :items="categories" 
-        :search="search || undefined" 
-        :items-per-page-text="pages"
-        :items-per-page-options="[10, 20, 50]" 
-        :items-per-page="itemsPerPage" 
-        :items-length="totalCategories"
-        :loading="loading" 
-        loading-text="Cargando... Espere por favor" 
-        @update:items-per-page="$emit('update-items-per-page', $event)"
-        @update:page="$emit('change-page', $event)">
-        
+      <v-data-table-server :headers="headers" :items="categories" :search="search || undefined"
+        :items-per-page-text="pages" :items-per-page-options="[10, 20, 50]" :items-per-page="itemsPerPage"
+        :items-length="totalCategories" :loading="loading" loading-text="Cargando... Espere por favor"
+        @update:items-per-page="$emit('update-items-per-page', $event)" @update:page="$emit('change-page', $event)">
         <template v-slot:item="{ item }">
           <tr>
             <td>{{ (item as Category).categoryName }}</td>
@@ -21,102 +12,54 @@
             <td>{{ (item as Category).auditCreateDate }}</td>
             <td>{{ (item as Category).statusCategory }}</td>
             <td>
-              <v-btn 
-                v-if="canEdit && (item as Category).statusCategory == 'Activo'" 
-                color="indigo" 
-                icon="edit" 
-                variant="text"
-                @click="$emit('edit-category', item)" 
-                size="small">
+              <v-btn v-if="canEdit && (item as Category).statusCategory == 'Activo'" color="indigo" icon="edit"
+                variant="text" @click="$emit('edit-category', item)" size="small">
               </v-btn>
-              
+
               <template v-if="canEdit && (item as Category).statusCategory == 'Inactivo'">
-                <v-btn 
-                  color="indigo" 
-                  icon="check" 
-                  variant="text" 
-                  @click="$emit('open-modal', { category: item, action: 1 })" 
-                  size="small">
+                <v-btn color="indigo" icon="check" variant="text"
+                  @click="$emit('open-modal', { category: item, action: 1 })" size="small">
                 </v-btn>
               </template>
-              
               <template v-if="canEdit && (item as Category).statusCategory == 'Activo'">
-                <v-btn 
-                  color="indigo" 
-                  icon="block" 
-                  variant="text" 
-                  @click="$emit('open-modal', { category: item, action: 2 })" 
-                  size="small">
+                <v-btn color="indigo" icon="block" variant="text"
+                  @click="$emit('open-modal', { category: item, action: 2 })" size="small">
                 </v-btn>
               </template>
-              
-              <v-btn 
-                v-if="canDelete" 
-                color="indigo" 
-                icon="delete" 
-                variant="text" 
-                @click="$emit('open-modal', { category: item, action: 0 })" 
-                size="small">
+
+              <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text"
+                @click="$emit('open-modal', { category: item, action: 0 })" size="small">
               </v-btn>
             </td>
           </tr>
         </template>
-        
         <template v-slot:top>
           <v-toolbar>
             <v-toolbar-title>Gestión de Categorías</v-toolbar-title>
             <v-spacer></v-spacer>
-            
-            <v-btn 
-              v-if="canRead" 
-              icon="download" 
-              @click="handleDownloadExcel" 
-              :loading="downloadingExcel">
+            <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel">
             </v-btn>
-            
             <v-btn icon="tune" @click="drawerModel = !drawerModel"></v-btn>
-            
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
-              <v-text-field 
-                v-if="canRead" 
-                append-inner-icon="search" 
-                density="compact" 
-                label="Búsqueda" 
-                variant="solo" 
-                hide-details
-                single-line 
-                v-model="search" 
-                @click:append-inner="handleSearch()"
+              <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo"
+                hide-details single-line v-model="search" @click:append-inner="handleSearch()"
                 @keyup.enter="handleSearch()">
               </v-text-field>
             </v-col>
-            
             <v-card-actions>
-              <v-btn 
-                v-if="canCreate" 
-                @click="$emit('open-form')" 
-                color="indigo" 
-                size="large"> 
-                Nuevo 
+              <v-btn v-if="canCreate" @click="$emit('open-form')" color="indigo" size="large">
+                Nuevo
               </v-btn>
             </v-card-actions>
           </v-toolbar>
         </template>
-        
         <template v-slot:no-data>
           <v-btn color="primary" @click="$emit('fetch-categories')"> Reset </v-btn>
         </template>
       </v-data-table-server>
     </v-card>
-    
-    <CategoryFilters 
-      v-model="drawerModel" 
-      v-model:selected-filter="selectedFilterModel" 
-      v-model:state="stateModel" 
-      v-model:start-date="startDateModel" 
-      v-model:end-date="endDateModel" 
-      @apply-filters="handleSearch" 
-    />
+    <CategoryFilters v-model="drawerModel" v-model:selected-filter="selectedFilterModel" v-model:state="stateModel"
+      v-model:start-date="startDateModel" v-model:end-date="endDateModel" @apply-filters="handleSearch" />
   </div>
 </template>
 
@@ -267,7 +210,7 @@ export default defineComponent({
         endDate: this.endDateModel
       });
     },
-    
+
     handleDownloadExcel() {
       this.$emit('download-excel', {
         search: this.search,
