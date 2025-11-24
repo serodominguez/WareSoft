@@ -9,8 +9,8 @@
 
     <StoreForm v-model="form" :store="selectedStore" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedStore?.idStore || 0" :itemName="selectedStore?.storeName || ''"
-      :action="action" moduleName="store" entityName="Store" gender="female"
+    <CommonModal v-model="modal" :itemId="selectedStore?.idStore || 0" :item="selectedStore?.storeName || ''"
+      :action="action" moduleName="store" entityName="Store" name="Tienda" gender="female"
       @action-completed="handleActionCompleted" />
   </div>
 </template>

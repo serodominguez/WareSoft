@@ -9,8 +9,8 @@
 
     <RoleForm v-model="form" :role="selectedRole" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedRole?.idRole || 0" :itemName="selectedRole?.roleName || ''"
-      :action="action" moduleName="role" entityName="Role" gender="male" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedRole?.idRole || 0" :item="selectedRole?.roleName || ''"
+      :action="action" moduleName="role" entityName="Role" name="Rol" gender="male" @action-completed="handleActionCompleted" />
   </div>
 </template>
 

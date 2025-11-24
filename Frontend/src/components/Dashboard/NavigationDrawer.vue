@@ -86,6 +86,7 @@ export default defineComponent({
     return {
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/categorias', module: 'categorias' },
+        { icon: 'contacts', text: 'Clientes', route: '/clientes', module: 'clientes' },
         { icon: 'copyright', text: 'Marcas', route: '/marcas', module: 'marcas' },
         { icon: 'inventory_2', text: 'Productos', route: '/productos', module: 'productos' },
         { icon: 'store', text: 'Tiendas', route: '/tiendas', module: 'tiendas' },

@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { normalize } from '@/helpers/utils';
 import Brand from '@/store/modules/Brand';
 import Category from '@/store/modules/Category';
+import Customer from '@/store/modules/Customer';
 import Module from '@/store/modules/Module';
 import Permission from '@/store/modules/Permission';
 import Product from './modules/Product';
@@ -243,6 +244,7 @@ const store = createStore<RootState>({
   modules: {
     brand: Brand,
     category: Category,
+    customer: Customer,
     role: Role,
     module: Module,
     permission: Permission,

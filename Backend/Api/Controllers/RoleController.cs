@@ -43,7 +43,7 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{categoryId:int}")]
+        [HttpGet("{roleId:int}")]
         [RequirePermission("Roles", "Leer")]
         public async Task<IActionResult> RoleById(int roleId)
         {

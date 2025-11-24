@@ -10,7 +10,7 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localBrand.brandName"
+                <v-text-field color="indigo" variant="underlined" v-model="localBrand.brandName"
                   :rules="[rules.required]" counter="25" :maxlength="25" label="Nombre de la Marca" required />
               </v-col>
             </v-row>
@@ -19,7 +19,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveBrand" :disabled="!valid"
+          <v-btn color="green" dark class="mb-2" elevation="4" @click="saveBrand" :disabled="!valid"
             :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>

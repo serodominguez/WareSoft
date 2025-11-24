@@ -10,7 +10,7 @@
     <CategoryForm v-model="form" :category="selectedCategory" @saved="handleSaved" />
 
     <CommonModal v-model="modal" :itemId="selectedCategory?.idCategory || 0"
-      :itemName="selectedCategory?.categoryName || ''" :action="action" moduleName="category" entityName="Category"
+      :item="selectedCategory?.categoryName || ''" :action="action" moduleName="category" entityName="Category" name="Categoría"
       gender="female" @action-completed="handleActionCompleted" />
   </div>
 </template>

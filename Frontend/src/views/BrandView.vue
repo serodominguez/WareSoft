@@ -9,8 +9,8 @@
 
     <BrandForm v-model="form" :brand="selectedBrand" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedBrand?.idBrand || 0" :itemName="selectedBrand?.brandName || ''"
-      :action="action" moduleName="brand" entityName="Brand" gender="female"
+    <CommonModal v-model="modal" :itemId="selectedBrand?.idBrand || 0" :item="selectedBrand?.brandName || ''"
+      :action="action" moduleName="brand" entityName="Brand" name="Marca" gender="female"
       @action-completed="handleActionCompleted" />
   </div>
 </template>

@@ -5,7 +5,6 @@ using Application.Dtos.Request.Product;
 using Application.Dtos.Response.Product;
 using Application.Interfaces;
 using Application.Mappers;
-using Application.Security;
 using FluentValidation;
 using Infrastructure.Persistences.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +15,12 @@ namespace Application.Services
     public class ProductService : IProductService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ISecurity _security;
         private readonly IValidator<ProductRequestDto> _validator;
         private readonly IOrderingQuery _orderingQuery;
 
-        public ProductService(IUnitOfWork unitOfWork, ISecurity security, IValidator<ProductRequestDto> validator, IOrderingQuery orderingQuery)
+        public ProductService(IUnitOfWork unitOfWork, IValidator<ProductRequestDto> validator, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
-            _security = security;
             _validator = validator;
             _orderingQuery = orderingQuery;
         }

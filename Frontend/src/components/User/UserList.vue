@@ -15,22 +15,22 @@
             <td>{{ (item as User).storeName }}</td>
             <td>{{ (item as User).auditCreateDate }}</td>
             <td>{{ (item as User).statusUser }}</td>
-            <td>
+            <td class="text-center">
               <v-btn v-if="canEdit && (item as User).statusUser == 'Activo'" color="indigo" icon="edit" variant="text"
-                @click="$emit('edit-user', item)" size="small">
+                @click="$emit('edit-user', item)" size="small" title="Editar">
               </v-btn>
               <template v-if="canEdit && (item as User).statusUser == 'Inactivo'">
-                <v-btn color="indigo" icon="check" variant="text"
-                  @click="$emit('open-modal', { user: item, action: 1 })" size="small">
+                <v-btn color="green" icon="check" variant="text"
+                  @click="$emit('open-modal', { user: item, action: 1 })" size="small" title="Activar">
                 </v-btn>
               </template>
               <template v-if="canEdit && (item as User).statusUser == 'Activo'">
-                <v-btn color="indigo" icon="block" variant="text"
-                  @click="$emit('open-modal', { user: item, action: 2 })" size="small">
+                <v-btn color="red" icon="block" variant="text"
+                  @click="$emit('open-modal', { user: item, action: 2 })" size="small" title="Desactivar">
                 </v-btn>
               </template>
-              <v-btn v-if="canDelete" color="indigo" icon="delete" variant="text"
-                @click="$emit('open-modal', { user: item, action: 0 })" size="small">
+              <v-btn v-if="canDelete" color="brown" icon="delete" variant="text"
+                @click="$emit('open-modal', { user: item, action: 0 })" size="small" title="Eliminar">
               </v-btn>
             </td>
           </tr>
@@ -39,9 +39,8 @@
           <v-toolbar>
             <v-toolbar-title>Gestión de Usuarios</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel">
-            </v-btn>
-            <v-btn icon="tune" @click="drawerModel = !drawerModel"></v-btn>
+            <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
+            <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
               <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo"
                 hide-details single-line v-model="search" @click:append-inner="handleSearch()"
@@ -49,9 +48,7 @@
               </v-text-field>
             </v-col>
             <v-card-actions>
-              <v-btn v-if="canCreate" @click="$emit('open-form')" color="indigo" size="large">
-                Nuevo
-              </v-btn>
+              <v-btn v-if="canCreate" icon="add_circle" @click="$emit('open-form')" title="Agregar"></v-btn>
             </v-card-actions>
           </v-toolbar>
         </template>
@@ -154,7 +151,7 @@ export default defineComponent({
     };
   },
   computed: {
-    headers() {
+    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
       return [
         { title: 'Usuario', key: 'userName', sortable: false },
         { title: 'Nombres', key: 'names', sortable: false },
@@ -164,7 +161,7 @@ export default defineComponent({
         { title: 'Sucursal', key: 'storeName', sortable: false },
         { title: 'Fecha registro', key: 'auditCreateDate', sortable: false },
         { title: 'Estado', key: 'statusUser', sortable: false },
-        { title: 'Acciones', key: 'actions', sortable: false },
+        { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
       ];
     },
     drawerModel: {

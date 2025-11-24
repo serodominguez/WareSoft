@@ -2,17 +2,17 @@
   <v-data-table :headers="headers" :items="permissions" :loading="loading" loading-text="Cargando permisos..."
     no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4" :hide-default-footer="true">
     <template v-slot:item.permissions.crear="{ item }">
-      <v-checkbox v-model="item.permissions.crear" color="primary" hide-details @change="$emit('permission-changed')" />
+      <v-checkbox v-model="item.permissions.crear" color="indigo" hide-details @change="$emit('permission-changed')" />
     </template>
     <template v-slot:item.permissions.leer="{ item }">
-      <v-checkbox v-model="item.permissions.leer" color="primary" hide-details @change="$emit('permission-changed')" />
+      <v-checkbox v-model="item.permissions.leer" color="indigo" hide-details @change="$emit('permission-changed')" />
     </template>
     <template v-slot:item.permissions.editar="{ item }">
-      <v-checkbox v-model="item.permissions.editar" color="primary" hide-details
+      <v-checkbox v-model="item.permissions.editar" color="indigo" hide-details
         @change="$emit('permission-changed')" />
     </template>
     <template v-slot:item.permissions.eliminar="{ item }">
-      <v-checkbox v-model="item.permissions.eliminar" color="primary" hide-details
+      <v-checkbox v-model="item.permissions.eliminar" color="indigo" hide-details
         @change="$emit('permission-changed')" />
     </template>
   </v-data-table>

@@ -10,19 +10,19 @@
                 <span v-if="action === 0">eliminar</span>
                 <span v-if="action === 1">activar</span>
                 <span v-if="action === 2">desactivar</span>
-                el ítem: {{ itemName }}.
+                el ítem: {{ item }}.
             </v-card-text>
             <v-card-actions class="d-flex justify-space-between">
                 <div class="d-flex">
-                    <v-btn v-if="action === 0" color="indigo" dark class="mr-2" elevation="4" @click="handleAction"
+                    <v-btn v-if="action === 0" color="green" dark class="mr-2" elevation="4" @click="handleAction"
                         :loading="processing">
                         Eliminar
                     </v-btn>
-                    <v-btn v-if="action === 1" color="indigo" dark class="mr-2" elevation="4" @click="handleAction"
+                    <v-btn v-if="action === 1" color="green" dark class="mr-2" elevation="4" @click="handleAction"
                         :loading="processing">
                         Activar
                     </v-btn>
-                    <v-btn v-if="action === 2" color="indigo" dark class="mr-2" elevation="4" @click="handleAction"
+                    <v-btn v-if="action === 2" color="green" dark class="mr-2" elevation="4" @click="handleAction"
                         :loading="processing">
                         Desactivar
                     </v-btn>
@@ -51,7 +51,7 @@ export default defineComponent({
             type: Number,
             required: true,
         },
-        itemName: {
+        item: {
             type: String,
             required: true,
         },
@@ -65,6 +65,10 @@ export default defineComponent({
             required: true,
         },
         entityName: {
+            type: String,
+            required: true,
+        },
+        name: {
             type: String,
             required: true,
         },
@@ -101,18 +105,18 @@ export default defineComponent({
             const actionMap = {
                 0: {
                     storeAction: `${this.moduleName}/remove${this.entityName}`,
-                    successMsg: `${this.entityName} eliminad${genderSuffix} con éxito!`,
-                    errorMsg: `Error al eliminar ${this.entityName.toLowerCase()}`
+                    successMsg: `${this.name} eliminad${genderSuffix} con éxito!`,
+                    errorMsg: `Error al eliminar ${this.name.toLowerCase()}`
                 },
                 1: {
                     storeAction: `${this.moduleName}/enable${this.entityName}`,
-                    successMsg: `${this.entityName} habilitad${genderSuffix} con éxito!`,
-                    errorMsg: `Error al habilitar ${this.entityName.toLowerCase()}`
+                    successMsg: `${this.name} habilitad${genderSuffix} con éxito!`,
+                    errorMsg: `Error al habilitar ${this.name.toLowerCase()}`
                 },
                 2: {
                     storeAction: `${this.moduleName}/disable${this.entityName}`,
-                    successMsg: `${this.entityName} deshabilitad${genderSuffix} con éxito!`,
-                    errorMsg: `Error al deshabilitar ${this.entityName.toLowerCase()}`
+                    successMsg: `${this.name} deshabilitad${genderSuffix} con éxito!`,
+                    errorMsg: `Error al deshabilitar ${this.name.toLowerCase()}`
                 }
             };
 

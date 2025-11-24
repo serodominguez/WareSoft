@@ -10,7 +10,7 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localModule.moduleName"
+                <v-text-field color="indigo" variant="underlined" v-model="localModule.moduleName"
                   :rules="[rules.required, rules.onlyLetters]" counter="25" :maxlength="25" label="Nombre del Módulo"
                   required />
               </v-col>

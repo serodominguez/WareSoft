@@ -22,7 +22,7 @@ namespace Application.Validators
 
             RuleFor(x => x.LastNames)
                 .NotEmpty().WithMessage("Los apellidos son requeridos!")
-                .MaximumLength(50).WithMessage("Los apellidos no puede tener más de 50 caracteres!")
+                .MaximumLength(50).WithMessage("Los apellidos no pueden tener más de 50 caracteres!")
                 .Matches("^[a-zA-Z0-9 áéíóúñÁÉÍÓÚÑ]+$");
 
             RuleFor(x => x.IdentificationNumber)

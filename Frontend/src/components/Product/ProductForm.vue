@@ -11,11 +11,11 @@
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.code" counter="25"
-                  :maxlength="25" label="Código" required />
+                  :maxlength="25" label="Código" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.description"
-                  :rules="[rules.required]" counter="25" :maxlength="25" label="Descripción" required />
+                  :rules="[rules.required]" counter="50" :maxlength="50" label="Descripción" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localProduct.material"
@@ -46,7 +46,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveProduct" :disabled="!valid"
+          <v-btn color="green" dark class="mb-2" elevation="4" @click="saveProduct" :disabled="!valid"
             :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>

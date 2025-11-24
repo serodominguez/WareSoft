@@ -49,6 +49,23 @@
         }
         #endregion
 
+        #region ColumnsCustomer
+        public static List<(string ColumnName, string PropertyName)> GetColumnsCustomers()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("NOMBRE", "Names"),
+                ("APELLIDOS", "LastNames"),
+                ("CARNET", "IdentificationNumber"),
+                ("TELÉFONO", "PhoneNumber"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusCustomer")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
         #region ColumnsModule
         public static List<(string ColumnName, string PropertyName)> GetColumnsModules()
         {

@@ -41,7 +41,6 @@ namespace Application.Mappers
                 Status = entity.Status,
                 StatusUser = ((StateTypes)(entity.Status ? 1 : 0)).ToString()
             };
-
         }
     }
 }

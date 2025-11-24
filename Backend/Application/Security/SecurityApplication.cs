@@ -39,7 +39,7 @@ namespace Application.Security
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(300),
+                expires: DateTime.Now.AddMinutes(240),
                 notBefore: DateTime.Now,
                 signingCredentials: credentials);
 

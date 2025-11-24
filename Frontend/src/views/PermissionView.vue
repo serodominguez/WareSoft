@@ -7,7 +7,7 @@
       <v-card-text>
         <v-row>
           <v-col cols="4" md="4" lg="2" xl="2">
-            <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="selectedRoleId"
+            <v-autocomplete color="indigo" variant="underlined" :items="roles" v-model="selectedRoleId"
               item-title="roleName" item-value="idRole" no-data-text="No hay datos disponibles" label="Rol"
               :loading="loadingRoles" />
           </v-col>
@@ -15,15 +15,12 @@
             <v-btn color="indigo" @click="loadPermissions" :disabled="!selectedRoleId || loading" :loading="loading">
               Cargar
             </v-btn>
-            <v-btn color="success" @click="savePermissions" :disabled="!hasChanges || saving" :loading="saving"
+            <v-btn color="green" @click="savePermissions" :disabled="!hasChanges || saving" :loading="saving"
               class="ml-2">
               Guardar
             </v-btn>
           </v-col>
         </v-row>
-        <v-alert v-if="alertMessage" :type="alertType" dismissible class="mt-4" @click:close="alertMessage = ''">
-          {{ alertMessage }}
-        </v-alert>
         <PermissionList :permissions="localPermissions" :loading="loading" @permission-changed="markAsChanged" />
       </v-card-text>
     </v-card>
@@ -54,9 +51,7 @@ export default defineComponent({
       localPermissions: [] as PermissionsByModule[],
       originalPermissions: [] as PermissionsByModule[],
       hasChanges: false,
-      saving: false,
-      alertMessage: '',
-      alertType: 'success' as 'success' | 'error' | 'warning' | 'info'
+      saving: false
     };
   },
   computed: {
@@ -95,7 +90,6 @@ export default defineComponent({
       }
 
       this.hasChanges = false;
-      this.alertMessage = '';
 
       try {
         await this.store.dispatch('permission/fetchPermissionsByRole', this.selectedRoleId);
@@ -115,7 +109,6 @@ export default defineComponent({
       }
 
       this.saving = true;
-      this.alertMessage = '';
 
       try {
         // Construir array de permisos actualizados
@@ -152,15 +145,9 @@ export default defineComponent({
         } else {
           const errorMsg = response?.message || 'Error al actualizar permisos';
           this.toast.error(errorMsg);
-
-          this.alertType = 'error';
-          this.alertMessage = errorMsg;
         }
       } catch (error) {
         const appError = handleApiError(error, 'Error al guardar los permisos');
-
-        this.alertType = 'error';
-        this.alertMessage = appError.message;
       } finally {
         this.saving = false;
       }

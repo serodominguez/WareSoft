@@ -10,38 +10,38 @@
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.userName"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.userName"
                   :rules="[rules.required, rules.onlyLetters]" counter="20" :maxlength="20" @keyup="uppercase"
                   label="Usuario" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.passwordHash" type="password"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.passwordHash" type="password"
                   :rules="[rules.required]" label="Contraseña" clearable required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.names"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.names"
                   :rules="[rules.required, rules.onlyLetters]" counter="30" :maxlength="30" label="Nombres" required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.lastNames"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.lastNames"
                   :rules="[rules.required, rules.onlyLetters]" counter="50" :maxlength="50" label="Apellidos"
                   required />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.identificationNumber" counter="8"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.identificationNumber" counter="8"
                   :maxlength="8" label="Carnet" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-text-field color="primary" variant="underlined" v-model="localUser.phoneNumber" counter="8"
+                <v-text-field color="indigo" variant="underlined" v-model="localUser.phoneNumber" counter="8"
                   :rules="[rules.onlyNumbers]" :maxlength="8" label="Teléfono" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="primary" variant="underlined" :items="roles" v-model="localUser.idRole"
+                <v-autocomplete color="indigo" variant="underlined" :items="roles" v-model="localUser.idRole"
                   item-title="roleName" item-value="idRole" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Rol" required :loading="loadingRoles" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="primary" variant="underlined" :items="stores" v-model="localUser.idStore"
+                <v-autocomplete color="indigo" variant="underlined" :items="stores" v-model="localUser.idStore"
                   item-title="storeName" item-value="idStore" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Tienda" required :loading="loadingStores" />
               </v-col>
@@ -51,7 +51,7 @@
       </v-card-text>
       <v-col xs12 sm12 md12 lg12 xl12>
         <v-card-actions>
-          <v-btn color="indigo" dark class="mb-2" elevation="4" @click="saveUser" :disabled="!valid"
+          <v-btn color="green" dark class="mb-2" elevation="4" @click="saveUser" :disabled="!valid"
             :loading="saving">Guardar</v-btn>
           <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cancelar</v-btn>
         </v-card-actions>
@@ -96,8 +96,6 @@ export default defineComponent({
         phoneNumber: null,
         idRole: null,
         idStore: null,
-        auditCreateDate: '',
-        statusUser: '',
         updatePassword: false
       }),
     },

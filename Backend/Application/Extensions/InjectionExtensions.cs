@@ -34,6 +34,7 @@ namespace Application.Extensions
             services.AddScoped<IGenerateExcelService, GenerateExcelService>();
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IModuleService, ModuleService>();
             services.AddScoped<IPermissionService, PermissionService>();
             services.AddScoped<IProductService, ProductService>();

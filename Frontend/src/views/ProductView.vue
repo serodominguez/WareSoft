@@ -9,8 +9,8 @@
 
     <ProductForm v-model="form" :product="selectedProduct" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedProduct?.idProduct || 0" :itemName="selectedProduct?.description || ''"
-      :action="action" moduleName="product" entityName="Product" gender="male"
+    <CommonModal v-model="modal" :itemId="selectedProduct?.idProduct || 0" :item="selectedProduct?.description || ''"
+      :action="action" moduleName="product" entityName="Product" name="Producto" gender="male"
       @action-completed="handleActionCompleted" />
   </div>
 </template>

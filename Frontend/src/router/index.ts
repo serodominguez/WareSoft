@@ -4,6 +4,7 @@ import { normalize } from '@/helpers/utils';
 import HomeView from '../views/HomeView.vue'
 import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
+import CustomerView from '@/views/CustomerView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ModuleView from '@/views/ModuleView.vue';
 import PermissionView from '@/views/PermissionView.vue';
@@ -53,6 +54,15 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: true,
       module: "categorias",
+    },
+  },
+  {
+    path: "/clientes",
+    name: "customer",
+    component: CustomerView,
+    meta: {
+      requiresAuth: true,
+      module: "clientes",
     },
   },
   {

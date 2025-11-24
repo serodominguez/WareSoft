@@ -43,7 +43,8 @@ namespace Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{categoryId:int}")]
+        [HttpGet("{brandId:int}")]
+        [RequirePermission("Marcas", "Leer")]
         public async Task<IActionResult> BrandById(int brandId)
         {
             var response = await _brandService.BrandById(brandId);
