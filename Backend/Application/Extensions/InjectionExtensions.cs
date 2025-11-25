@@ -40,6 +40,7 @@ namespace Application.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IStoreService, StoreService>();
+            services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<IUserService, UserService>();
 
             return services;

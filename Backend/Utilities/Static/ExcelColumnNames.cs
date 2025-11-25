@@ -122,8 +122,28 @@
                 ("TIENDA", "StoreName"),
                 ("ENCARGADO", "Manager"),
                 ("DIRECCIÓN", "Address"),
+                ("TELÉFONO", "PhoneNumber"),
+                ("CORREO", "Email"),
+                ("TIPO", "Type"),
                 ("FECHA DE CREACIÓN", "AuditCreateDate"),
                 ("ESTADO", "StatusStore")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
+        #region ColumnsSupplier
+        public static List<(string ColumnName, string PropertyName)> GetColumnsSuppliers()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("EMPRESA", "CompanyName"),
+                ("CONTACTO", "Contact"),
+                ("TELÉFONO", "PhoneNumber"),
+                ("CORREO", "Email"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusSupplier")
             };
 
             return columnsProperties;
@@ -138,6 +158,7 @@
                 ("USUARIO", "UserName"),
                 ("NOMBRES", "Names"),
                 ("APELLIDOS", "LastNames"),
+                ("CARNET", "IdentificationNumber"),
                 ("TELÉFONO", "PhoneNumber"),
                 ("ROL", "RoleName"),
                 ("TIENDA", "StoreName"),

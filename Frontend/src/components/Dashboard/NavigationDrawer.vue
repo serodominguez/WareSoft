@@ -86,18 +86,19 @@ export default defineComponent({
     return {
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/categorias', module: 'categorias' },
-        { icon: 'contacts', text: 'Clientes', route: '/clientes', module: 'clientes' },
+        { icon: 'contact_page', text: 'Clientes', route: '/clientes', module: 'clientes' },
         { icon: 'copyright', text: 'Marcas', route: '/marcas', module: 'marcas' },
         { icon: 'inventory_2', text: 'Productos', route: '/productos', module: 'productos' },
+        { icon: 'contacts', text: 'Proveedores', route: '/proveedores', module: 'proveedores' },
         { icon: 'store', text: 'Tiendas', route: '/tiendas', module: 'tiendas' },
       ] as Link[],
       linkAccess: [
-        { icon: 'supervisor_account', text: 'Permisos', route: '/permisos', module: 'permisos' },
-        { icon: 'manage_accounts', text: 'Roles', route: '/roles', module: 'roles' },
+        { icon: 'manage_accounts', text: 'Permisos', route: '/permisos', module: 'permisos' },
+        { icon: 'supervisor_account', text: 'Roles', route: '/roles', module: 'roles' },
         { icon: 'person', text: 'Usuarios', route: '/usuarios', module: 'usuarios' },
       ] as Link[],
       linkConfiguration: [
-        { icon: 'widgets', text: 'Módulos', route: '/modulos', module: 'modulos' },
+        { icon: 'app_registration', text: 'Módulos', route: '/modulos', module: 'modulos' },
       ] as Link[],
     };
   },

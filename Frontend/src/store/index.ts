@@ -11,7 +11,9 @@ import Permission from '@/store/modules/Permission';
 import Product from './modules/Product';
 import Role from '@/store/modules/Role';
 import Store from '@/store/modules/Store';
+import Supplier from './modules/Supplier';
 import User from '@/store/modules/User';
+import SupplierForm from '@/components/Supplier/SupplierForm.vue';
 
 interface UserPermission {
   module: string;
@@ -250,6 +252,7 @@ const store = createStore<RootState>({
     permission: Permission,
     product: Product,
     store: Store,
+    supplier: Supplier,
     user: User,
   },
 });

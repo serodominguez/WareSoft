@@ -27,7 +27,7 @@
                   @click="$emit('open-modal', { store: item, action: 2 })" size="small" title="Desactivar">
                 </v-btn>
               </template>
-              <v-btn v-if="canDelete" color="brown" icon="delete" variant="text"
+              <v-btn v-if="canDelete" color="grey" icon="delete" variant="text"
                 @click="$emit('open-modal', { store: item, action: 0 })" size="small" title="Eliminar">
               </v-btn>
             </td>
@@ -51,7 +51,7 @@
           </v-toolbar>
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary" @click="$emit('fetch-stores')"> Reset </v-btn>
+          <v-btn color="indigo" @click="$emit('fetch-stores')"> Reset </v-btn>
         </template>
       </v-data-table-server>
     </v-card>

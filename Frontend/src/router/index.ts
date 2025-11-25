@@ -11,7 +11,9 @@ import PermissionView from '@/views/PermissionView.vue';
 import ProductView from '@/views/ProductView.vue';
 import RoleView from '@/views/RoleView.vue'
 import StoreView from '@/views/StoreView.vue'
+import SupplierView from '@/views/SupplierView.vue';
 import UserView from '@/views/UserView.vue'
+
  
 declare module 'vue-router' {
   interface RouteMeta {
@@ -116,6 +118,15 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: true,
       module: "tiendas",
+    },
+  },
+  {
+    path: "/proveedores",
+    name: "supplier",
+    component: SupplierView,
+    meta: {
+      requiresAuth: true,
+      module: "proveedores",
     },
   },
   {

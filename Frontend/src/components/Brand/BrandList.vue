@@ -24,7 +24,7 @@
                   size="small" title="Desactivar">
                 </v-btn>
               </template>
-              <v-btn v-if="canDelete" color="brown" icon="delete" variant="text"
+              <v-btn v-if="canDelete" color="grey" icon="delete" variant="text"
                 @click="$emit('open-modal', { brand: item, action: 0 })" size="small" title="Eliminar">
               </v-btn>
             </td>
@@ -48,7 +48,7 @@
           </v-toolbar>
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary" @click="$emit('fetch-brands')"> Reset </v-btn>
+          <v-btn color="indigo" @click="$emit('fetch-brands')"> Reset </v-btn>
         </template>
       </v-data-table-server>
     </v-card>
@@ -66,21 +66,26 @@ import CommonFilters from '@/components/Common/CommonFilters.vue';
 export default defineComponent({
   name: 'BrandList',
   components: {
-    CommonFilters
+    CommonFilters // Componente de filtros reutilizable
   },
+  // Props recibidas del componente padre incluye datos, permisos y configuración de filtros
   props: {
+    // Array de la entidad a mostrar en la tabla
     brands: {
       type: Array as PropType<Brand[]>,
       required: true
     },
+    // Indica si los datos están cargando
     loading: {
       type: Boolean,
       required: true
     },
+    // Total de la entidad (para paginación del servidor)
     totalBrands: {
       type: Number,
       required: true
     },
+    // Permisos CRUD del usuario actual
     canCreate: {
       type: Boolean,
       required: true
@@ -97,18 +102,22 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
+    // Estado del drawer de filtros
     drawer: {
       type: Boolean,
       default: false
     },
+    // Filtro seleccionado actualmente
     selectedFilter: {
       type: String,
       default: 'Marca'
     },
+    // Estado de filtro (Activos/Inactivos/Todos)
     state: {
       type: String,
       default: 'Activos'
     },
+    // Rango de fechas para filtrar
     startDate: {
       type: [Date, null] as any,
       default: null
@@ -117,35 +126,42 @@ export default defineComponent({
       type: [Date, null] as any,
       default: null
     },
+    // Estado de descarga de Excel
     downloadingExcel: {
       type: Boolean,
       default: false
     }
   },
+  /**
+   * Eventos que este componente puede emitir al padre
+   * Sigue el patrón de comunicación padre-hijo de Vue
+   */
   emits: [
-    'open-form',
-    'open-modal',
-    'edit-brand',
-    'fetch-brands',
-    'search-brands',
-    'update-items-per-page',
-    'change-page',
-    'download-excel',
-    'update:drawer',
-    'update:selectedFilter',
-    'update:state',
-    'update:startDate',
-    'update:endDate'
+    'open-form',                        // Abrir formulario para crear
+    'open-modal',                      // Abrir modal de confirmación (activar/desactivar/eliminar)
+    'edit-brand',                     // Editar marca existente
+    'fetch-brands',                  // Recargar/obtener marca
+    'search-brands',                // Recargar/obtener marca
+    'update-items-per-page',       // Cambiar cantidad de items por página
+    'change-page',                // Cambiar de página
+    'download-excel',            // Descargar reporte Excel
+    'update:drawer',            // Actualizar estado del drawer (patrón v-model)
+    'update:selectedFilter',   // Actualizar filtro seleccionado
+    'update:state',           // Actualizar estado de filtro
+    'update:startDate',      // Actualizar fecha inicio
+    'update:endDate'        // Actualizar fecha fin
   ],
   data() {
     return {
-      itemsPerPage: 10,
-      pages: "Marcas por Página",
-      search: null as string | null,
-      filterOptions: ['Marca']
+      itemsPerPage: 10,                 // Items por página predeterminados
+      pages: "Marcas por Página",      // Texto para selector de items por página
+      search: null as string | null,  // Término de búsqueda actual
+      filterOptions: ['Marca']       // Opciones disponibles para filtrar
     };
   },
+  // Propiedades computadas
   computed: {
+    // Define las columnas/encabezados de la tabla
     headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
       return [
         { title: 'Marca', key: 'brandName', sortable: false },
@@ -154,6 +170,7 @@ export default defineComponent({
         { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
       ];
     },
+    // Computed property bidireccional para el drawer de filtros
     drawerModel: {
       get() {
         return this.drawer;
@@ -162,6 +179,7 @@ export default defineComponent({
         this.$emit('update:drawer', value);
       }
     },
+    // Computed property bidireccional para el filtro seleccionado
     selectedFilterModel: {
       get() {
         return this.selectedFilter;
@@ -170,6 +188,7 @@ export default defineComponent({
         this.$emit('update:selectedFilter', value);
       }
     },
+    // Computed property bidireccional para el estado del filtro
     stateModel: {
       get() {
         return this.state;
@@ -178,6 +197,7 @@ export default defineComponent({
         this.$emit('update:state', value);
       }
     },
+    // Computed property bidireccional para la fecha de inicio
     startDateModel: {
       get() {
         return this.startDate;
@@ -186,6 +206,7 @@ export default defineComponent({
         this.$emit('update:startDate', value);
       }
     },
+    // Computed property bidireccional para la fecha de fin
     endDateModel: {
       get() {
         return this.endDate;
@@ -196,6 +217,7 @@ export default defineComponent({
     }
   },
   methods: {
+    // Maneja la búsqueda de marcas con todos los filtros activos
     handleSearch() {
       this.$emit('search-brands', {
         search: this.search,
@@ -205,7 +227,7 @@ export default defineComponent({
         endDate: this.endDateModel
       });
     },
-
+    // Maneja la descarga del reporte Excel
     handleDownloadExcel() {
       this.$emit('download-excel', {
         search: this.search,

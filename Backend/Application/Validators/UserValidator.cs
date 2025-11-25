@@ -27,7 +27,8 @@ namespace Application.Validators
 
             RuleFor(x => x.IdentificationNumber)
                 .MaximumLength(10).WithMessage("El número de identificación no puede tener más de 10 caracteres!")
-                .Matches("^[a-zA-Z0-9 áéíóúñÁÉÍÓÚÑ]+$");
+                .Matches("^[a-zA-Z0-9 áéíóúñÁÉÍÓÚÑ]+$")
+                .When(x => !string.IsNullOrWhiteSpace(x.IdentificationNumber));
 
             RuleFor(x => x.IdRole)
                 .NotNull().WithMessage("El identificador del rol no puede ser nulo!");

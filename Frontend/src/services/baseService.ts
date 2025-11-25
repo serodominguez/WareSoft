@@ -18,7 +18,7 @@ export class BaseService<T> {
     this.customEndpoints = config.customEndpoints || {};
   }
 
-  //Construye los parámetros de consulta
+  // Construye los parámetros de consulta
   private buildParams(params: FilterParams = {}): any {
     const queryParams: any = {
       NumberPage: params.pageNumber || 1,
@@ -95,33 +95,33 @@ export class BaseService<T> {
     }
   }
 
-  //Obtiene lista para selects (sin paginación)
+  // Obtiene lista para selects (sin paginación)
   async select(): Promise<BaseResponse<T[]>> {
     const response = await axios.get<BaseResponse<T[]>>(`api/${this.selectEndpoint}`);
     return response.data;
   }
 
-  //Obtiene un item por ID
+  // Obtiene un item por ID
   async fetchById(id: number): Promise<BaseResponse<T>> {
     const response = await axios.get<BaseResponse<T>>(`api/${this.endpoint}/${id}`);
     return response.data;
   }
 
-  //Crea un nuevo item
+  // Crea un nuevo item
   async create(data: T): Promise<BaseResponse<T>> {
     const endpoint = this.customEndpoints?.create || `${this.endpoint}/Register`;
     const response = await axios.post<BaseResponse<T>>(`api/${endpoint}`, data);
     return response.data;
   }
 
-  //Actualiza un item existente
+  // Actualiza un item existente
   async update(id: number, data: T): Promise<BaseResponse<T>> {
     const endpoint = this.customEndpoints?.update || `${this.endpoint}/Edit/${id}`;
     const response = await axios.put<BaseResponse<T>>(`api/${endpoint}`, data);
     return response.data;
   }
 
-  //Habilita un item
+  // Habilita un item
   async enable(id: number): Promise<BaseResponse<void>> {
     const endpoint = this.customEndpoints?.enable || `${this.endpoint}/Enable/${id}`;
     const response = await axios.put<BaseResponse<void>>(`api/${endpoint}`, {});
@@ -135,7 +135,7 @@ export class BaseService<T> {
     return response.data;
   }
 
-  //Elimina un item (soft delete)
+  // Elimina un item (soft delete)
   async remove(id: number): Promise<BaseResponse<void>> {
     const endpoint = this.customEndpoints?.remove || `${this.endpoint}/Remove/${id}`;
     const response = await axios.put<BaseResponse<void>>(`api/${endpoint}`, {});

@@ -35,10 +35,12 @@ import { defineComponent, PropType } from 'vue';
 import { Brand } from '@/interfaces/brandInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
+// Interfaz para el tipo de referencia del formulario
 interface FormRef {
   validate: () => boolean;
 }
 
+// Extensión de las propiedades personalizadas del componente para TypeScript
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     $store: VuexStore<any>;
@@ -46,6 +48,11 @@ declare module '@vue/runtime-core' {
 }
 
 export default defineComponent({
+    /**
+   * Props del componente:
+   * - modelValue: Controla si el diálogo está abierto o cerrado (patrón v-model)
+   * - brand: Objeto con los datos de la entidad a editar, o valores por defecto para nueva entidad
+   */
   props: {
     modelValue: {
       type: Boolean,
@@ -58,26 +65,34 @@ export default defineComponent({
         brandName: ''
       }),
     },
-  },
+  }, 
+
+  // Estado reactivo del componente
   data() {
     return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localBrand: { ...this.brand } as Brand,
-      toast: useToast(),
+      isOpen: this.modelValue,              // Estado local de visibilidad del diálogo
+      valid: false,                        // Estado de validación del formulario
+      saving: false,                      // Indica si se está guardando (para mostrar loading)
+      localBrand: { ...this.brand } as Brand,  // Copia local de la marca para editar
+      toast: useToast(),                      // Instancia de notificaciones toast
       rules: {
+        // Reglas de validación
         required: (value: string) => !!value || 'Este campo es requerido.',
       },
     };
   },
+
+  // Watchers para sincronizar props con estado local
   watch: {
+    // Sincroniza cambios del prop modelValue con el estado local isOpen
     modelValue(newValue: boolean) {
       this.isOpen = newValue;
     },
+    // Emite cambios del estado local isOpen al componente padre (patrón v-model)
     isOpen(newValue: boolean) {
       this.$emit('update:modelValue', newValue);
     },
+    // Sincroniza cambios en el prop brand con la copia local
     brand: {
       handler(newBrand: Brand) {
         this.localBrand = { ...newBrand };
@@ -86,48 +101,56 @@ export default defineComponent({
     },
   },
   methods: {
+    // Cierra el diálogo
     close() {
       this.isOpen = false;
     },
+    // Guarda o actualiza la entidad
     async saveBrand() {
+      // Obtiene la referencia del formulario y valida
       const form = this.$refs.form as FormRef;
       if (!form.validate()) {
         this.toast.warning('Por favor completa todos los campos requeridos');
         return;
       }
-      this.saving = true;
+      this.saving = true; // Activa estado de carga
       try {
+        // Determina si es edición o creación según si existe id de la entidad
         const isEditing = !!this.localBrand.idBrand;
         let result;
 
         if (isEditing) {
+          // Llama al action de Vuex para editar entidad existente
           result = await this.$store.dispatch('brand/editBrand', {
             id: this.localBrand.idBrand,
             brand: { ...this.localBrand }
           });
         } else {
+          // Llama al action de Vuex para registrar nuevo
           result = await this.$store.dispatch('brand/registerBrand', { ...this.localBrand });
         }
 
+        // Si la operación fue exitosa
         if (result.isSuccess) {
           const successMsg = isEditing
             ? 'Marca actualizada con éxito!'
             : 'Marca registrada con éxito!';
 
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localBrand });
-          this.close();
+          this.toast.success(successMsg);                 // Muestra notificación de éxito
+          this.$emit('saved', { ...this.localBrand });   // Emite evento al componente padre
+          this.close();                                 // Cierra el diálogo
         }
 
       } catch (error: any) {
+        // Manejo de errores
         const isEditing = !!this.localBrand.idBrand;
         const customMessage = isEditing
           ? 'Error al actualizar la marca'
           : 'Error al guardar la marca';
 
-        handleApiError(error, customMessage);
+        handleApiError(error, customMessage); // Usa helper para manejar el error
       } finally {
-        this.saving = false;
+        this.saving = false; // Desactiva estado de carga
       }
     },
   },

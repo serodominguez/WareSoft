@@ -1267,6 +1267,173 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "ListSuppliers",
+    "RelativePath": "api/Supplier",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "NumberFilter",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "TextFilter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "StateFilter",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "StartDate",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "EndDate",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Download",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "NumberPage",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "NumberRecordsPage",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "Order",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Sort",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Records",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "SupplierById",
+    "RelativePath": "api/Supplier/{supplierId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "supplierId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "DisableSupplier",
+    "RelativePath": "api/Supplier/Disable/{supplierId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "supplierId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "EditSupplier",
+    "RelativePath": "api/Supplier/Edit/{supplierId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "supplierId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "requestDto",
+        "Type": "Application.Dtos.Request.Supplier.SupplierRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "EnableSupplier",
+    "RelativePath": "api/Supplier/Enable/{supplierId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "supplierId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "RegisterSupplier",
+    "RelativePath": "api/Supplier/Register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "Application.Dtos.Request.Supplier.SupplierRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.SupplierController",
+    "Method": "RemoveSupplier",
+    "RelativePath": "api/Supplier/Remove/{supplierId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "supplierId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Api.Controllers.UserController",
     "Method": "ListUsers",
     "RelativePath": "api/User",
