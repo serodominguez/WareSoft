@@ -33,40 +33,53 @@ export default defineComponent({
     CommonModal
   },
   setup() {
+    // Inicialización del store de Vuex y el sistema de notificaciones toast
     const store = useStore();
     const toast = useToast();
     return { store, toast };
   },
   data() {
     return {
+      // Control de paginación
       currentPage: 1,
       itemsPerPage: 10,
+      // Control de búsqueda y filtros
       search: null as string | null,
-      form: false,
-      modal: false,
-      selectedBrand: null as Brand | null,
-      action: 0,
       selectedFilter: 'Marca',
       drawer: false,
       state: 'Activos',
       startDate: null,
       endDate: null,
+      // Control de modales y formularios
+      form: false,
+      modal: false,
+      // Marca seleccionada para edición o eliminación
+      selectedBrand: null as Brand | null,
+      // Tipo de acción a realizar en el modal (0: eliminar, etc.)
+      action: 0, 
+
+      // Estado de descarga de Excel
       downloadingExcel: false
     };
   },
   computed: {
+    // Obtiene la lista de marcas desde el store de Vuex
     brands() {
       return this.store.getters['brand/brands'];
     },
+    // Estado de carga desde el store
     loading() {
       return this.store.getters['brand/loading'];
     },
+    // Total de marcas para la paginación
     totalBrands() {
       return this.store.getters['brand/totalBrands'];
     },
+    // Convierte el filtro de estado textual a numérico (1: Activos, 0: Inactivos)
     stateFilter(): number {
       return this.state === 'Activos' ? 1 : 0;
     },
+    // Permisos del usuario para diferentes acciones en el módulo de marcas
     canCreate(): boolean {
       return this.$store.getters.hasPermission('marcas', 'crear');
     },
@@ -81,12 +94,13 @@ export default defineComponent({
     }
   },
   methods: {
+    // Abre el modal de confirmación para acciones sobre marcas, @param payload - Objeto con la marca y el tipo de acción a realizar
     openModal(payload: { brand: Brand, action: number }) {
       this.selectedBrand = payload.brand;
       this.action = payload.action;
       this.modal = true;
     },
-
+    // Abre el formulario para crear o editar una marca, @param brand - Marca a editar (opcional). Si no se proporciona, crea una nueva
     openForm(brand?: Brand) {
       this.selectedBrand = brand ? { ...brand } : {
         idBrand: null,
@@ -96,7 +110,7 @@ export default defineComponent({
       };
       this.form = true;
     },
-
+    // Obtiene la lista de marcas desde el servidor, @param params - Parámetros opcionales de filtrado y paginación
     async fetchBrands(params?: any) {
       try {
         await this.store.dispatch('brand/fetchBrands', params || {
@@ -105,16 +119,20 @@ export default defineComponent({
           stateFilter: this.stateFilter
         });
       } catch (error) {
+        // Manejo silencioso del error (no muestra notificación al usuario)
         handleSilentError(error);
       }
     },
-
+    // Construye los parámetros de filtrado para las peticiones al servidor
     getFilterParams(params: any) {
+      // Mapeo de filtros textuales a valores numéricos
       const filterMap: { [key: string]: number } = { "Marca": 1 };
       const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
       const textFilterValue = params.search?.trim() || null;
+      // Formateo de fechas si existen
       const startDateStr = params.startDate ? this.formatDate(params.startDate) : null;
       const endDateStr = params.endDate ? this.formatDate(params.endDate) : null;
+      // Conversión del filtro de estado
       const stateFilter = typeof params.stateFilter === 'string'
         ? (params.stateFilter === 'Activos' ? 1 : 0)
         : (params.state === 'Activos' ? 1 : 0);
@@ -127,8 +145,9 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
-
+    // Realiza una búsqueda de marcas con los parámetros especificados
     async searchBrands(params: any) {
+      // Actualiza los valores locales de búsqueda y filtros
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
       this.state = params.state;
@@ -141,13 +160,15 @@ export default defineComponent({
           pageSize: this.itemsPerPage,
           ...this.getFilterParams(params)
         });
+        // Resetea a la primera página después de una búsqueda
         this.currentPage = 1;
       } catch (error) {
         handleApiError(error, 'Error al buscar marcas');
       }
     },
-
+    // Refresca la lista de marcas manteniendo los filtros actuales
     refreshBrands() {
+      // // Si hay una búsqueda activa, la ejecuta; si no, obtiene todas las marcas
       if (this.search?.trim()) {
         this.searchBrands({
           search: this.search,
@@ -160,18 +181,18 @@ export default defineComponent({
         this.fetchBrands();
       }
     },
-
+    // Actualiza el número de items por página y refresca la lista
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
+      this.currentPage = 1; // Resetea a la primera página
       this.refreshBrands();
     },
-
+    // Cambia la página actual y refresca la lista
     changePage(page: number) {
       this.currentPage = page;
       this.refreshBrands();
     },
-
+    // Descarga un archivo Excel con los datos de las marcas filtradas
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
@@ -187,7 +208,7 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
-
+    // Formatea una fecha al formato YYYY-MM-DD
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 
@@ -197,16 +218,18 @@ export default defineComponent({
 
       return `${year}-${month}-${day}`;
     },
-
+    // Manejador del evento después de guardar una marca
     handleSaved() {
       this.fetchBrands();
     },
-
+    // Manejador del evento después de completar una acción en el modal
     handleActionCompleted() {
       this.fetchBrands();
     }
   },
+  // Hook que se ejecuta cuando el componente es montado en el DOM
   mounted() {
+    // Carga inicial de las marcas
     this.fetchBrands();
   }
 });
