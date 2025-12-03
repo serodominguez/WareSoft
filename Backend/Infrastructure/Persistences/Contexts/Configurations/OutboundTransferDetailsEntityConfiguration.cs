@@ -29,12 +29,12 @@ namespace Infrastructure.Persistences.Contexts.Configurations
 
             builder.Property(d => d.UnitPrice)
                 .HasColumnName("UNIT_PRICE")
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
             builder.Property(d => d.TotalPrice)
                 .HasColumnName("TOTAL_PRICE")
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
             builder.HasOne(o => o.OutboundTransfer)

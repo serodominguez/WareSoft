@@ -21,7 +21,7 @@ namespace Infrastructure.Persistences.Contexts.Configurations
 
             builder.Property(i => i.TotalAmount)
                 .HasColumnName("TOTAL_AMOUNT")
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
             builder.Property(i => i.Annotations)

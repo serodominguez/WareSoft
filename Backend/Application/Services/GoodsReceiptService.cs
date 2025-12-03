@@ -1,0 +1,168 @@
+﻿using Application.Commons.Bases.Request;
+using Application.Commons.Bases.Response;
+using Application.Commons.Ordering;
+using Application.Dtos.Request.GoodsReceipt;
+using Application.Dtos.Response.GoodsReceipt;
+using Application.Interfaces;
+using Application.Mappers;
+using Domain.Entities;
+using Infrastructure.Persistences.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Utilities.Static;
+
+namespace Application.Services
+{
+    public class GoodsReceiptService : IGoodsReceiptService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IOrderingQuery _orderingQuery;
+
+        public GoodsReceiptService(IUnitOfWork unitOfWork, IOrderingQuery orderingQuery)
+        {
+            _unitOfWork = unitOfWork;
+            _orderingQuery = orderingQuery;
+        }
+
+        public async Task<BaseResponse<IEnumerable<GoodsReceiptResponseDto>>> ListGoodsReceipt(BaseFiltersRequest filters)
+        {
+            var response = new BaseResponse<IEnumerable<GoodsReceiptResponseDto>>();
+            try
+            {
+                var receipts = _unitOfWork.GoodsReceipt.GetGoodsReceiptQueryable()
+                                        .Where(u => u.AuditDeleteUser == null && u.AuditDeleteDate == null);
+
+                if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
+                {
+                    switch (filters.NumberFilter)
+                    {
+                        case 1:
+                            receipts = receipts.Where(x => x.Code!.Contains(filters.TextFilter));
+                            break;
+                        case 2:
+                            receipts = receipts.Where(x => x.Store.StoreName!.Contains(filters.TextFilter));
+                            break;
+                        case 3:
+                            receipts = receipts.Where(x => x.Supplier.CompanyName!.Contains(filters.TextFilter));
+                            break;
+                    }
+                }
+
+                if (filters.StateFilter is not null)
+                {
+                    var stateValue = Convert.ToBoolean(filters.StateFilter);
+                    receipts = receipts.Where(x => x.Status == stateValue);
+                }
+
+                if (!string.IsNullOrEmpty(filters.StartDate) && !string.IsNullOrEmpty(filters.EndDate))
+                {
+                    var startDate = Convert.ToDateTime(filters.StartDate).Date;
+                    var endDate = Convert.ToDateTime(filters.EndDate).Date.AddDays(1);
+                    receipts = receipts.Where(x => x.AuditCreateDate >= startDate && x.AuditCreateDate < endDate);
+                }
+                response.TotalRecords = await receipts.CountAsync();
+
+                filters.Sort ??= "IdReceipt";
+                var items = await _orderingQuery.Ordering(filters, receipts, !(bool)filters.Download!).ToListAsync();
+                response.IsSuccess = true;
+                response.Data = items.Select(GoodsReceiptMapp.GoodsReceiptResponseDtoMapping);
+                response.Message = ReplyMessage.MESSAGE_QUERY;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<GoodsReceiptWithDetailsResponseDto>> GoodsReceiptById(int receiptId)
+        {
+            var response = new BaseResponse<GoodsReceiptWithDetailsResponseDto>();
+
+            try
+            {
+                var receipt = await _unitOfWork.GoodsReceipt.GetGoodsReceiptByIdAsync(receiptId);
+
+                if (receipt is null )
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_QUERY_EMPTY;
+                }
+
+                string? userName = null;
+                if (receipt!.AuditCreateUser.HasValue)
+                {
+                    var user = await _unitOfWork.User.GetByIdAsync(receipt.AuditCreateUser.Value);
+                    userName = user?.UserName;
+                }
+
+                var details = await _unitOfWork.GoodsReceiptDetails.GetGoodsReceiptDetailsAsync(receipt!.IdReceipt);
+
+                receipt.GoodsReceiptDetails = details.ToList();
+
+                response.IsSuccess = true;
+                response.Data = GoodsReceiptMapp.GoodsReceiptWithDetailsResponseDtoMapping(receipt, userName);
+                response.Message= ReplyMessage.MESSAGE_QUERY;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<bool>> RegisterGoodsReceipt(int authenticatedUserId, GoodsReceiptRequestDto requestDto)
+        {
+            var response = new BaseResponse<bool>();
+
+            using var transaction = _unitOfWork.BeginTransaction();
+
+            try
+            {
+                var entity = GoodsReceiptMapp.GoodsReceiptMapping(requestDto);
+                entity.Code = await _unitOfWork.GoodsReceipt.GenerateCodeAsync();
+                entity.AuditCreateUser = authenticatedUserId;
+                entity.AuditCreateDate = DateTime.Now;
+                entity.Status = true;
+                await _unitOfWork.GoodsReceipt.RegisterGoodsReceiptAsync(entity);
+
+                foreach (var item in entity.GoodsReceiptDetails)
+                {
+                    var currentStock = await _unitOfWork.Inventory.GetStockById(item.IdProduct, requestDto.IdStore);
+                    if (currentStock is not null)
+                    {
+                        currentStock.Stock += item.Quantity;
+                        await _unitOfWork.Inventory.UpdateStockByProducts(currentStock);
+                    }
+                    else 
+                    {
+                        var newStock = new InventoryEntity
+                        {
+                            IdProduct = item.IdProduct,
+                            IdStore = requestDto.IdStore,
+                            Stock = item.Quantity,
+                            Price = 0
+                        };
+                        await _unitOfWork.Inventory.RegisterStockByProducts(newStock);
+                    }
+
+                }
+
+                transaction.Commit();
+                response.IsSuccess = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
+    }
+}

@@ -25,7 +25,7 @@ namespace Infrastructure.Persistences.Contexts.Configurations
 
             builder.Property(i => i.Price)
                 .HasColumnName("PRICE")
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
             builder.HasOne(s => s.Store)

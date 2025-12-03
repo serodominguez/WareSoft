@@ -537,6 +537,104 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Api.Controllers.GoodsReceiptController",
+    "Method": "ListGoodsReceipt",
+    "RelativePath": "api/GoodsReceipt",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "NumberFilter",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "TextFilter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "StateFilter",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "StartDate",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "EndDate",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Download",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "NumberPage",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "NumberRecordsPage",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "Order",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Sort",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Records",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.GoodsReceiptController",
+    "Method": "GoodsReceiptById",
+    "RelativePath": "api/GoodsReceipt/{receiptId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "receiptId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.GoodsReceiptController",
+    "Method": "RegisterGoodsReceipt",
+    "RelativePath": "api/GoodsReceipt/Register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "requestDto",
+        "Type": "Application.Dtos.Request.GoodsReceipt.GoodsReceiptRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Api.Controllers.ModuleController",
     "Method": "ListModules",
     "RelativePath": "api/Module",

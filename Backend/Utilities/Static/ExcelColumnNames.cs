@@ -66,6 +66,25 @@
         }
         #endregion
 
+        #region ColumnsGoodsReceipt
+        public static List<(string ColumnName, string PropertyName)> GetColumnsGoodsReceipt()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("CÓDIGO", "Code"),
+                ("FECHA DE ADQUISICIÓN", "PurchaseDate"),
+                ("TIPO", "Type"),
+                ("TIPO DE DOCUMENTO", "DocumentType"),
+                ("PROVEEDOR", "CompanyName"),
+                ("TIENDA", "StoreName"),
+                ("FECHA DE CREACIÓN", "AuditCreateDate"),
+                ("ESTADO", "StatusReceipt")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
         #region ColumnsModule
         public static List<(string ColumnName, string PropertyName)> GetColumnsModules()
         {

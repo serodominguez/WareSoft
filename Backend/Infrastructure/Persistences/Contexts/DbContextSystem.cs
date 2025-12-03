@@ -25,6 +25,7 @@ namespace Infrastructure.Persistences.Contexts
         public virtual DbSet<PermissionEntity> Permission { get; set; }
         public virtual DbSet<ProductEntity> Product { get; set; }
         public virtual DbSet<RoleEntity> Role { get; set; }
+        public virtual DbSet<SequenceEntity> Sequence { get; set; }
         public virtual DbSet<StoreEntity> Store { get; set; }
         public virtual DbSet<SupplierEntity> Supplier { get; set; }
         public virtual DbSet<UserEntity> User { get; set; }

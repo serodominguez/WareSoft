@@ -15,6 +15,9 @@ namespace Infrastructure.Persistences.Repositories
         public IGenericRepository<CustomerEntity> _customer = null!;
         public IGenericRepository<StoreEntity> _store = null!;
         public IGenericRepository<SupplierEntity> _supplier = null!;
+        public IGoodsReceiptDetailsRepository _goodsReceiptDetails = null!;
+        public IGoodsReceiptRepository _goodsReceipt = null!;
+        public IInventoryRepository _inventory = null!;
         public IModuleRepository _module = null!;
         public IPermissionRepository _permission = null!;
         public IProductRepository _product = null!;
@@ -31,6 +34,9 @@ namespace Infrastructure.Persistences.Repositories
         public IGenericRepository<CustomerEntity> Customer => _customer ?? new GenericRepository<CustomerEntity>(_context);
         public IGenericRepository<StoreEntity> Store => _store ?? new GenericRepository<StoreEntity>(_context);
         public IGenericRepository<SupplierEntity> Supplier => _supplier ?? new GenericRepository<SupplierEntity>(_context);
+        public IGoodsReceiptDetailsRepository GoodsReceiptDetails => _goodsReceiptDetails ?? new GoodsReceiptDetailsRepository(_context);
+        public IGoodsReceiptRepository GoodsReceipt => _goodsReceipt ?? new GoodsReceiptRepository(_context);
+        public IInventoryRepository Inventory => _inventory ?? new InventoryRepository(_context);
         public IModuleRepository Module => _module ?? new ModuleRepository(_context);
         public IPermissionRepository Permission => _permission ?? new PermissionRepository(_context);
         public IProductRepository Product => _product ?? new ProductRepository(_context);   

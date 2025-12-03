@@ -13,9 +13,5 @@
         public int IdStore { get; set; }
         public virtual RoleEntity Role { get; set; } = null!;
         public virtual StoreEntity Store { get; set; } = null!;
-        public virtual ICollection<GoodsIssueEntity> GoodsIssue { get; set; } = new List<GoodsIssueEntity>();
-        public virtual ICollection<GoodsReceiptEntity> GoodsReceipt { get; set; } = new List<GoodsReceiptEntity>();
-        public virtual ICollection<InboundTransferEntity> InboundTransfer { get; set; } = new List<InboundTransferEntity>();
-        public virtual ICollection<OutboundTransferEntity> OutboundTransfer { get; set; } = new List<OutboundTransferEntity>();
     }
 }

@@ -10,6 +10,9 @@ namespace Infrastructure.Persistences.Interfaces
         IGenericRepository<CustomerEntity> Customer { get; }
         IGenericRepository<StoreEntity> Store { get; }
         IGenericRepository<SupplierEntity> Supplier { get; }
+        IGoodsReceiptDetailsRepository GoodsReceiptDetails { get; }
+        IGoodsReceiptRepository GoodsReceipt { get; }
+        IInventoryRepository Inventory { get; }
         IModuleRepository Module { get; }
         IPermissionRepository Permission { get; }
         IProductRepository Product { get; }

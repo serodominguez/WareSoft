@@ -23,23 +23,24 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasColumnName("PURCHASE_DATE")
                 .IsRequired();
 
-            builder.Property(g => g.CreateDate)
-                .HasColumnName("CREATE_DATE")
-                .IsRequired();
-
             builder.Property(g => g.Type)
                 .HasColumnName("TYPE")
                 .HasMaxLength(15)
                 .IsRequired();
 
-            builder.Property(g => g.Number)
-                .HasColumnName("NUMBER")
+            builder.Property(g => g.DocumentType)
+                .HasColumnName("DOCUMENT_TYPE")
+                .HasMaxLength(15)
+                .IsRequired();
+
+            builder.Property(g => g.DocumentNumber)
+                .HasColumnName("DOCUMENT_NUMBER")
                 .HasMaxLength(30)
                 .IsRequired();
 
             builder.Property(g => g.TotalAmount)
                 .HasColumnName("TOTAL_AMOUNT")
-                .HasColumnType("decimal(18,2)")
+                .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
             builder.Property(g => g.Annotations)
@@ -54,9 +55,11 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasColumnName("PK_STORE")
                 .IsRequired();
 
-            builder.Property(g => g.IdUser)
-                .HasColumnName("PK_USER")
-                .IsRequired();
+            builder.Property(e => e.AuditCreateUser)
+                .HasColumnName("AUDIT_CREATE_USER");
+
+            builder.Property(e => e.AuditCreateDate)
+                .HasColumnName("AUDIT_CREATE_DATE");
 
             builder.Property(g => g.AuditDeleteUser)
               .HasColumnName("AUDIT_DELETE_USER");
@@ -74,10 +77,6 @@ namespace Infrastructure.Persistences.Contexts.Configurations
             builder.HasOne(s => s.Store)
                 .WithMany(g => g.GoodsReceipt)
                 .HasForeignKey(g => g.IdStore);
-
-            builder.HasOne(u => u.User)
-                .WithMany(g => g.GoodsReceipt)
-                .HasForeignKey(g => g.IdUser);
         }
     }
 }
