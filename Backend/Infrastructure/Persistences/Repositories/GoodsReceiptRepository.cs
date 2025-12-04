@@ -76,5 +76,12 @@ namespace Infrastructure.Persistences.Repositories
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
+
+        public async Task<bool> CancelGoodsReceiptAsync(GoodsReceiptEntity entity)
+        {
+            _context.Update(entity);
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
+        }
     }
 }

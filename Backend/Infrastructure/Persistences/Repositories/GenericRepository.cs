@@ -18,7 +18,8 @@ namespace Infrastructure.Persistences.Repositories
 
         public IQueryable<T> GetAllQueryable()
         {
-            var getAllQuery = GetEntityQuery();
+            var getAllQuery = GetEntityQuery()
+                    .Where(x => x.AuditDeleteUser == null && x.AuditDeleteDate == null);
             return getAllQuery;
         }
 
@@ -26,6 +27,7 @@ namespace Infrastructure.Persistences.Repositories
         {
             var getAll = await _entity
                     .AsNoTracking()
+                    .Where(x => x.AuditDeleteUser == null && x.AuditDeleteDate == null && x.Status == true)
                     .ToListAsync();
             return getAll;
         }

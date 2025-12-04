@@ -17,9 +17,10 @@ namespace Infrastructure.Persistences.Repositories
         public IQueryable<ProductEntity> GetProductsQueryable()
         {
             return _context.Product
-                .Include(u => u.Brand)
-                .Include(u => u.Category)
-                .AsNoTracking();
+                .AsNoTracking()
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Where(p => p.AuditDeleteUser == null && p.AuditDeleteDate == null);
         }
     }
 }

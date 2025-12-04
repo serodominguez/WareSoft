@@ -75,7 +75,7 @@ namespace Application.Mappers
                 AuditCreateName = userName,
                 AuditCreateDate = entity.AuditCreateDate.HasValue ? entity.AuditCreateDate.Value.ToString("dd/MM/yyyy HH:mm") : null,
                 StatusReceipt = ((StateTypes)(entity.Status ? 1 : 0)).ToString(),
-                GoodsReceiptDetailsResponseDto = entity.GoodsReceiptDetails
+                GoodsReceiptDetails = entity.GoodsReceiptDetails
                         .Select(d => new GoodsReceiptDetailsResponseDto
                         {
                             Item = d.Item,

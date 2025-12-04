@@ -30,8 +30,7 @@ namespace Application.Services
             var response = new BaseResponse<IEnumerable<ProductResponseDto>>();
             try
             {
-                var products = _unitOfWork.Product.GetProductsQueryable()
-                                        .Where(u => u.AuditDeleteUser == null && u.AuditDeleteDate == null);
+                var products = _unitOfWork.Product.GetProductsQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

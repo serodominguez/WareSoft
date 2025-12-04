@@ -31,8 +31,7 @@ namespace Application.Services
 
             try
             {
-                var stores = _unitOfWork.Store.GetAllQueryable()
-                                        .Where(s => s.AuditDeleteUser == null && s.AuditDeleteDate == null);
+                var stores = _unitOfWork.Store.GetAllQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -89,8 +88,7 @@ namespace Application.Services
 
             try
             {
-                var stores = (await _unitOfWork.Store.GetSelectAsync())
-                                                .Where(s => s.Status == true && s.AuditDeleteUser == null && s.AuditDeleteDate == null);
+                var stores = (await _unitOfWork.Store.GetSelectAsync());
 
                 if (stores is not null && stores.Any())
                 {

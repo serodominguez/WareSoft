@@ -18,6 +18,7 @@ namespace Infrastructure.Persistences.Repositories
         {
             return await _context.Role
                 .AsNoTracking()
+                .Where(r => r.AuditDeleteUser == null && r.AuditDeleteDate == null)  //&& r.Id != 1)
                 .ToListAsync();
         }
 

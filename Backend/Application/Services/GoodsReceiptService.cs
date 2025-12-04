@@ -153,6 +153,63 @@ namespace Application.Services
 
                 transaction.Commit();
                 response.IsSuccess = true;
+                response.Data = true;
+                response.Message = ReplyMessage.MESSAGE_SAVE;
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<bool>> CancelGoodsReceipt(int authenticatedUserId, int receiptId)
+        {
+            var response = new BaseResponse<bool>();
+
+            using var transaction = _unitOfWork.BeginTransaction();
+
+            try
+            {
+
+                var receipt = await _unitOfWork.GoodsReceipt.GetGoodsReceiptByIdAsync(receiptId);
+                if (receipt is null) 
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
+                    return response;
+                }
+
+                var details = await _unitOfWork.GoodsReceiptDetails.GetGoodsReceiptDetailsAsync(receipt!.IdReceipt);
+
+                receipt.AuditDeleteUser = authenticatedUserId;
+                receipt.AuditDeleteDate = DateTime.Now;
+                receipt.Status = false;
+
+                response.Data = await _unitOfWork.GoodsReceipt.CancelGoodsReceiptAsync(receipt);
+
+                foreach (var item in details)
+                {
+                    var currentStock = await _unitOfWork.Inventory.GetStockById(item.IdProduct, receipt.IdStore);
+
+                    if (currentStock is null)
+                    {
+                        response.IsSuccess = false;
+                        response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
+                        return response;
+                    }
+                    else
+                    {
+                        currentStock.Stock -= item.Quantity;
+                        await _unitOfWork.Inventory.UpdateStockByProducts(currentStock);
+                    }
+                }
+
+                transaction.Commit();
+                response.IsSuccess = true;
                 response.Message = ReplyMessage.MESSAGE_SAVE;
             }
             catch (Exception ex)

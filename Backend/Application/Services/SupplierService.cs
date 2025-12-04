@@ -31,8 +31,7 @@ namespace Application.Services
 
             try
             {
-                var suppliers = _unitOfWork.Supplier.GetAllQueryable()
-                                        .Where(b => b.AuditDeleteUser == null && b.AuditDeleteDate == null);
+                var suppliers = _unitOfWork.Supplier.GetAllQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

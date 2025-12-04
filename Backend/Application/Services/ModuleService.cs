@@ -36,8 +36,7 @@ namespace Application.Services
 
             try
             {
-                var modules = _unitOfWork.Module.GetAllQueryable()
-                                       .Where(m => m.AuditDeleteUser == null && m.AuditDeleteDate == null);
+                var modules = _unitOfWork.Module.GetAllQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

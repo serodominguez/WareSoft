@@ -36,8 +36,7 @@ namespace Application.Services
 
             try
             {
-                var roles = _unitOfWork.Role.GetAllQueryable()
-                                       .Where(r => r.AuditDeleteUser == null && r.AuditDeleteDate == null); //&& r.Id != 1);
+                var roles = _unitOfWork.Role.GetAllQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -85,8 +84,7 @@ namespace Application.Services
 
             try
             {
-                var roles = (await _unitOfWork.Role.GetSelectAsync())
-                                               .Where(r => r.Status == true && r.AuditDeleteUser == null && r.AuditDeleteDate == null); //&& r.Id != 1);
+                var roles = (await _unitOfWork.Role.GetSelectAsync());
 
                 if (roles is not null && roles.Any())
                 {

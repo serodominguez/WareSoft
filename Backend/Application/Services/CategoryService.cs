@@ -31,8 +31,7 @@ namespace Application.Services
 
             try
             {
-                var categories = _unitOfWork.Category.GetAllQueryable()
-                                            .Where(c => c.AuditDeleteUser == null && c.AuditDeleteDate == null);
+                var categories = _unitOfWork.Category.GetAllQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -83,8 +82,7 @@ namespace Application.Services
 
             try
             {
-                var categories = (await _unitOfWork.Category.GetSelectAsync())
-                                                    .Where(c => c.Status == true && c.AuditDeleteUser == null && c.AuditDeleteDate == null);
+                var categories = (await _unitOfWork.Category.GetSelectAsync());
 
                 if (categories is not null && categories.Any())
                 {

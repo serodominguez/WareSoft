@@ -55,7 +55,6 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Crear")]
         public async Task<IActionResult> RegisterCategory([FromBody] CategoryRequestDto requestDto)
         {
-
             var response = await _categoryService.RegisterCategory(AuthenticatedUserId, requestDto);
             return Ok(response);
         }
@@ -64,7 +63,6 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> EditCategory(int categoryId, [FromBody] CategoryRequestDto requestDto)
         {
-
             var response = await _categoryService.EditCategory(AuthenticatedUserId, categoryId, requestDto);
             return Ok(response);
         }
@@ -73,7 +71,6 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> EnableCategory(int categoryId)
         {
-
             var response = await _categoryService.EnableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
@@ -82,7 +79,6 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Editar")]
         public async Task<IActionResult> DisableCategory(int categoryId)
         {
-
             var response = await _categoryService.DisableCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }
@@ -91,7 +87,6 @@ namespace Api.Controllers
         [RequirePermission("Categorías", "Eliminar")]
         public async Task<IActionResult> RemoveCategory(int categoryId)
         {
-
             var response = await _categoryService.RemoveCategory(AuthenticatedUserId, categoryId);
             return Ok(response);
         }

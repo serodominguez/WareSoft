@@ -25,6 +25,7 @@ namespace Application.Services
         public async Task<bool> UserPermissions(int userId, string moduleName, string actionName)
         {
             var user = await _userRepository.GetByIdAsync(userId);
+
             if (user == null || !user.Status) return false;
 
             return await _permissionRepository.GetPermissionsAsync(user.IdRole, moduleName, actionName);
@@ -104,6 +105,7 @@ namespace Application.Services
             try
             {
                 var user = await _unitOfWork.User.GetByIdAsync(userId);
+
                 if (user == null || !user.Status)
                 {
                     response.IsSuccess = false;

@@ -33,8 +33,7 @@ namespace Application.Services
             var response = new BaseResponse<IEnumerable<UserResponseDto>>();
             try
             {
-                var users = _unitOfWork.User.GetUsersQueryable()
-                                        .Where(u => u.AuditDeleteUser == null && u.AuditDeleteDate == null);
+                var users = _unitOfWork.User.GetUsersQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {

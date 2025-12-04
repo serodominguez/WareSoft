@@ -17,9 +17,10 @@ namespace Infrastructure.Persistences.Repositories
         public IQueryable<UserEntity> GetUsersQueryable()
         {
             return _context.User
+                .AsNoTracking()
                 .Include(u => u.Role)
                 .Include(u => u.Store)
-                .AsNoTracking();
+                .Where(u => u.AuditDeleteUser == null && u.AuditDeleteDate == null);
         }
 
         public async Task<bool> EditUserAsync(int authenticatedUserId, UserEntity user, bool? updatePassword)

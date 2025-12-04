@@ -19,6 +19,6 @@
         public string? AuditCreateDate { get; set; }
         public string? StatusReceipt { get; set; }
 
-        public ICollection<GoodsReceiptDetailsResponseDto> GoodsReceiptDetailsResponseDto { get; set; } = null!;
+        public ICollection<GoodsReceiptDetailsResponseDto> GoodsReceiptDetails { get; set; } = null!;
     }
 }

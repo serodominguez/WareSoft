@@ -10,7 +10,7 @@ namespace Application.Interfaces
         Task<BaseResponse<IEnumerable<GoodsReceiptResponseDto>>> ListGoodsReceipt(BaseFiltersRequest filters);
         Task<BaseResponse<GoodsReceiptWithDetailsResponseDto>> GoodsReceiptById(int receiptId);
         Task<BaseResponse<bool>> RegisterGoodsReceipt(int authenticatedUserId, GoodsReceiptRequestDto requestDto);
-
+        Task<BaseResponse<bool>> CancelGoodsReceipt(int authenticatedUserId, int receiptId);
     }
 }
 

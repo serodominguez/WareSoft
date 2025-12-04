@@ -2,6 +2,7 @@
 using Application.Dtos.Request.GoodsReceipt;
 using Application.Interfaces;
 using Application.Security;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using Utilities.Static;
 
@@ -48,6 +49,14 @@ namespace Api.Controllers
         public async Task<IActionResult> RegisterGoodsReceipt([FromBody] GoodsReceiptRequestDto requestDto)
         {
             var response = await _goodsReceiptService.RegisterGoodsReceipt(AuthenticatedUserId, requestDto);
+            return Ok(response);
+        }
+
+        [HttpPut("Cancel/{receiptId:int}")]
+        [RequirePermission("Ingreso de Productos", "Eliminar")]
+        public async Task<IActionResult> CancelGoodsReceipt(int receiptId)
+        {
+            var response = await _goodsReceiptService.CancelGoodsReceipt(AuthenticatedUserId, receiptId);
             return Ok(response);
         }
     }

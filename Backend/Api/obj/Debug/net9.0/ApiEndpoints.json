@@ -620,6 +620,22 @@
   },
   {
     "ContainingType": "Api.Controllers.GoodsReceiptController",
+    "Method": "CancelGoodsReceipt",
+    "RelativePath": "api/GoodsReceipt/Cancel/{receiptId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "receiptId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Api.Controllers.GoodsReceiptController",
     "Method": "RegisterGoodsReceipt",
     "RelativePath": "api/GoodsReceipt/Register",
     "HttpMethod": "POST",
