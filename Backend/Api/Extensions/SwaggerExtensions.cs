@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace Api.Extensions
 {
@@ -17,11 +17,10 @@ namespace Api.Extensions
                     Name = "IT SOLUTIONS",
                     Email = "sergio_sistemas@outlook.com"
                 }
-
             };
+
             services.AddSwaggerGen(x =>
             {
-                openApi.Version = "v1";
                 x.SwaggerDoc("v1", openApi);
 
                 var securityScheme = new OpenApiSecurityScheme
@@ -30,20 +29,25 @@ namespace Api.Extensions
                     Description = "JWT Bearer Token",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
                 };
 
-                x.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
-                x.AddSecurityRequirement(new OpenApiSecurityRequirement
+                x.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+
+                x.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
                 {
-                    { securityScheme, new string[]{ } }
+                    {
+                        new OpenApiSecuritySchemeReference(
+                            JwtBearerDefaults.AuthenticationScheme,
+                            doc,
+                            null
+                        ),
+                        []
+                    }
                 });
             });
+
             return services;
         }
     }
