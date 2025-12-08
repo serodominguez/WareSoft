@@ -89,7 +89,6 @@ namespace Application.Mappers
                             TotalPrice = d.TotalPrice
                         })
                         .ToList()
-
             };
         }
     }

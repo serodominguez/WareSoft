@@ -13,11 +13,13 @@ namespace Api.Controllers
     {
         private readonly IGoodsReceiptService _goodsReceiptService;
         private readonly IGenerateExcelService _generateExcelService;
+        private readonly IGeneratePdfService _generatePdfService;
 
-        public GoodsReceiptController(IGoodsReceiptService goodsReceiptService, IGenerateExcelService generateExcelService)
+        public GoodsReceiptController(IGoodsReceiptService goodsReceiptService, IGenerateExcelService generateExcelService, IGeneratePdfService generatePdfService)
         {
             _goodsReceiptService = goodsReceiptService;
             _generateExcelService = generateExcelService;
+            _generatePdfService = generatePdfService;
         }
 
         [HttpGet]
@@ -42,6 +44,30 @@ namespace Api.Controllers
         {
             var response = await _goodsReceiptService.GoodsReceiptById(receiptId);
             return Ok(response);
+        }
+
+        //[HttpGet("ExportPdf/{receiptId:int}")]
+        //[RequirePermission("Ingreso de Productos", "Leer")]
+        //public async Task<IActionResult> ExportPdfGoodsReceipt(int receiptId)
+        //{
+        //    var response = await _goodsReceiptService.ExportPdfGoodsReceipt(receiptId);
+        //    var fileBytes = _generatePdfService.GoodsReceiptGeneratePdf(response.Data!);
+        //    return File(fileBytes, ContentType.ContentTypePdf);
+        //}
+
+        [HttpGet("ExportPdf/{receiptId:int}")]
+        [RequirePermission("Ingreso de Productos", "Leer")]
+        [Produces("application/pdf")]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ExportPdfGoodsReceipt(int receiptId)
+        {
+            var response = await _goodsReceiptService.GoodsReceiptById(receiptId);
+            var fileBytes = _generatePdfService.GoodsReceiptGeneratePdf(response.Data!);
+
+            var fileName = $"Recibo_{response.Data!.Code}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         [HttpPost("Register")]

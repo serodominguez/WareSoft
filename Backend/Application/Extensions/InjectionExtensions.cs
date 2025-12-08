@@ -29,6 +29,7 @@ namespace Application.Extensions
 
             services.AddTransient<IOrderingQuery, OrderingQuery>();
             services.AddTransient<ISecurity, SecurityApplication>();
+            services.AddTransient<IGeneratePdfService, GeneratePdfService>();
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IGenerateExcelService, GenerateExcelService>();

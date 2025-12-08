@@ -636,6 +636,44 @@
   },
   {
     "ContainingType": "Api.Controllers.GoodsReceiptController",
+    "Method": "ExportPdfGoodsReceipt",
+    "RelativePath": "api/GoodsReceipt/ExportPdf/{receiptId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "receiptId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.FileContentResult",
+        "MediaTypes": [
+          "application/pdf"
+        ],
+        "StatusCode": 200
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "application/pdf"
+        ],
+        "StatusCode": 404
+      },
+      {
+        "Type": "Microsoft.AspNetCore.Mvc.ProblemDetails",
+        "MediaTypes": [
+          "application/pdf"
+        ],
+        "StatusCode": 400
+      }
+    ]
+  },
+  {
+    "ContainingType": "Api.Controllers.GoodsReceiptController",
     "Method": "RegisterGoodsReceipt",
     "RelativePath": "api/GoodsReceipt/Register",
     "HttpMethod": "POST",
