@@ -1,11 +1,11 @@
 <template>
   <div>
     <BrandList :brands="brands" :loading="loading" :totalBrands="totalBrands" :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" v-model:drawer="drawer"
-      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
-      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-brand="openForm"
-      @fetch-brands="fetchBrands" @search-brands="searchBrands" @update-items-per-page="updateItemsPerPage"
-      @change-page="changePage" @download-excel="downloadExcel" />
+      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage"
+      v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @edit-brand="openForm" @fetch-brands="fetchBrands" @search-brands="searchBrands"
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
 
     <BrandForm v-model="form" :brand="selectedBrand" @saved="handleSaved" />
 

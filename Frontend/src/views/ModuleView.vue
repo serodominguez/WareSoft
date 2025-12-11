@@ -1,11 +1,11 @@
 <template>
   <div>
     <ModuleList :modules="modules" :loading="loading" :totalModules="totalModules" :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" v-model:drawer="drawer"
-      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
-      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-module="openForm"
-      @fetch-modules="fetchModules" @search-modules="searchModules" @update-items-per-page="updateItemsPerPage"
-      @change-page="changePage" @download-excel="downloadExcel" />
+      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage"
+      v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @edit-module="openForm" @fetch-modules="fetchModules" @search-modules="searchModules"
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
 
     <ModuleForm v-model="form" :module="selectedModule" @saved="handleSaved" />
 

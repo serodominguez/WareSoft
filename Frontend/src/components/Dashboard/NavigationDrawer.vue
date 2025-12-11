@@ -91,6 +91,7 @@ export default defineComponent({
       linkStore: [
         { icon: 'category', text: 'Categorías', route: '/categorias', module: 'categorias' },
         { icon: 'contact_page', text: 'Clientes', route: '/clientes', module: 'clientes' },
+        { icon: 'add_shopping_cart', text: 'Ingresos', route: '/ingresos', module: 'ingreso de productos' },
         { icon: 'copyright', text: 'Marcas', route: '/marcas', module: 'marcas' },
         { icon: 'inventory_2', text: 'Productos', route: '/productos', module: 'productos' },
         { icon: 'contacts', text: 'Proveedores', route: '/proveedores', module: 'proveedores' },

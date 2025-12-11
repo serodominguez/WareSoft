@@ -6,6 +6,7 @@ import { normalize } from '@/helpers/utils';
 import Brand from '@/store/modules/Brand';
 import Category from '@/store/modules/Category';
 import Customer from '@/store/modules/Customer';
+import GoodsReceipt from './modules/GoodsReceipt';
 import Module from '@/store/modules/Module';
 import Permission from '@/store/modules/Permission';
 import Product from './modules/Product';
@@ -13,7 +14,6 @@ import Role from '@/store/modules/Role';
 import Store from '@/store/modules/Store';
 import Supplier from './modules/Supplier';
 import User from '@/store/modules/User';
-import SupplierForm from '@/components/Supplier/SupplierForm.vue';
 
 interface UserPermission {
   module: string;
@@ -247,6 +247,7 @@ const store = createStore<RootState>({
     brand: Brand,
     category: Category,
     customer: Customer,
+    goodsreceipt: GoodsReceipt,
     role: Role,
     module: Module,
     permission: Permission,

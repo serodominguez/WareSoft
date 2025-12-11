@@ -5,6 +5,7 @@ import HomeView from '../views/HomeView.vue'
 import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import CustomerView from '@/views/CustomerView.vue';
+import GoodsReceiptView from '@/views/GoodsReceiptView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ModuleView from '@/views/ModuleView.vue';
 import PermissionView from '@/views/PermissionView.vue';
@@ -65,6 +66,15 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: true,
       module: "clientes",
+    },
+  },
+  {
+    path: "/ingresos",
+    name: "goodsreceipt",
+    component: GoodsReceiptView,
+    meta: {
+      requiresAuth: true,
+      module: "ingreso de productos",
     },
   },
   {

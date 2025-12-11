@@ -1,6 +1,6 @@
 <template>
   <v-data-table :headers="headers" :items="permissions" :loading="loading" loading-text="Cargando permisos..."
-    no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4" :hide-default-footer="true">
+    no-data-text="Seleccione un rol y presione en Cargar" class="elevation-1 mt-4" :items-per-page="-1" :hide-default-footer="true" > <!--:items-per-page-options="[10, 20, { value: -1, title: 'Todos' }]"-->
     <template v-slot:item.permissions.crear="{ item }">
       <v-checkbox v-model="item.permissions.crear" color="indigo" hide-details @change="$emit('permission-changed')" />
     </template>

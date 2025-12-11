@@ -2,10 +2,11 @@
   <div>
     <ProductList :products="products" :loading="loading" :totalProducts="totalProducts"
       :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
-      :canDelete="canDelete" v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
-      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
-      @edit-product="openForm" @fetch-products="fetchProducts" @search-products="searchProducts"
-      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
+      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer"
+      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
+      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-product="openForm"
+      @fetch-products="fetchProducts" @search-products="searchProducts" @update-items-per-page="updateItemsPerPage"
+      @change-page="changePage" @download-excel="downloadExcel" />
 
     <ProductForm v-model="form" :product="selectedProduct" @saved="handleSaved" />
 

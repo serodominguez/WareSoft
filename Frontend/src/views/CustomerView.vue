@@ -2,16 +2,17 @@
   <div>
     <CustomerList :customers="customers" :loading="loading" :totalCustomers="totalCustomers"
       :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
-      :canDelete="canDelete" v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
-      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
-      @edit-customer="openForm" @fetch-customers="fetchCustomers" @search-customers="searchCustomers"
-      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
+      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer"
+      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
+      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-customer="openForm"
+      @fetch-customers="fetchCustomers" @search-customers="searchCustomers" @update-items-per-page="updateItemsPerPage"
+      @change-page="changePage" @download-excel="downloadExcel" />
 
     <CustomerForm v-model="form" :customer="selectedCustomer" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedCustomer?.idCustomer || 0"
-      :item="selectedCustomer?.names || ''" :action="action" moduleName="customer" entityName="Customer" name="Cliente"
-      gender="male" @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedCustomer?.idCustomer || 0" :item="selectedCustomer?.names || ''"
+      :action="action" moduleName="customer" entityName="Customer" name="Cliente" gender="male"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 

@@ -1,17 +1,15 @@
 <template>
   <div>
-    <SupplierList :suppliers="suppliers" :loading="loading" :totalSuppliers="totalSuppliers"
-      :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
-      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer"
-      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
-      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-supplier="openForm"
-      @fetch-supplier="fetchSuppliers" @search-suppliers="searchSuppliers" @update-items-per-page="updateItemsPerPage"
-      @change-page="changePage" @download-excel="downloadExcel" />
+    <GoodsReceiptList :goodsreceipt="goodsreceipt" :loading="loading" :totalGoodsReceipt="totalGoodsReceipt" :downloadingExcel="downloadingExcel"
+      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage"
+      v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @view-goodsreceipt="openForm" @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
 
-    <SupplierForm v-model="form" :supplier="selectedSupplier" @saved="handleSaved" />
 
-    <CommonModal v-model="modal" :itemId="selectedSupplier?.idSupplier || 0" :item="selectedSupplier?.companyName || ''"
-      :action="action" moduleName="supplier" entityName="Supplier" name="Proveedor" gender="male"
+    <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" :item="selectedGoodsReceipt?.code || ''"
+      :action="action" moduleName="goodsreceipt" entityName="GoodsReceipt" name="Ingreso" gender="male"
       @action-completed="handleActionCompleted" />
   </div>
 </template>
@@ -20,17 +18,15 @@
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { Supplier } from '@/interfaces/supplierInterface';
+import { GoodsReceipt } from '@/interfaces/goodsReceiptInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
-import SupplierList from '@/components/Supplier/SupplierList.vue';
-import SupplierForm from '@/components/Supplier/SupplierForm.vue';
+import GoodsReceiptList from '@/components/GoodsReceipt/GoodsReceiptList.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
 export default defineComponent({
-  name: 'SupplierView',
+  name: 'GoodsReceiptView',
   components: {
-    SupplierList,
-    SupplierForm,
+    GoodsReceiptList,
     CommonModal
   },
   setup() {
@@ -43,80 +39,82 @@ export default defineComponent({
       currentPage: 1,
       itemsPerPage: 10,
       search: null as string | null,
-      form: false,
-      modal: false,
-      selectedSupplier: null as Supplier | null,
-      action: 0,
-      selectedFilter: 'Empresa',
+      selectedFilter: 'Código',
       drawer: false,
       state: 'Activos',
       startDate: null,
       endDate: null,
+      form: false,
+      modal: false,
+      selectedGoodsReceipt: null as GoodsReceipt | null,
+      action: 0, 
       downloadingExcel: false
     };
   },
   computed: {
-    suppliers() {
-      return this.store.getters['supplier/suppliers'];
+    goodsreceipt() {
+      return this.store.getters['goodsreceipt/goodsreceipt'];
     },
     loading() {
-      return this.store.getters['supplier/loading'];
+      return this.store.getters['goodsreceipt/loading'];
     },
-    totalSuppliers() {
-      return this.store.getters['supplier/totalSuppliers'];
+    totalGoodsReceipt() {
+      return this.store.getters['goodsreceipt/totalGoodsReceipt'];
     },
     stateFilter(): number {
       return this.state === 'Activos' ? 1 : 0;
     },
     canCreate(): boolean {
-      return this.$store.getters.hasPermission('proveedores', 'crear');
+      return this.$store.getters.hasPermission('ingreso de productos', 'crear');
     },
     canRead(): boolean {
-      return this.$store.getters.hasPermission('proveedores', 'leer');
+      return this.$store.getters.hasPermission('ingreso de productos', 'leer');
     },
     canEdit(): boolean {
-      return this.$store.getters.hasPermission('proveedores', 'editar');
+      return this.$store.getters.hasPermission('ingreso de productos', 'editar');
     },
     canDelete(): boolean {
-      return this.$store.getters.hasPermission('proveedores', 'eliminar');
+      return this.$store.getters.hasPermission('ingreso de productos', 'eliminar');
     }
   },
   methods: {
-    openModal(payload: { supplier: Supplier, action: number }) {
-      this.selectedSupplier = payload.supplier;
+    openModal(payload: { goodsreceipt: GoodsReceipt, action: number }) {
+      this.selectedGoodsReceipt = payload.goodsreceipt;
       this.action = payload.action;
       this.modal = true;
     },
-
-    openForm(supplier?: Supplier) {
-      this.selectedSupplier = supplier ? { ...supplier } : {
-        idSupplier: null,
+    openForm(goodsreceipt?: GoodsReceipt) {
+      this.selectedGoodsReceipt = goodsreceipt ? { ...goodsreceipt } : {
+        idReceipt: null,
+        code: '',
+        type: '',
+        storeName: '',
         companyName: '',
-        contact: '',
-        email: '',
-        phoneNumber: null,
+        documentDate: '',
+        documentType: '',
         auditCreateDate: '',
-        statusSupplier: ''
+        statusReceipt: ''
       };
       this.form = true;
     },
-
-    async fetchSuppliers(params?: any) {
+    async fetchGoodsReceipt(params?: any) {
       try {
-        await this.store.dispatch('supplier/fetchSuppliers', params || {
+        await this.store.dispatch('goodsreceipt/fetchGoodsReceipt', params || {
           pageNumber: this.currentPage,
           pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
+          stateFilter: this.stateFilter,
+          sort: 'IdReceipt',
+          order: 'asc' 
         });
       } catch (error) {
         handleSilentError(error);
       }
     },
-
     getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Empresa": 1,
-        "Contacto": 2
+      const filterMap: { [key: string]: number } = { 
+        "Código": 1,
+        "Tienda": 2,
+        "Proveedor": 3 
       };
       const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
       const textFilterValue = params.search?.trim() || null;
@@ -134,8 +132,7 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
-
-    async searchSuppliers(params: any) {
+    async searchGoodsReceipt(params: any) {
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
       this.state = params.state;
@@ -143,20 +140,21 @@ export default defineComponent({
       this.endDate = params.endDate;
 
       try {
-        await this.store.dispatch("supplier/fetchSuppliers", {
+        await this.store.dispatch("goodsreceipt/fetchGoodsReceipt", {
           pageNumber: 1,
           pageSize: this.itemsPerPage,
+          sort: 'IdReceipt',
+          order: 'asc', 
           ...this.getFilterParams(params)
         });
         this.currentPage = 1;
       } catch (error) {
-        handleApiError(error, 'Error al buscar proveedores');
+        handleApiError(error, 'Error al buscar ingresos');
       }
     },
-
-    refreshSuppliers() {
+    refreshGoodsReceipt() {
       if (this.search?.trim()) {
-        this.searchSuppliers({
+        this.searchGoodsReceipt({
           search: this.search,
           selectedFilter: this.selectedFilter,
           state: this.state,
@@ -164,27 +162,26 @@ export default defineComponent({
           endDate: this.endDate
         });
       } else {
-        this.fetchSuppliers();
+        this.fetchGoodsReceipt();
       }
     },
-
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
       this.currentPage = 1;
-      this.refreshSuppliers();
+      this.refreshGoodsReceipt();
     },
-
     changePage(page: number) {
       this.currentPage = page;
-      this.refreshSuppliers();
+      this.refreshGoodsReceipt();
     },
-
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
-        await this.store.dispatch("supplier/downloadSuppliersExcel", {
+        await this.store.dispatch("goodsreceipt/downloadGoodsReceiptExcel", {
           pageNumber: this.currentPage,
           pageSize: this.itemsPerPage,
+          sort: 'IdReceipt',
+          order: 'asc', 
           ...this.getFilterParams(params)
         });
         this.toast.success('Archivo descargado correctamente');
@@ -194,7 +191,6 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
-
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 
@@ -204,17 +200,15 @@ export default defineComponent({
 
       return `${year}-${month}-${day}`;
     },
-
     handleSaved() {
-      this.fetchSuppliers();
+      this.fetchGoodsReceipt();
     },
-
     handleActionCompleted() {
-      this.fetchSuppliers();
+      this.fetchGoodsReceipt();
     }
   },
   mounted() {
-    this.fetchSuppliers();
+    this.fetchGoodsReceipt();
   }
 });
 </script>

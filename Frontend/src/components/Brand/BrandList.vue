@@ -130,7 +130,11 @@ export default defineComponent({
     downloadingExcel: {
       type: Boolean,
       default: false
-    }
+    },
+    itemsPerPage: {
+    type: Number,
+    default: 10
+  }
   },
   /**
    * Eventos que este componente puede emitir al padre
@@ -153,7 +157,6 @@ export default defineComponent({
   ],
   data() {
     return {
-      itemsPerPage: 10,                 // Items por página predeterminados
       pages: "Marcas por Página",      // Texto para selector de items por página
       search: null as string | null,  // Término de búsqueda actual
       filterOptions: ['Marca']       // Opciones disponibles para filtrar

@@ -120,7 +120,11 @@ export default defineComponent({
     downloadingExcel: {
       type: Boolean,
       default: false
-    }
+    },
+    itemsPerPage: {
+      type: Number,
+      default: 10
+    } 
   },
   emits: [
     'open-form',
@@ -139,7 +143,6 @@ export default defineComponent({
   ],
   data() {
     return {
-      itemsPerPage: 10,
       pages: "Módulos por Página",
       search: null as string | null,
       filterOptions: ['Módulo']

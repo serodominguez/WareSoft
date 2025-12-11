@@ -1,7 +1,7 @@
 <template>
   <div>
     <RoleList :roles="roles" :loading="loading" :totalRoles="totalRoles" :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" v-model:drawer="drawer"
+      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer"
       v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
       v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-role="openForm"
       @fetch-roles="fetchRoles" @search-roles="searchRoles" @update-items-per-page="updateItemsPerPage"

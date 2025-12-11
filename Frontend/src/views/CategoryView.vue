@@ -2,16 +2,17 @@
   <div>
     <CategoryList :categories="categories" :loading="loading" :totalCategories="totalCategories"
       :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit"
-      :canDelete="canDelete" v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
-      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
-      @edit-category="openForm" @fetch-categories="fetchCategories" @search-categories="searchCategories"
+      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer"
+      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
+      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-category="openForm"
+      @fetch-categories="fetchCategories" @search-categories="searchCategories"
       @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
 
     <CategoryForm v-model="form" :category="selectedCategory" @saved="handleSaved" />
 
     <CommonModal v-model="modal" :itemId="selectedCategory?.idCategory || 0"
-      :item="selectedCategory?.categoryName || ''" :action="action" moduleName="category" entityName="Category" name="Categoría"
-      gender="female" @action-completed="handleActionCompleted" />
+      :item="selectedCategory?.categoryName || ''" :action="action" moduleName="category" entityName="Category"
+      name="Categoría" gender="female" @action-completed="handleActionCompleted" />
   </div>
 </template>
 

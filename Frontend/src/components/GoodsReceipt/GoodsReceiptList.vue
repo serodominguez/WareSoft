@@ -1,41 +1,34 @@
 <template>
   <div>
     <v-card elevation="2">
-      <v-data-table-server :headers="headers" :items="stores" :search="search || undefined" :items-per-page-text="pages"
-        :items-per-page-options="[10, 20, 50]" :items-per-page="itemsPerPage" :items-length="totalStores"
+      <v-data-table-server :headers="headers" :items="goodsreceipt" :search="search || undefined" :items-per-page-text="pages"
+        :items-per-page-options="[10, 20, 50]" :items-per-page="itemsPerPage" :items-length="totalGoodsReceipt"
         :loading="loading" loading-text="Cargando... Espere por favor"
         @update:items-per-page="$emit('update-items-per-page', $event)" @update:page="$emit('change-page', $event)">
         <template v-slot:item="{ item }">
           <tr>
-            <td>{{ (item as Store).storeName }}</td>
-            <td>{{ (item as Store).manager }}</td>
-            <td>{{ (item as Store).address }}</td>
-            <td>{{ (item as Store).city }}</td>
-            <td>{{ (item as Store).auditCreateDate }}</td>
-            <td>{{ (item as Store).statusStore }}</td>
+            <td>{{ (item as GoodsReceipt).code }}</td>
+            <td>{{ (item as GoodsReceipt).type }}</td>
+            <td>{{ (item as GoodsReceipt).storeName}}</td>
+            <td>{{ (item as GoodsReceipt).companyName }}</td>
+            <td>{{ (item as GoodsReceipt).documentDate }}</td>
+            <td>{{ (item as GoodsReceipt).documentType }}</td>
+            <td>{{ (item as GoodsReceipt).auditCreateDate }}</td>
+            <td>{{ (item as GoodsReceipt).statusReceipt }}</td>
             <td class="text-center">
-              <v-btn v-if="canEdit && (item as Store).statusStore == 'Activo'" color="indigo" icon="edit" variant="text"
-                @click="$emit('edit-store', item)" size="small" title="Editar">
+              <v-btn color="indigo" icon="tab" variant="text" @click="$emit('view-goodsreceipt', item)" size="small" title="Ver">
               </v-btn>
-              <template v-if="canEdit && (item as Store).statusStore == 'Inactivo'">
-                <v-btn color="green" icon="check" variant="text"
-                  @click="$emit('open-modal', { store: item, action: 1 })" size="small" title="Activar">
+              <template v-if="canEdit && (item as GoodsReceipt).statusReceipt == 'Activo'">
+                <v-btn color="red" icon="block" variant="text" @click="$emit('open-modal', { goodsreceipt: item, action: 2 })"
+                  size="small" title="Anular">
                 </v-btn>
               </template>
-              <template v-if="canEdit && (item as Store).statusStore == 'Activo'">
-                <v-btn color="red" icon="block" variant="text"
-                  @click="$emit('open-modal', { store: item, action: 2 })" size="small" title="Desactivar">
-                </v-btn>
-              </template>
-              <v-btn v-if="canDelete" color="grey" icon="delete" variant="text"
-                @click="$emit('open-modal', { store: item, action: 0 })" size="small" title="Eliminar">
-              </v-btn>
             </td>
           </tr>
         </template>
         <template v-slot:top>
           <v-toolbar>
-            <v-toolbar-title>Gestión de Tiendas</v-toolbar-title>
+            <v-toolbar-title>Gestión de Ingresos</v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
             <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
@@ -51,7 +44,7 @@
           </v-toolbar>
         </template>
         <template v-slot:no-data>
-          <v-btn color="indigo" @click="$emit('fetch-stores')"> Reset </v-btn>
+          <v-btn color="indigo" @click="$emit('fetch-goodsreceipt')"> Reset </v-btn>
         </template>
       </v-data-table-server>
     </v-card>
@@ -63,24 +56,24 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { Store } from '@/interfaces/storeInterface';
+import { GoodsReceipt } from '@/interfaces/goodsReceiptInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
 export default defineComponent({
-  name: 'StoreList',
+  name: 'GoodsReceiptList',
   components: {
     CommonFilters
   },
   props: {
-    stores: {
-      type: Array as PropType<Store[]>,
+    goodsreceipt: {
+      type: Array as PropType<GoodsReceipt[]>,
       required: true
     },
     loading: {
       type: Boolean,
       required: true
     },
-    totalStores: {
+    totalGoodsReceipt: {
       type: Number,
       required: true
     },
@@ -106,7 +99,7 @@ export default defineComponent({
     },
     selectedFilter: {
       type: String,
-      default: 'Tienda'
+      default: 'Ingreso'
     },
     state: {
       type: String,
@@ -125,41 +118,43 @@ export default defineComponent({
       default: false
     },
     itemsPerPage: {
-      type: Number,
-      default: 10
-    }
+    type: Number,
+    default: 10
+  }
   },
   emits: [
-    'open-form',
-    'open-modal',
-    'edit-store',
-    'fetch-stores',
-    'search-stores',
-    'update-items-per-page',
-    'change-page',
-    'download-excel',
-    'update:drawer',
-    'update:selectedFilter',
-    'update:state',
-    'update:startDate',
-    'update:endDate'
+    'open-form',                      
+    'open-modal',       
+    'view-goodsreceipt',                  
+    'fetch-goodsreceipt',              
+    'search-goodsreceipt',             
+    'update-items-per-page',       
+    'change-page',               
+    'download-excel',          
+    'update:drawer',          
+    'update:selectedFilter',   
+    'update:state',          
+    'update:startDate',      
+    'update:endDate'        
   ],
   data() {
     return {
-      pages: "Tiendas por Página",
-      search: null as string | null,
-      filterOptions: ['Tienda', 'Encargado', 'Dirección', 'Ciudad']
+      pages: "Ingresos por Página",      
+      search: null as string | null, 
+      filterOptions: ['Código', 'Tienda', 'Proveedor']       
     };
   },
   computed: {
     headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
       return [
+        { title: 'Código', key: 'code', sortable: false },
+        { title: 'Tipo', key: 'type', sortable: false },
         { title: 'Tienda', key: 'storeName', sortable: false },
-        { title: 'Encargado', key: 'manager', sortable: false },
-        { title: 'Dirección', key: 'address', sortable: false },
-        { title: 'Ciudad', key: 'city', sortable: false },
+        { title: 'Proveedor', key: 'companyName', sortable: false },
+        { title: 'Fecha del Documento', key: 'documentDate', sortable: false },
+        { title: 'Tipo de Documento', key: 'documentType', sortable: false },
         { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
-        { title: 'Estado', key: 'statusStore', sortable: false },
+        { title: 'Estado', key: 'statusReceipt', sortable: false },
         { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
       ];
     },
@@ -206,7 +201,7 @@ export default defineComponent({
   },
   methods: {
     handleSearch() {
-      this.$emit('search-stores', {
+      this.$emit('search-goodsreceipt', {
         search: this.search,
         selectedFilter: this.selectedFilterModel,
         state: this.stateModel,
@@ -214,7 +209,6 @@ export default defineComponent({
         endDate: this.endDateModel
       });
     },
-
     handleDownloadExcel() {
       this.$emit('download-excel', {
         search: this.search,

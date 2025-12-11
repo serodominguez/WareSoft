@@ -122,6 +122,10 @@ export default defineComponent({
     downloadingExcel: {
       type: Boolean,
       default: false
+    },
+    itemsPerPage: {
+      type: Number,
+      default: 10
     }
   },
   emits: [
@@ -141,7 +145,6 @@ export default defineComponent({
   ],
   data() {
     return {
-      itemsPerPage: 10,
       pages: "Proveedores por Página",
       search: null as string | null,
       filterOptions: ['Empresa', 'Contacto']
