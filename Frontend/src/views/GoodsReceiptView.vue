@@ -1,18 +1,19 @@
 <template>
   <div>
-    <GoodsReceiptList v-if="!form" :goodsreceipt="goodsreceipt" :loading="loading" :totalGoodsReceipt="totalGoodsReceipt" :downloadingExcel="downloadingExcel"
-      :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage"
-      v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
-      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
-      @view-goodsreceipt="openForm" @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
+    <GoodsReceiptList v-if="!form" :goodsreceipt="goodsreceipt" :loading="loading" :totalGoodsReceipt="totalGoodsReceipt" 
+      :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" 
+      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer" 
+      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate" 
+      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @view-goodsreceipt="openForm" 
+      @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
       @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
     
-      <GoodsReceiptForm v-if="form" v-model="form" 
+    <GoodsReceiptForm v-if="form" v-model="form"
       :receiptDetails="selectedReceiptDetails" @saved="handleSaved" @close="closeForm" />
 
-    <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" :item="selectedGoodsReceipt?.code || ''"
-      :action="action" moduleName="goodsreceipt" entityName="GoodsReceipt" name="Entrada" gender="female"
-      @action-completed="handleActionCompleted" />
+    <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" 
+      :item="selectedGoodsReceipt?.code || ''" :action="action" moduleName="goodsreceipt" 
+      entityName="GoodsReceipt" name="Entrada" gender="female" @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -90,58 +91,41 @@ export default defineComponent({
       this.action = payload.action;
       this.modal = true;
     },
-    openForm(goodsreceipt?: GoodsReceipt) {
-/*       this.selectedGoodsReceipt = goodsreceipt ? {
-        idReceipt: goodsreceipt.idReceipt,
-        code: goodsreceipt.code,
-        type: goodsreceipt.type,
-        storeName: goodsreceipt.storeName,
-        idSupplier: goodsreceipt.idSupplier,
-        companyName: goodsreceipt.companyName,
-        documentDate: new Date(goodsreceipt.documentDate), // <- Convertir string a Date
-        documentType: goodsreceipt.documentType,
-        documentNumber: goodsreceipt.documentNumber,
-        annotations: goodsreceipt.annotations,
-        auditCreateDate: goodsreceipt.auditCreateDate, // Esta puede quedar como string si no está en GoodsReceiptForm
-        statusReceipt: goodsreceipt.statusReceipt
-      } : {
-        idReceipt: null,
-        code: '',
-        type: '',
-        storeName: '',
-        documentType: '',
-        documentNumber: '',
-        documentDate: null, // <- null en lugar de new Date() para formulario nuevo
-        idSupplier: null,
-        companyName: '',
-        annotations: '',
-        auditCreateDate: '',
-        statusReceipt: ''
-      }; */
+    
+    async openForm(goodsreceipt?: GoodsReceipt) {
+      if (goodsreceipt?.idReceipt) {
+        // Vista de solo lectura: cargar los detalles
+        try {
+          await this.store.dispatch('goodsreceipt/fetchGoodsReceiptById', goodsreceipt.idReceipt);
+          this.selectedGoodsReceipt = this.store.getters['goodsreceipt/selectedGoodsReceipt'];
+        } catch (error) {
+          handleApiError(error, 'Error al cargar los detalles de la entrada');
+          return;
+        }
+      } else {
+        // Nuevo registro: inicializar vacío
+        this.selectedGoodsReceipt = {
+          idReceipt: null,
+          code: '',
+          type: '',
+          storeName: '',
+          documentType: '',
+          documentNumber: '',
+          documentDate: '',
+          idSupplier: null,
+          companyName: '',
+          annotations: '',
+          auditCreateDate: '',
+          statusReceipt: ''
+        };
+      }
+      
       this.form = true;
     },
+    
     closeForm() {
       this.form = false;
       this.selectedGoodsReceipt = null;
-    },
-
-    async viewGoodsReceipt(goodsreceipt: GoodsReceipt) {
-      try {
-        // Cargar los detalles de la entrada
-        await this.store.dispatch('goodsreceipt/fetchGoodsReceiptById', goodsreceipt.idReceipt);
-        
-        // Obtener la entrada completa del store
-        const fullReceipt = this.store.getters['goodsreceipt/selectedGoodsReceipt'];
-        
-        this.selectedGoodsReceipt = {
-          ...fullReceipt,
-          idReceipt: goodsreceipt.idReceipt
-        };
-        
-        this.form = true;
-      } catch (error) {
-        handleApiError(error, 'Error al cargar los detalles de la entrada');
-      }
     },
 
     async fetchGoodsReceipt(params?: any) {
@@ -157,6 +141,7 @@ export default defineComponent({
         handleSilentError(error);
       }
     },
+    
     getFilterParams(params: any) {
       const filterMap: { [key: string]: number } = { 
         "Código": 1,
@@ -179,6 +164,7 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
+    
     async searchGoodsReceipt(params: any) {
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
@@ -199,6 +185,7 @@ export default defineComponent({
         handleApiError(error, 'Error al buscar ingresos');
       }
     },
+    
     refreshGoodsReceipt() {
       if (this.search?.trim()) {
         this.searchGoodsReceipt({
@@ -212,15 +199,18 @@ export default defineComponent({
         this.fetchGoodsReceipt();
       }
     },
+    
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
       this.currentPage = 1;
       this.refreshGoodsReceipt();
     },
+    
     changePage(page: number) {
       this.currentPage = page;
       this.refreshGoodsReceipt();
     },
+    
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
@@ -238,6 +228,7 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
+    
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 
@@ -247,9 +238,11 @@ export default defineComponent({
 
       return `${year}-${month}-${day}`;
     },
+    
     handleSaved() {
       this.fetchGoodsReceipt();
     },
+    
     handleActionCompleted() {
       this.fetchGoodsReceipt();
     }

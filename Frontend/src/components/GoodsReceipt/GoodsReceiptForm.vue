@@ -3,7 +3,6 @@
     <v-toolbar>
       <v-toolbar-title class="text-truncate" style="max-width: 100px;">Entradas</v-toolbar-title>
       <v-divider class="mx-2" inset vertical></v-divider>
-      <div class="font-weight-bold" style="font-size: 16px;">{{ }} </div>
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card-text>
@@ -73,16 +72,13 @@
             </td>
             <td v-else>{{ formatCurrency(item.cost) }}</td>
             <td>{{ formatCurrency(item.quantity * item.cost) }}</td>
-            <td v-if="!localReceipt.idReceipt">
-              <v-btn color="red" icon="delete" variant="text" @click="removeProduct(item)" size="small"></v-btn>
-            </td>
           </tr>
         </template>
       </v-data-table>
       <v-col cols="12" class="d-flex justify-end">
         <strong>Total Bs.</strong>{{ formatCurrency(totalCost) }}
       </v-col>
-      <v-col ols="12" md="12" lg="12" xl="12">
+      <v-col cols="12" md="12" lg="12" xl="12">
         <v-text-field color="indigo" variant="underlined" label="Observaciones" counter="80" :maxlength="80"
           v-model="localReceipt.annotations" @keyup="uppercase" :readonly="!!localReceipt.idReceipt"></v-text-field>
       </v-col>
@@ -103,6 +99,7 @@
         {{ localReceipt.idReceipt ? 'Cerrar' : 'Cancelar' }}
       </v-btn>
     </v-card-actions>
+    <CommonProductIn v-model="productModal" @close="productModal = false" />
   </v-card>
 </template>
 
@@ -112,6 +109,7 @@ import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import axios from 'axios';
 import { handleApiError } from '@/helpers/errorHandler';
+import CommonProductIn from '@/components/Common/CommonProductIn.vue';
 
 interface GoodsReceiptDetail {
   idProduct: number;
@@ -144,6 +142,9 @@ interface FormRef {
 
 export default defineComponent({
   name: 'GoodsReceiptForm',
+  components: {
+    CommonProductIn
+  },
   props: {
     modelValue: {
       type: Boolean,
@@ -183,8 +184,6 @@ export default defineComponent({
       downloading: false,
       alert: false,
       productModal: false,
-      productSearch: '',
-      warningMessage: '',
       localReceipt: { ...this.receipt } as GoodsReceiptForm,
       details: [] as GoodsReceiptDetail[],
       documentTypes: [] as string[],
@@ -211,10 +210,6 @@ export default defineComponent({
         { title: 'SubTotal', key: 'subtotal', sortable: false }
       ];
 
-      if (!this.localReceipt.idReceipt) {
-        baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false });
-      }
-
       return baseHeaders;
     },
     documentNumberRules() {
@@ -232,24 +227,6 @@ export default defineComponent({
     },
     loadingSuppliers(): boolean {
       return this.store.getters['supplier/loading'];
-    },
-    products() {
-      const productsFromStore = this.store.getters['product/products'];
-      return Array.isArray(productsFromStore) ? productsFromStore : [];
-    },
-    loadingProducts(): boolean {
-      return this.store.getters['product/loading'];
-    },
-    filteredProducts() {
-      if (!this.productSearch) return this.products;
-      
-      const search = this.productSearch.toLowerCase();
-      return this.products.filter((p: any) => 
-        p.code?.toLowerCase().includes(search) ||
-        p.description?.toLowerCase().includes(search) ||
-        p.material?.toLowerCase().includes(search) ||
-        p.color?.toLowerCase().includes(search)
-      );
     }
   },
   watch: {
@@ -302,34 +279,6 @@ export default defineComponent({
         stateFilter: 1
       });
     },
-    addProduct(product: any) {
-      const exists = this.details.some(item => item.idProduct === product.idProduct);
-      
-      if (exists) {
-        this.warningMessage = 'El producto ya está en la lista';
-        return;
-      }
-
-      this.details.push({
-        idProduct: product.idProduct,
-        code: product.code,
-        description: product.description,
-        material: product.material || '',
-        color: product.color || '',
-        categoryName: product.categoryName,
-        brandName: product.brandName,
-        quantity: 0,
-        cost: 0
-      });
-      
-      this.warningMessage = '';
-    },
-    removeProduct(item: GoodsReceiptDetail) {
-      const index = this.details.indexOf(item);
-      if (index > -1) {
-        this.details.splice(index, 1);
-      }
-    },
     async saveReceipt() {
       const form = this.$refs.form as FormRef;
       
@@ -343,7 +292,6 @@ export default defineComponent({
         return;
       }
 
-      // Validar que todos los productos tengan cantidad y costo
       const invalidProducts = this.details.filter(d => d.quantity <= 0 || d.cost <= 0);
       if (invalidProducts.length > 0) {
         this.toast.warning('Todos los productos deben tener cantidad y costo válidos');
@@ -427,7 +375,6 @@ export default defineComponent({
   mounted() {
     this.details = [...this.receiptDetails];
     
-    // Cargar proveedores para el select
     this.store.dispatch('supplier/fetchSuppliers', {
       pageNumber: 1,
       pageSize: 100,
