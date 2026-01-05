@@ -1,10 +1,15 @@
-import { GoodsReceipt } from '@/interfaces/goodsReceiptInterface';
+import { GoodsReceipt, GoodsReceiptDetail } from '@/interfaces/goodsReceiptInterface';
 import { goodsReceiptService } from '@/services/goodsReceiptService';
 import { BaseState, FilterParams } from '@/interfaces/baseInterface'
 
-const state: BaseState<GoodsReceipt> = {
+interface GoodsReceiptState extends BaseState<GoodsReceipt> {
+  selectedReceiptDetails: GoodsReceiptDetail[];
+}
+
+const state: GoodsReceiptState = {
   items: [] as GoodsReceipt[],
   selectedItem: null as GoodsReceipt | null,
+  selectedReceiptDetails: [] as GoodsReceiptDetail[],
   totalItems: 0,
   loading: false,
   error: null as string | null,
@@ -21,6 +26,9 @@ const mutations = {
   SET_SELECTED_ITEMS(state: BaseState<GoodsReceipt>, item: GoodsReceipt | null) {
     state.selectedItem = item;
   },
+  SET_SELECTED_RECEIPT_DETAILS(state: GoodsReceiptState, details: GoodsReceiptDetail[]) {
+    state.selectedReceiptDetails = details;
+  },
   SET_LOADING(state: BaseState<GoodsReceipt>, loading: boolean) {
     state.loading = loading;
   },
@@ -33,6 +41,7 @@ const mutations = {
 };
 
 const actions = {
+  // Obtener lista de entradas
   async fetchGoodsReceipt({ commit }: any, params: FilterParams = {}) {
     commit("SET_LOADING", true);
     commit("SET_ITEMS", []);
@@ -54,6 +63,7 @@ const actions = {
     }
   },
 
+  // Descargar Excel
   async downloadGoodsReceiptExcel({ state }: any, params?: FilterParams) {
     try {
       const filterParams = params || state.lastFilterParams || {};
@@ -63,11 +73,85 @@ const actions = {
       throw error;
     }
   },
+
+  // Obtener entrada por ID con detalles
+  async fetchGoodsReceiptById({ commit }: any, receiptId: number) {
+    commit("SET_LOADING", true);
+
+    try {
+      const result = await goodsReceiptService.getReceiptWithDetails(receiptId);
+      
+      if (result.isSuccess) {
+        commit("SET_SELECTED_ITEM", result.data);
+        commit("SET_SELECTED_RECEIPT_DETAILS", result.data.details || []);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
+
+  // Registrar nueva entrada
+  async registerGoodsReceipt({ dispatch, state }: any, receiptData: any) {
+    try {
+      const result = await goodsReceiptService.register(receiptData);
+      
+      if (result.isSuccess) {
+        // Recargar lista con los últimos filtros
+        dispatch("fetchGoodsReceipt", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Anular entrada
+  async cancelGoodsReceipt({ dispatch, state }: any, receiptId: number) {
+    try {
+      const result = await goodsReceiptService.cancel(receiptId);
+      
+      if (result.isSuccess) {
+        // Recargar lista con los últimos filtros
+        dispatch("fetchGoodsReceipt", state.lastFilterParams || {});
+      }
+      
+      return result;
+    } catch (error: any) {
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Exportar PDF
+  async exportGoodsReceiptPdf(_: any, receiptId: number) {
+    try {
+      const blob = await goodsReceiptService.exportPdf(receiptId);
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Entrada_${receiptId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { isSuccess: true };
+    } catch (error: any) {
+      console.error('Error al exportar PDF:', error);
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  }
 };
 
 const getters = {
   goodsreceipt: (state: BaseState<GoodsReceipt>) => state.items,
   selectedGoodsReceipt: (state: BaseState<GoodsReceipt>) => state.selectedItem,
+  selectedReceiptDetails: (state: GoodsReceiptState) => state.selectedReceiptDetails,
   loading: (state: BaseState<GoodsReceipt>) => state.loading,
   error: (state: BaseState<GoodsReceipt>) => state.error,
   totalGoodsReceipt: (state: BaseState<GoodsReceipt>) => state.totalItems || 0,

@@ -69,12 +69,12 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/ingresos",
+    path: "/entradas",
     name: "goodsreceipt",
     component: GoodsReceiptView,
     meta: {
       requiresAuth: true,
-      module: "ingreso de productos",
+      module: "entrada de productos",
     },
   },
   {

@@ -28,7 +28,7 @@
         </template>
         <template v-slot:top>
           <v-toolbar>
-            <v-toolbar-title>Gestión de Ingresos</v-toolbar-title>
+            <v-toolbar-title>Gestión de Entradas</v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
             <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
