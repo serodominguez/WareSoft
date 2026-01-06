@@ -7,7 +7,7 @@
     </v-toolbar>
     <v-card-text>
       <v-form ref="form" v-model="valid">
-        <v-row>
+        <v-row justify="center">
           <v-col cols="12" md="2">
             <v-select v-if="!localReceipt.idReceipt" color="indigo" variant="underlined" v-model="localReceipt.type"
               :items="receiptTypes" label="Tipo de Entrada" :rules="[rules.required]"
@@ -99,7 +99,7 @@
         {{ localReceipt.idReceipt ? 'Cerrar' : 'Cancelar' }}
       </v-btn>
     </v-card-actions>
-    <CommonProductIn v-model="productModal" @close="productModal = false" />
+    <CommonProductIn v-model="productModal" @close="productModal = false" @product-added="handleProductAdded" />
   </v-card>
 </template>
 
@@ -273,11 +273,30 @@ export default defineComponent({
     },
     async openProductModal() {
       this.productModal = true;
-      await this.store.dispatch('product/fetchProducts', {
-        pageNumber: 1,
-        pageSize: 100,
-        stateFilter: 1
+    },
+     handleProductAdded(product: any) {
+      // Verifica si el producto ya está en la lista
+      const exists = this.details.find(d => d.idProduct === product.idProduct);
+      
+      if (exists) {
+        this.toast.warning('Este producto ya está en la lista');
+        return;
+      }
+      
+      // Agrega el producto a los detalles
+      this.details.push({
+        idProduct: product.idProduct,
+        code: product.code,
+        description: product.description,
+        material: product.material,
+        color: product.color,
+        categoryName: product.categoryName,
+        brandName: product.brandName,
+        quantity: 1,  // Cantidad inicial
+        cost: 0       // Precio inicial
       });
+      
+      this.toast.success('Producto agregado a la lista');
     },
     async saveReceipt() {
       const form = this.$refs.form as FormRef;
