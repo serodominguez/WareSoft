@@ -53,8 +53,9 @@
       </v-form>
       <v-divider class="my-4"></v-divider>
       <v-data-table :headers="headers" :items="details" class="elevation-1" hide-default-footer>
-        <template v-slot:item="{ item }">
+        <template v-slot:item="{ item, index }">
           <tr>
+            <td class="text-center">{{ index + 1 }}</td>
             <td>{{ item.code }}</td>
             <td>{{ item.description }}</td>
             <td>{{ item.material }}</td>
@@ -72,6 +73,10 @@
             </td>
             <td v-else>{{ formatCurrency(item.cost) }}</td>
             <td>{{ formatCurrency(item.quantity * item.cost) }}</td>
+            <td v-if="!localReceipt.idReceipt" class="text-center">
+              <v-btn color="red" icon="delete" variant="text" @click="removeProduct(item)" size="small"
+                title="Quitar" />
+            </td>
           </tr>
         </template>
       </v-data-table>
@@ -197,8 +202,9 @@ export default defineComponent({
     };
   },
   computed: {
-    headers() {
-      const baseHeaders = [
+    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
+      const baseHeaders: Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> = [
+        { title: 'Item', key: 'item', sortable: false, align: 'center' },
         { title: 'Código', key: 'code', sortable: false },
         { title: 'Descripción', key: 'description', sortable: false },
         { title: 'Material', key: 'material', sortable: false },
@@ -209,6 +215,10 @@ export default defineComponent({
         { title: 'Precio U.', key: 'cost', sortable: false },
         { title: 'SubTotal', key: 'subtotal', sortable: false }
       ];
+
+      if (!this.localReceipt.idReceipt) {
+        baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false, align: 'center' });
+      }
 
       return baseHeaders;
     },
@@ -274,15 +284,15 @@ export default defineComponent({
     async openProductModal() {
       this.productModal = true;
     },
-     handleProductAdded(product: any) {
+    handleProductAdded(product: any) {
       // Verifica si el producto ya está en la lista
       const exists = this.details.find(d => d.idProduct === product.idProduct);
-      
+
       if (exists) {
         this.toast.warning('Este producto ya está en la lista');
         return;
       }
-      
+
       // Agrega el producto a los detalles
       this.details.push({
         idProduct: product.idProduct,
@@ -295,12 +305,20 @@ export default defineComponent({
         quantity: 1,  // Cantidad inicial
         cost: 0       // Precio inicial
       });
-      
+
       this.toast.success('Producto agregado a la lista');
+    },
+    removeProduct(product: GoodsReceiptDetail) {
+      const index = this.details.findIndex(d => d.idProduct === product.idProduct);
+
+      if (index !== -1) {
+        this.details.splice(index, 1);
+        this.toast.error(`Producto ${product.code} eliminado de la lista`);
+      }
     },
     async saveReceipt() {
       const form = this.$refs.form as FormRef;
-      
+
       if (!form.validate()) {
         this.toast.warning('Por favor completa todos los campos requeridos');
         return;
@@ -338,7 +356,7 @@ export default defineComponent({
         };
 
         const result = await this.store.dispatch('goodsreceipt/registerGoodsReceipt', receiptData);
-        
+
         if (result.isSuccess) {
           this.toast.success('Entrada registrada con éxito');
           this.$emit('saved');
@@ -378,12 +396,12 @@ export default defineComponent({
     },
     formatDateForApi(date: Date | null): string | null {
       if (!date) return null;
-      
+
       const d = new Date(date);
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      
+
       return `${year}-${month}-${day}`;
     },
     close() {
@@ -393,7 +411,7 @@ export default defineComponent({
   },
   mounted() {
     this.details = [...this.receiptDetails];
-    
+
     this.store.dispatch('supplier/fetchSuppliers', {
       pageNumber: 1,
       pageSize: 100,

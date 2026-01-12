@@ -76,7 +76,10 @@ export default defineComponent({
       search: null as string | null,
       selectedFilter: '',
       filterOptions: ['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca'],
-      hasSearched: false
+      hasSearched: false,
+      products: [] as Product[],
+      totalProducts: 0,
+      loading: false
     };
   },
   computed: {
@@ -99,15 +102,6 @@ export default defineComponent({
         this.$emit('update:modelValue', value);
       }
     },
-    products(): Product[] {
-      return this.store.getters['product/products'];
-    },
-    loading(): boolean {
-      return this.store.getters['product/loading'];
-    },
-    totalProducts(): number {
-      return this.store.getters['product/totalProducts'];
-    },
     noDataMessage(): string {
       return this.hasSearched ? 'No hay productos para mostrar' : 'Realice una búsqueda para ver los productos';
     }
@@ -125,9 +119,8 @@ export default defineComponent({
       this.currentPage = 1;
       this.itemsPerPage = 5;
       this.hasSearched = false;
-      // Limpia la lista de productos en el store
-      this.store.commit('product/SET_ITEMS', []);
-      this.store.commit('product/SET_TOTAL_ITEMS', 0);
+      this.products = [];
+      this.totalProducts = 0;
     },
     // Obtiene los parámetros de filtro
     getFilterParams() {
@@ -151,17 +144,26 @@ export default defineComponent({
       this.currentPage = 1;
       await this.fetchProducts();
     },
-    // Obtiene productos con la página actual
+    // Obtiene productos maneja estado local
     async fetchProducts() {
       try {
-        await this.store.dispatch('product/fetchProducts', {
+        this.loading = true;
+        const response = await this.store.dispatch('product/fetchProducts', {
           pageNumber: this.currentPage,
           pageSize: this.itemsPerPage,
           ...this.getFilterParams()
         });
+
+        // Obtiene los datos del store después de la acción
+        this.products = this.store.getters['product/products'] || [];
+        this.totalProducts = this.store.getters['product/totalProducts'] || 0;
         this.hasSearched = true;
       } catch (error) {
         handleApiError(error, 'Error al buscar productos');
+        this.products = [];
+        this.totalProducts = 0;
+      } finally {
+        this.loading = false;
       }
     },
     // Actualiza items por página

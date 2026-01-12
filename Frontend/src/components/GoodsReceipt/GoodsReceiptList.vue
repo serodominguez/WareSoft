@@ -1,26 +1,27 @@
 <template>
   <div>
     <v-card elevation="2">
-      <v-data-table-server :headers="headers" :items="goodsreceipt" :search="search || undefined" :items-per-page-text="pages"
-        :items-per-page-options="[10, 20, 50]" :items-per-page="itemsPerPage" :items-length="totalGoodsReceipt"
-        :loading="loading" loading-text="Cargando... Espere por favor"
+      <v-data-table-server :headers="headers" :items="goodsreceipt" :search="search || undefined"
+        :items-per-page-text="pages" :items-per-page-options="[10, 20, 50]" :items-per-page="itemsPerPage"
+        :items-length="totalGoodsReceipt" :loading="loading" loading-text="Cargando... Espere por favor"
         @update:items-per-page="$emit('update-items-per-page', $event)" @update:page="$emit('change-page', $event)">
         <template v-slot:item="{ item }">
           <tr>
             <td>{{ (item as GoodsReceipt).code }}</td>
             <td>{{ (item as GoodsReceipt).type }}</td>
-            <td>{{ (item as GoodsReceipt).storeName}}</td>
+            <td>{{ (item as GoodsReceipt).storeName }}</td>
             <td>{{ (item as GoodsReceipt).companyName }}</td>
             <td>{{ (item as GoodsReceipt).documentDate }}</td>
             <td>{{ (item as GoodsReceipt).documentType }}</td>
             <td>{{ (item as GoodsReceipt).auditCreateDate }}</td>
             <td>{{ (item as GoodsReceipt).statusReceipt }}</td>
             <td class="text-center">
-              <v-btn color="indigo" icon="tab" variant="text" @click="$emit('view-goodsreceipt', item)" size="small" title="Ver">
+              <v-btn color="indigo" icon="tab" variant="text" @click="$emit('view-goodsreceipt', item)" size="small"
+                title="Ver">
               </v-btn>
               <template v-if="canEdit && (item as GoodsReceipt).statusReceipt == 'Activo'">
-                <v-btn color="red" icon="block" variant="text" @click="$emit('open-modal', { goodsreceipt: item, action: 2 })"
-                  size="small" title="Anular">
+                <v-btn color="red" icon="block" variant="text"
+                  @click="$emit('open-modal', { goodsreceipt: item, action: 2 })" size="small" title="Anular">
                 </v-btn>
               </template>
             </td>
@@ -30,7 +31,8 @@
           <v-toolbar>
             <v-toolbar-title>Gestión de Entradas</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
+            <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel"
+              title="Descargar Excel"></v-btn>
             <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
               <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo"
@@ -118,30 +120,30 @@ export default defineComponent({
       default: false
     },
     itemsPerPage: {
-    type: Number,
-    default: 10
-  }
+      type: Number,
+      default: 10
+    }
   },
   emits: [
-    'open-form',                      
-    'open-modal',       
-    'view-goodsreceipt',                  
-    'fetch-goodsreceipt',              
-    'search-goodsreceipt',             
-    'update-items-per-page',       
-    'change-page',               
-    'download-excel',          
-    'update:drawer',          
-    'update:selectedFilter',   
-    'update:state',          
-    'update:startDate',      
-    'update:endDate'        
+    'open-form',
+    'open-modal',
+    'view-goodsreceipt',
+    'fetch-goodsreceipt',
+    'search-goodsreceipt',
+    'update-items-per-page',
+    'change-page',
+    'download-excel',
+    'update:drawer',
+    'update:selectedFilter',
+    'update:state',
+    'update:startDate',
+    'update:endDate'
   ],
   data() {
     return {
-      pages: "Ingresos por Página",      
-      search: null as string | null, 
-      filterOptions: ['Código', 'Tienda', 'Proveedor']       
+      pages: "Ingresos por Página",
+      search: null as string | null,
+      filterOptions: ['Código', 'Tienda', 'Proveedor']
     };
   },
   computed: {

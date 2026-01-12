@@ -1,19 +1,19 @@
 <template>
   <div>
-    <GoodsReceiptList v-if="!form" :goodsreceipt="goodsreceipt" :loading="loading" :totalGoodsReceipt="totalGoodsReceipt" 
-      :downloadingExcel="downloadingExcel" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" 
-      :canDelete="canDelete" :items-per-page="itemsPerPage" v-model:drawer="drawer" 
-      v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate" 
-      v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @view-goodsreceipt="openForm" 
-      @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
+    <GoodsReceiptList v-if="!form" :goodsreceipt="goodsreceipt" :loading="loading"
+      :totalGoodsReceipt="totalGoodsReceipt" :downloadingExcel="downloadingExcel" :canCreate="canCreate"
+      :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete" :items-per-page="itemsPerPage"
+      v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
+      v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
+      @view-goodsreceipt="openForm" @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
       @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
-    
-    <GoodsReceiptForm v-if="form" v-model="form"
-      :receiptDetails="selectedReceiptDetails" @saved="handleSaved" @close="closeForm" />
 
-    <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" 
-      :item="selectedGoodsReceipt?.code || ''" :action="action" moduleName="goodsreceipt" 
-      entityName="GoodsReceipt" name="Entrada" gender="female" @action-completed="handleActionCompleted" />
+    <GoodsReceiptForm v-if="form" v-model="form" :receiptDetails="selectedReceiptDetails" @saved="handleSaved"
+      @close="closeForm" />
+
+    <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" :item="selectedGoodsReceipt?.code || ''"
+      :action="action" moduleName="goodsreceipt" entityName="GoodsReceipt" name="Entrada" gender="female"
+      @action-completed="handleActionCompleted" />
   </div>
 </template>
 
@@ -52,7 +52,7 @@ export default defineComponent({
       form: false,
       modal: false,
       selectedGoodsReceipt: null as GoodsReceipt | null,
-      action: 0, 
+      action: 0,
       downloadingExcel: false
     };
   },
@@ -91,7 +91,7 @@ export default defineComponent({
       this.action = payload.action;
       this.modal = true;
     },
-    
+
     async openForm(goodsreceipt?: GoodsReceipt) {
       if (goodsreceipt?.idReceipt) {
         // Vista de solo lectura: cargar los detalles
@@ -119,10 +119,10 @@ export default defineComponent({
           statusReceipt: ''
         };
       }
-      
+
       this.form = true;
     },
-    
+
     closeForm() {
       this.form = false;
       this.selectedGoodsReceipt = null;
@@ -135,18 +135,18 @@ export default defineComponent({
           pageSize: this.itemsPerPage,
           stateFilter: this.stateFilter,
           sort: 'IdReceipt',
-          order: 'asc' 
+          order: 'asc'
         });
       } catch (error) {
         handleSilentError(error);
       }
     },
-    
+
     getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = { 
+      const filterMap: { [key: string]: number } = {
         "Código": 1,
         "Tienda": 2,
-        "Proveedor": 3 
+        "Proveedor": 3
       };
       const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
       const textFilterValue = params.search?.trim() || null;
@@ -164,7 +164,7 @@ export default defineComponent({
         endDate: endDateStr
       };
     },
-    
+
     async searchGoodsReceipt(params: any) {
       this.search = params.search;
       this.selectedFilter = params.selectedFilter;
@@ -177,7 +177,7 @@ export default defineComponent({
           pageNumber: 1,
           pageSize: this.itemsPerPage,
           sort: 'IdReceipt',
-          order: 'asc', 
+          order: 'asc',
           ...this.getFilterParams(params)
         });
         this.currentPage = 1;
@@ -185,7 +185,7 @@ export default defineComponent({
         handleApiError(error, 'Error al buscar ingresos');
       }
     },
-    
+
     refreshGoodsReceipt() {
       if (this.search?.trim()) {
         this.searchGoodsReceipt({
@@ -199,18 +199,18 @@ export default defineComponent({
         this.fetchGoodsReceipt();
       }
     },
-    
+
     updateItemsPerPage(itemsPerPage: number) {
       this.itemsPerPage = itemsPerPage;
       this.currentPage = 1;
       this.refreshGoodsReceipt();
     },
-    
+
     changePage(page: number) {
       this.currentPage = page;
       this.refreshGoodsReceipt();
     },
-    
+
     async downloadExcel(params: any) {
       this.downloadingExcel = true;
       try {
@@ -218,7 +218,7 @@ export default defineComponent({
           pageNumber: this.currentPage,
           pageSize: this.itemsPerPage,
           sort: 'IdReceipt',
-          order: 'asc', 
+          order: 'asc',
           ...this.getFilterParams(params)
         });
         this.toast.success('Archivo descargado correctamente');
@@ -228,7 +228,7 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
-    
+
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 
@@ -238,11 +238,11 @@ export default defineComponent({
 
       return `${year}-${month}-${day}`;
     },
-    
+
     handleSaved() {
       this.fetchGoodsReceipt();
     },
-    
+
     handleActionCompleted() {
       this.fetchGoodsReceipt();
     }
