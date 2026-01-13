@@ -16,8 +16,11 @@
             <td>{{ (item as GoodsReceipt).auditCreateDate }}</td>
             <td>{{ (item as GoodsReceipt).statusReceipt }}</td>
             <td class="text-center">
-              <v-btn color="indigo" icon="tab" variant="text" @click="$emit('view-goodsreceipt', item)" size="small"
+              <v-btn color="indigo" icon="preview" variant="text" @click="$emit('view-goodsreceipt', item)" size="small"
                 title="Ver">
+              </v-btn>
+             <v-btn color="blue" icon="picture_as_pdf" variant="text" @click="$emit('print-pdf', item)" size="small"
+                title="Imprimir PDF">
               </v-btn>
               <template v-if="canEdit && (item as GoodsReceipt).statusReceipt == 'Activo'">
                 <v-btn color="red" icon="block" variant="text"
@@ -133,6 +136,7 @@ export default defineComponent({
     'update-items-per-page',
     'change-page',
     'download-excel',
+    'print-pdf',
     'update:drawer',
     'update:selectedFilter',
     'update:state',

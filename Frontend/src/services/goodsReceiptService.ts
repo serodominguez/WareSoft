@@ -40,12 +40,40 @@ class GoodsReceiptService extends BaseService<GoodsReceipt> {
   }
 
   // Exportar PDF de una entrada
-  async exportPdf(receiptId: number): Promise<Blob> {
+  async exportPdf(receiptId: number): Promise<{ blob: Blob; filename: string }> {
     const response = await axios.get(
       `api/GoodsReceipt/ExportPdf/${receiptId}`,
       { responseType: 'blob' }
     );
-    return response.data;
+
+    // Extraer el nombre del archivo del header Content-Disposition
+    const contentDisposition =
+      response.headers['content-disposition'] ||
+      response.headers['Content-Disposition'] ||
+      response.headers.contentDisposition;
+
+    let filename = `Entrada_${receiptId}.pdf`; // Nombre por defecto
+
+    if (contentDisposition) {
+      // Primero intenta extraer filename*=UTF-8''
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+
+      if (utf8Match && utf8Match[1]) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        // Si no encuentra UTF-8, intenta con filename=
+        const standardMatch = contentDisposition.match(/filename[^;=\n]*=["']?([^"';\n]+)["']?/i);
+
+        if (standardMatch && standardMatch[1]) {
+          filename = standardMatch[1].replace(/^["']|["']$/g, '');
+        }
+      }
+    }
+
+    return {
+      blob: response.data,
+      filename: filename
+    };
   }
 }
 

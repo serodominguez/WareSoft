@@ -20,13 +20,19 @@ export interface GoodsReceiptDetail {
 }
 
 export interface GoodsReceiptRegister {
-  documentDate: string | null;
   type: string;
+  documentDate: string | null;
   documentType: string;
   documentNumber: string;
+  totalAmount: number;
   annotations: string;
   idSupplier: number | null;
-  idUser: number;
   idStore: number;
-  details: GoodsReceiptDetail[];
+  goodsReceiptDetails: {
+    item: number;
+    idProduct: number;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }[];
 }

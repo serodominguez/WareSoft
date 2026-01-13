@@ -6,9 +6,9 @@
       v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
       v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
       @view-goodsreceipt="openForm" @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
-      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" />
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" @print-pdf="printPdf" />
 
-    <GoodsReceiptForm v-if="form" v-model="form" :receiptDetails="selectedReceiptDetails" @saved="handleSaved"
+    <GoodsReceiptForm v-if="form" v-model="form" :receipt="selectedGoodsReceipt" :receiptDetails="selectedReceiptDetails" @saved="handleSaved"
       @close="closeForm" />
 
     <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" :item="selectedGoodsReceipt?.code || ''"
@@ -94,7 +94,6 @@ export default defineComponent({
 
     async openForm(goodsreceipt?: GoodsReceipt) {
       if (goodsreceipt?.idReceipt) {
-        // Vista de solo lectura: cargar los detalles
         try {
           await this.store.dispatch('goodsreceipt/fetchGoodsReceiptById', goodsreceipt.idReceipt);
           this.selectedGoodsReceipt = this.store.getters['goodsreceipt/selectedGoodsReceipt'];
@@ -103,19 +102,18 @@ export default defineComponent({
           return;
         }
       } else {
-        // Nuevo registro: inicializar vacío
         this.selectedGoodsReceipt = {
           idReceipt: null,
           code: '',
           type: '',
-          storeName: '',
+          storeName: '',           
           documentType: '',
           documentNumber: '',
           documentDate: '',
           idSupplier: null,
           companyName: '',
           annotations: '',
-          auditCreateDate: '',
+          auditCreateDate: '',    
           statusReceipt: ''
         };
       }
@@ -124,8 +122,10 @@ export default defineComponent({
     },
 
     closeForm() {
-      this.form = false;
+      this.store.commit('goodsreceipt/SET_SELECTED_RECEIPT_DETAILS', []);
+      this.store.commit('goodsreceipt/SET_SELECTED_ITEM', null);
       this.selectedGoodsReceipt = null;
+      this.form = false;
     },
 
     async fetchGoodsReceipt(params?: any) {
@@ -135,7 +135,7 @@ export default defineComponent({
           pageSize: this.itemsPerPage,
           stateFilter: this.stateFilter,
           sort: 'IdReceipt',
-          order: 'asc'
+          order: 'desc'
         });
       } catch (error) {
         handleSilentError(error);
@@ -177,7 +177,7 @@ export default defineComponent({
           pageNumber: 1,
           pageSize: this.itemsPerPage,
           sort: 'IdReceipt',
-          order: 'asc',
+          order: 'desc',
           ...this.getFilterParams(params)
         });
         this.currentPage = 1;
@@ -218,7 +218,7 @@ export default defineComponent({
           pageNumber: this.currentPage,
           pageSize: this.itemsPerPage,
           sort: 'IdReceipt',
-          order: 'asc',
+          order: 'desc',
           ...this.getFilterParams(params)
         });
         this.toast.success('Archivo descargado correctamente');
@@ -228,7 +228,21 @@ export default defineComponent({
         this.downloadingExcel = false;
       }
     },
+    async printPdf(goodsreceipt: GoodsReceipt) {
+      if (!goodsreceipt.idReceipt) return;
 
+      try {
+        const result = await this.store.dispatch('goodsreceipt/openGoodsReceiptPdf', goodsreceipt.idReceipt);
+
+        if (result.isSuccess) {
+          this.toast.success('PDF abierto correctamente');
+        } else {
+          this.toast.error('Error al abrir el PDF');
+        }
+      } catch (error) {
+        handleApiError(error, 'Error al abrir el PDF');
+      }
+    },
     formatDate(date: Date | null): string | null {
       if (!date) return null;
 

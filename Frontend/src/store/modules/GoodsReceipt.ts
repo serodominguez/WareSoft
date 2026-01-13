@@ -23,7 +23,7 @@ const mutations = {
   SET_TOTAL_ITEMS(state: BaseState<GoodsReceipt>, total: number) {
     state.totalItems = total;
   },
-  SET_SELECTED_ITEMS(state: BaseState<GoodsReceipt>, item: GoodsReceipt | null) {
+  SET_SELECTED_ITEM(state: BaseState<GoodsReceipt>, item: GoodsReceipt | null) {
     state.selectedItem = item;
   },
   SET_SELECTED_RECEIPT_DETAILS(state: GoodsReceiptState, details: GoodsReceiptDetail[]) {
@@ -76,14 +76,28 @@ const actions = {
 
   // Obtener entrada por ID con detalles
   async fetchGoodsReceiptById({ commit }: any, receiptId: number) {
-    commit("SET_LOADING", true);
+  commit("SET_LOADING", true);
 
     try {
       const result = await goodsReceiptService.getReceiptWithDetails(receiptId);
-      
+
       if (result.isSuccess) {
         commit("SET_SELECTED_ITEM", result.data);
-        commit("SET_SELECTED_RECEIPT_DETAILS", result.data.details || []);
+
+        // Mapear los detalles al formato esperado por el componente
+        const mappedDetails = result.data.goodsReceiptDetails?.map((detail: any) => ({
+          idProduct: detail.idProduct,
+          code: detail.code,
+          description: detail.description,
+          material: detail.material || 'N/A',      
+          color: detail.color || 'N/A',           
+          categoryName: detail.categoryName,
+          brandName: detail.brandName,
+          quantity: detail.quantity,
+          cost: detail.unitPrice                   
+        })) || [];
+
+        commit("SET_SELECTED_RECEIPT_DETAILS", mappedDetails);
       } else {
         commit("SET_ERROR", result.message || result.errors);
       }
@@ -126,23 +140,51 @@ const actions = {
     }
   },
 
+  // Alias para mantener consistencia con CommonModal
+  async disableGoodsReceipt({ dispatch }: any, receiptId: number) {
+    return dispatch('cancelGoodsReceipt', receiptId);
+  },
+
   // Exportar PDF
   async exportGoodsReceiptPdf(_: any, receiptId: number) {
     try {
-      const blob = await goodsReceiptService.exportPdf(receiptId);
-      
+      const { blob, filename } = await goodsReceiptService.exportPdf(receiptId);
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Entrada_${receiptId}.pdf`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       return { isSuccess: true };
     } catch (error: any) {
       console.error('Error al exportar PDF:', error);
+      return { isSuccess: false, message: error.message, errors: error };
+    }
+  },
+
+  // Abrir PDF en nueva pestaña
+  async openGoodsReceiptPdf(_: any, receiptId: number) {
+    try {
+      const { blob, filename } = await goodsReceiptService.exportPdf(receiptId);
+
+      // Crear URL del blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Abrir en nueva pestaña
+      window.open(url, '_blank');
+
+      // Limpiar URL después de un tiempo
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+
+      return { isSuccess: true };
+    } catch (error: any) {
+      console.error('Error al abrir PDF:', error);
       return { isSuccess: false, message: error.message, errors: error };
     }
   }

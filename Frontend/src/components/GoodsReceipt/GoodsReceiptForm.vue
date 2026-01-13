@@ -3,6 +3,7 @@
     <v-toolbar>
       <v-toolbar-title class="text-truncate" style="max-width: 100px;">Entradas</v-toolbar-title>
       <v-divider class="mx-2" inset vertical></v-divider>
+      <div class="font-weight-bold" style="font-size: 16px; margin-top: 4px; margin-right: 1500px;">{{ localReceipt.code }} </div>
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card-text>
@@ -134,7 +135,7 @@ interface GoodsReceiptForm {
   type: string;
   documentType: string;
   documentNumber: string;
-  documentDate: Date | null;
+  documentDate: string | null;
   idSupplier: number | null;
   companyName: string;
   annotations: string;
@@ -339,19 +340,21 @@ export default defineComponent({
       this.alert = false;
 
       try {
-        const receiptData = {
+       const receiptData = {
           documentDate: this.formatDateForApi(this.localReceipt.documentDate),
           type: this.localReceipt.type,
           documentType: this.localReceipt.documentType,
           documentNumber: this.localReceipt.documentNumber,
+          totalAmount: this.totalCost,
           annotations: this.localReceipt.annotations || '',
           idSupplier: this.localReceipt.idSupplier,
-          idUser: this.store.state.currentUser.userId,
           idStore: this.store.state.currentUser.storeId,
-          details: this.details.map(d => ({
+          goodsReceiptDetails: this.details.map((d, index) => ({
+            item: index + 1,
             idProduct: d.idProduct,
             quantity: d.quantity,
-            cost: d.cost
+            unitPrice: d.cost,
+            totalPrice: d.quantity * d.cost
           }))
         };
 
@@ -373,20 +376,7 @@ export default defineComponent({
 
       this.downloading = true;
       try {
-        const response = await axios.get(
-          `api/GoodsReceipt/ExportPdf/${this.localReceipt.idReceipt}`,
-          { responseType: 'blob' }
-        );
-
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `Ingreso_${this.localReceipt.code}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.parentNode?.removeChild(link);
-        window.URL.revokeObjectURL(url);
-
+        await this.$store.dispatch('goodsreceipt/exportGoodsReceiptPdf', this.localReceipt.idReceipt);
         this.toast.success('PDF descargado correctamente');
       } catch (error) {
         handleApiError(error, 'Error al descargar el PDF');
@@ -394,15 +384,15 @@ export default defineComponent({
         this.downloading = false;
       }
     },
-    formatDateForApi(date: Date | null): string | null {
+    formatDateForApi(date: string | null): string | null {
       if (!date) return null;
 
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      // Si ya es un string en formato correcto (YYYY-MM-DD), retornarlo directamente
+      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
+        return date.split('T')[0]; // Por si viene con timestamp
+      }
 
-      return `${year}-${month}-${day}`;
+      return date;
     },
     close() {
       this.isOpen = false;
