@@ -3,11 +3,12 @@
     <v-toolbar>
       <v-toolbar-title class="text-truncate" style="max-width: 100px;">Entradas</v-toolbar-title>
       <v-divider class="mx-2" inset vertical></v-divider>
-      <div class="font-weight-bold" style="font-size: 16px; margin-top: 4px; margin-right: 1500px;">{{ localReceipt.code }} </div>
+      <div class="font-weight-bold" style="font-size: 16px;">{{ localReceipt.code }} </div>
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card-text>
       <v-form ref="form" v-model="valid">
+      <v-container class="px-4" max-width="1700px">
         <v-row justify="center">
           <v-col cols="12" md="2">
             <v-select v-if="!localReceipt.idReceipt" color="indigo" variant="underlined" v-model="localReceipt.type"
@@ -26,7 +27,7 @@
           <v-col cols="12" md="2">
             <v-text-field v-if="!localReceipt.idReceipt" color="indigo" variant="underlined"
               v-model="localReceipt.documentNumber" :rules="documentNumberRules" counter="30" :maxlength="30"
-              label="Número del Comprobante" @keyup="uppercase" />
+              label="Número del Comprobante" />
             <v-text-field v-else color="indigo" variant="underlined" v-model="localReceipt.documentNumber"
               label="Número del Comprobante" readonly />
           </v-col>
@@ -51,9 +52,11 @@
             </v-btn>
           </v-col>
         </v-row>
+        </v-container>
       </v-form>
       <v-divider class="my-4"></v-divider>
-      <v-data-table :headers="headers" :items="details" class="elevation-1" hide-default-footer>
+      <v-data-table :headers="headers" :items="details" class="elevation-1" hide-default-footer
+        :no-data-text="'No hay productos agregados'">
         <template v-slot:item="{ item, index }">
           <tr>
             <td class="text-center">{{ index + 1 }}</td>
@@ -69,8 +72,8 @@
             </td>
             <td v-else>{{ item.quantity }}</td>
             <td v-if="!localReceipt.idReceipt">
-              <v-text-field v-model.number="item.cost" variant="underlined" type="number" min="0" step="0.01"
-                :rules="[rules.required, rules.minValue]"></v-text-field>
+              <v-text-field v-model.number="item.cost" variant="underlined" type="number" min="0"
+                :rules="localReceipt.type === 'REGULARIZACIÓN' ? [rules.required, rules.minValueOrZero] : [rules.required, rules.minValue]"></v-text-field>
             </td>
             <td v-else>{{ formatCurrency(item.cost) }}</td>
             <td>{{ formatCurrency(item.quantity * item.cost) }}</td>
@@ -86,11 +89,8 @@
       </v-col>
       <v-col cols="12" md="12" lg="12" xl="12">
         <v-text-field color="indigo" variant="underlined" label="Observaciones" counter="80" :maxlength="80"
-          v-model="localReceipt.annotations" @keyup="uppercase" :readonly="!!localReceipt.idReceipt"></v-text-field>
+          v-model="localReceipt.annotations" :readonly="!!localReceipt.idReceipt"></v-text-field>
       </v-col>
-      <v-alert v-if="alert" type="warning" class="mt-3">
-        No hay productos en la lista. Por favor, añade productos.
-      </v-alert>
     </v-card-text>
     <v-card-actions>
       <v-btn v-if="!localReceipt.idReceipt" color="green" dark class="mb-2" elevation="4" @click="saveReceipt"
@@ -113,34 +113,10 @@
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import axios from 'axios';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductIn from '@/components/Common/CommonProductIn.vue';
+import { GoodsReceipt, GoodsReceiptDetail } from '@/interfaces/goodsReceiptInterface';
 
-interface GoodsReceiptDetail {
-  idProduct: number;
-  code: string;
-  description: string;
-  material: string;
-  color: string;
-  categoryName: string;
-  brandName: string;
-  quantity: number;
-  cost: number;
-}
-
-interface GoodsReceiptForm {
-  idReceipt: number | null;
-  code: string;
-  type: string;
-  documentType: string;
-  documentNumber: string;
-  documentDate: string | null;
-  idSupplier: number | null;
-  companyName: string;
-  annotations: string;
-  statusReceipt: string;
-}
 
 interface FormRef {
   validate: () => boolean;
@@ -157,17 +133,19 @@ export default defineComponent({
       required: true
     },
     receipt: {
-      type: Object as PropType<GoodsReceiptForm | null>,
+      type: Object as PropType<GoodsReceipt | null>,
       default: () => ({
         idReceipt: null,
         code: '',
         type: '',
+        storeName: '',
         documentType: '',
         documentNumber: '',
-        documentDate: null,
+        documentDate: '',
         idSupplier: null,
         companyName: '',
         annotations: '',
+        auditCreateDate: '',
         statusReceipt: ''
       })
     },
@@ -188,9 +166,8 @@ export default defineComponent({
       valid: false,
       saving: false,
       downloading: false,
-      alert: false,
       productModal: false,
-      localReceipt: { ...this.receipt } as GoodsReceiptForm,
+      localReceipt: { ...this.receipt } as GoodsReceipt,
       details: [] as GoodsReceiptDetail[],
       documentTypes: [] as string[],
       receiptTypes: ['ADQUISICIÓN', 'REGULARIZACIÓN'],
@@ -198,7 +175,8 @@ export default defineComponent({
       typesImports: ['ENTRADA'],
       rules: {
         required: (value: any) => !!value || 'Este campo es requerido',
-        minValue: (value: number) => value > 0 || 'Debe ser mayor a 0'
+        minValue: (value: number) => value > 0 || 'Debe ser mayor a 0',
+        minValueOrZero: (value: number) => (value !== null && value !== undefined && value >= 0) || 'Debe ser mayor o igual a 0'
       }
     };
   },
@@ -248,7 +226,7 @@ export default defineComponent({
       this.$emit('update:modelValue', newValue);
     },
     receipt: {
-      handler(newReceipt: GoodsReceiptForm) {
+      handler(newReceipt: GoodsReceipt) {
         this.localReceipt = { ...newReceipt };
         this.details = [...this.receiptDetails];
         this.updateDocuments();
@@ -258,18 +236,11 @@ export default defineComponent({
   },
   methods: {
     formatCurrency(value: number): string {
-      return value.toLocaleString('es-BO', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    },
-    uppercase() {
-      if (this.localReceipt.documentNumber) {
-        this.localReceipt.documentNumber = this.localReceipt.documentNumber.toUpperCase();
-      }
-      if (this.localReceipt.annotations) {
-        this.localReceipt.annotations = this.localReceipt.annotations.toUpperCase();
-      }
+      return new Intl.NumberFormat('es-BO', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        useGrouping: true
+      }).format(value).replace(/\./g, ',');
     },
     updateDocuments() {
       this.localReceipt.documentType = '';
@@ -325,22 +296,29 @@ export default defineComponent({
         return;
       }
 
-      if (this.details.length === 0) {
-        this.alert = true;
-        return;
-      }
+      const invalidProducts = this.details.filter(d => {
+        if (this.localReceipt.type === 'REGULARIZACIÓN') {
+          // Para REGULARIZACIÓN: cantidad > 0 y costo >= 0 (permite 0)
+          return d.quantity <= 0 || d.cost === null || d.cost === undefined || d.cost < 0;
+        } else {
+          // Para ADQUISICIÓN: cantidad > 0 y costo > 0
+          return d.quantity <= 0 || d.cost <= 0;
+        }
+      });
 
-      const invalidProducts = this.details.filter(d => d.quantity <= 0 || d.cost <= 0);
       if (invalidProducts.length > 0) {
-        this.toast.warning('Todos los productos deben tener cantidad y costo válidos');
+        if (this.localReceipt.type === 'REGULARIZACIÓN') {
+          this.toast.warning('Todos los productos deben tener cantidad mayor a 0 y costo mayor o igual a 0');
+        } else {
+          this.toast.warning('Todos los productos deben tener cantidad y costo válidos mayores a 0');
+        }
         return;
       }
-
+      
       this.saving = true;
-      this.alert = false;
 
       try {
-       const receiptData = {
+        const receiptData = {
           documentDate: this.formatDateForApi(this.localReceipt.documentDate),
           type: this.localReceipt.type,
           documentType: this.localReceipt.documentType,
@@ -401,15 +379,9 @@ export default defineComponent({
   },
   mounted() {
     this.details = [...this.receiptDetails];
-
-    this.store.dispatch('supplier/fetchSuppliers', {
-      pageNumber: 1,
-      pageSize: 100,
-      stateFilter: 1
-    });
-
+    this.store.dispatch('supplier/selectSupplier');
     if (!this.localReceipt.idReceipt) {
-      this.localReceipt.documentDate = null;
+      this.localReceipt.documentDate = '';
       this.updateDocuments();
     }
   }

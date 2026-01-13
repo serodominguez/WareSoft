@@ -19,8 +19,8 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasMaxLength(15)
                 .IsRequired();
 
-            builder.Property(g => g.PurchaseDate)
-                .HasColumnName("PURCHASE_DATE")
+            builder.Property(g => g.DocumentDate)
+                .HasColumnName("DOCUMENT_DATE")
                 .IsRequired();
 
             builder.Property(g => g.Type)

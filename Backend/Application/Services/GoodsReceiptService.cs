@@ -28,8 +28,7 @@ namespace Application.Services
             var response = new BaseResponse<IEnumerable<GoodsReceiptResponseDto>>();
             try
             {
-                var receipts = _unitOfWork.GoodsReceipt.GetGoodsReceiptQueryable()
-                                        .Where(u => u.AuditDeleteUser == null && u.AuditDeleteDate == null);
+                var receipts = _unitOfWork.GoodsReceipt.GetGoodsReceiptQueryable();
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -124,6 +123,12 @@ namespace Application.Services
             {
                 var entity = GoodsReceiptMapp.GoodsReceiptMapping(requestDto);
                 entity.Code = await _unitOfWork.GoodsReceipt.GenerateCodeAsync();
+                
+                if (requestDto.Type == "REGULARIZACIÓN")
+                {
+                    entity.DocumentNumber = entity.Code;
+                }
+
                 entity.AuditCreateUser = authenticatedUserId;
                 entity.AuditCreateDate = DateTime.Now;
                 entity.Status = true;

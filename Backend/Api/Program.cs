@@ -27,9 +27,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: Cors,
         builder =>
         {
-            builder.WithOrigins("*");
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
+            builder.SetIsOriginAllowed(origin => true)
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .WithExposedHeaders("Content-Disposition");
         });
 });
 

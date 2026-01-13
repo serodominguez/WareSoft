@@ -72,11 +72,12 @@
             var columnsProperties = new List<(string ColumnName, string PropertyName)>
             {
                 ("CÓDIGO", "Code"),
-                ("FECHA DE ADQUISICIÓN", "PurchaseDate"),
                 ("TIPO", "Type"),
-                ("TIPO DE DOCUMENTO", "DocumentType"),
-                ("PROVEEDOR", "CompanyName"),
                 ("TIENDA", "StoreName"),
+                ("PROVEEDOR", "CompanyName"),
+                ("FECHA DEL DOCUMENTO", "DocumentDate"),
+                ("TIPO DE DOCUMENTO", "DocumentType"),
+                ("NÚMERO DE DOCUMENTO", "DocumentNumber"),
                 ("FECHA DE CREACIÓN", "AuditCreateDate"),
                 ("ESTADO", "StatusReceipt")
             };

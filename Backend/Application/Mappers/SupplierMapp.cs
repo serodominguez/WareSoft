@@ -1,4 +1,5 @@
 ﻿using Application.Dtos.Request.Supplier;
+using Application.Dtos.Response.Category;
 using Application.Dtos.Response.Supplier;
 using Domain.Entities;
 using Infrastructure.Extensions;
@@ -30,6 +31,15 @@ namespace Application.Mappers
                 AuditCreateDate = entity.AuditCreateDate.HasValue ? entity.AuditCreateDate.Value.ToString("dd/MM/yyyy HH:mm") : null,
                 Status = entity.Status,
                 StatusSupplier = ((StateTypes)(entity.Status ? 1 : 0)).ToString()
+            };
+        }
+
+        public static SupplierSelectResponseDto SuppliersSelectResponseDtoMapping(SupplierEntity entity)
+        {
+            return new SupplierSelectResponseDto
+            {
+                IdSupplier = entity.Id,
+                CompanyName = entity.CompanyName.ToTitleCase()
             };
         }
     }

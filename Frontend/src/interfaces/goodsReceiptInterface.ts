@@ -15,6 +15,12 @@ export interface GoodsReceipt {
 
 export interface GoodsReceiptDetail {
   idProduct: number;
+  code: string;
+  description: string;
+  material: string;
+  color: string;
+  categoryName: string;
+  brandName: string;
   quantity: number;
   cost: number;
 }

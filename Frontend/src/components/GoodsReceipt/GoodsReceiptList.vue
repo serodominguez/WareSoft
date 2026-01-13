@@ -16,13 +16,17 @@
             <td>{{ (item as GoodsReceipt).auditCreateDate }}</td>
             <td>{{ (item as GoodsReceipt).statusReceipt }}</td>
             <td class="text-center">
+              <template v-if="canRead">
               <v-btn color="indigo" icon="preview" variant="text" @click="$emit('view-goodsreceipt', item)" size="small"
                 title="Ver">
               </v-btn>
-             <v-btn color="blue" icon="picture_as_pdf" variant="text" @click="$emit('print-pdf', item)" size="small"
-                title="Imprimir PDF">
+              </template>
+              <template v-if="canRead && (item as GoodsReceipt).statusReceipt == 'Activo'">
+              <v-btn color="grey" icon="picture_as_pdf" variant="text" @click="$emit('print-pdf', item)" size="small"
+                title="Imprimir">
               </v-btn>
-              <template v-if="canEdit && (item as GoodsReceipt).statusReceipt == 'Activo'">
+              </template>
+              <template v-if="canDelete && (item as GoodsReceipt).statusReceipt == 'Activo'">
                 <v-btn color="red" icon="block" variant="text"
                   @click="$emit('open-modal', { goodsreceipt: item, action: 2 })" size="small" title="Anular">
                 </v-btn>
@@ -36,7 +40,7 @@
             <v-spacer></v-spacer>
             <v-btn v-if="canRead" icon="download" @click="handleDownloadExcel" :loading="downloadingExcel"
               title="Descargar Excel"></v-btn>
-            <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
+            <v-btn v-if="canRead" icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
               <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo"
                 hide-details single-line v-model="search" @click:append-inner="handleSearch()"
@@ -145,7 +149,7 @@ export default defineComponent({
   ],
   data() {
     return {
-      pages: "Ingresos por Página",
+      pages: "Entradas por Página",
       search: null as string | null,
       filterOptions: ['Código', 'Tienda', 'Proveedor']
     };

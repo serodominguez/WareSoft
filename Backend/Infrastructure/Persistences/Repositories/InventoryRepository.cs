@@ -14,6 +14,17 @@ namespace Infrastructure.Persistences.Repositories
             _context = context;
         }
 
+        public IQueryable<InventoryEntity> GetStockByStoreQueryable(int storeId)
+        {
+            return _context.Inventory
+                .AsNoTracking()
+                .Include(i => i.Product)
+                    .ThenInclude(p => p.Brand)
+                .Include(i => i.Product)
+                    .ThenInclude(p => p.Category)
+                .Where(p => p.IdStore == storeId);
+        }
+
         public async Task<InventoryEntity> GetStockById(int productId, int storeId)
         {
             var stock = await _context.Inventory

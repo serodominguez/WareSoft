@@ -4,7 +4,7 @@
     {
         public int IdReceipt { get; set; }
         public string? Code { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public DateTime DocumentDate { get; set; }
         public string? Type { get; set; }
         public string? DocumentType { get; set; }
         public string? DocumentNumber { get; set; }

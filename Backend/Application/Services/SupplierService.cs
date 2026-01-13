@@ -75,6 +75,34 @@ namespace Application.Services
 
             return response;
         }
+        public async Task<BaseResponse<IEnumerable<SupplierSelectResponseDto>>> ListSelectSuppliers()
+        {
+            var response = new BaseResponse<IEnumerable<SupplierSelectResponseDto>>();
+
+            try
+            {
+                var suppliers = (await _unitOfWork.Supplier.GetSelectAsync());
+
+                if (suppliers is not null && suppliers.Any())
+                {
+                    response.Data = suppliers.Select(SupplierMapp.SuppliersSelectResponseDtoMapping);
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_QUERY;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
 
         public async Task<BaseResponse<SupplierResponseDto>> SupplierById(int supplierId)
         {

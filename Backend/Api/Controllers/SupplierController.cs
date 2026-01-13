@@ -36,6 +36,14 @@ namespace Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("Select")]
+        [RequirePermission("Proveedores", "Leer")]
+        public async Task<IActionResult> ListSelectSuppliers()
+        {
+            var response = await _supplierService.ListSelectSuppliers();
+            return Ok(response);
+        }
+
         [HttpGet("{supplierId:int}")]
         [RequirePermission("Proveedores", "Leer")]
         public async Task<IActionResult> SupplierById(int supplierId)

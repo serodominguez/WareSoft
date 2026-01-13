@@ -6,10 +6,11 @@
       v-model:drawer="drawer" v-model:selectedFilter="selectedFilter" v-model:state="state"
       v-model:startDate="startDate" v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal"
       @view-goodsreceipt="openForm" @fetch-goodsreceipt="fetchGoodsReceipt" @search-goodsreceipt="searchGoodsReceipt"
-      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel" @print-pdf="printPdf" />
+      @update-items-per-page="updateItemsPerPage" @change-page="changePage" @download-excel="downloadExcel"
+      @print-pdf="printPdf" />
 
-    <GoodsReceiptForm v-if="form" v-model="form" :receipt="selectedGoodsReceipt" :receiptDetails="selectedReceiptDetails" @saved="handleSaved"
-      @close="closeForm" />
+    <GoodsReceiptForm v-if="form" v-model="form" :receipt="selectedGoodsReceipt"
+      :receiptDetails="selectedReceiptDetails" @saved="handleSaved" @close="closeForm" />
 
     <CommonModal v-model="modal" :itemId="selectedGoodsReceipt?.idReceipt || 0" :item="selectedGoodsReceipt?.code || ''"
       :action="action" moduleName="goodsreceipt" entityName="GoodsReceipt" name="Entrada" gender="female"
@@ -106,14 +107,14 @@ export default defineComponent({
           idReceipt: null,
           code: '',
           type: '',
-          storeName: '',           
+          storeName: '',
           documentType: '',
           documentNumber: '',
           documentDate: '',
           idSupplier: null,
           companyName: '',
           annotations: '',
-          auditCreateDate: '',    
+          auditCreateDate: '',
           statusReceipt: ''
         };
       }

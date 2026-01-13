@@ -22,5 +22,5 @@ namespace Infrastructure.Persistences.Repositories
                 .Include(p => p.Category)
                 .Where(p => p.AuditDeleteUser == null && p.AuditDeleteDate == null);
         }
-    }
+     }
 }

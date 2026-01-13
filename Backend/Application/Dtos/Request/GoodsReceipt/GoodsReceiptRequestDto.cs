@@ -5,17 +5,16 @@ namespace Application.Dtos.Request.GoodsReceipt
     public class GoodsReceiptRequestDto
     {
         [Required]
-        public DateTime PurchaseDate { get; set; }
-
-        [Required]
         [StringLength(15, ErrorMessage = "The type must be 1 to 25 characters.", MinimumLength = 1)]
         public string? Type { get; set; }
+
+        [Required]
+        public DateTime DocumentDate { get; set; }
 
         [Required]
         [StringLength(15, ErrorMessage = "The type must be 1 to 25 characters.", MinimumLength = 1)]
         public string? DocumentType { get; set; }
 
-        [Required]
         public string? DocumentNumber { get; set; }
 
         [Required]
@@ -32,6 +31,15 @@ namespace Application.Dtos.Request.GoodsReceipt
 
         public ICollection<GoodsReceiptDetailsRequestDto> GoodsReceiptDetails { get; set; } = null!;
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
 
+            if (Type == "ADQUISICIÓN" && string.IsNullOrWhiteSpace(DocumentNumber))
+            {
+                yield return new ValidationResult("Document number is required for acquisition type.",
+                    new[] { nameof(DocumentNumber) }
+                );
+            }
+        }
     }
 }

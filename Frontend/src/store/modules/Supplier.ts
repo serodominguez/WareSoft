@@ -64,6 +64,25 @@ const actions = {
     }
   },
 
+  async selectSupplier({ commit }: any) {
+    commit("SET_LOADING", true);
+    commit("SET_ITEMS", []);
+    
+    try {
+      const result = await supplierService.select();
+      
+      if (result.isSuccess) {
+        commit("SET_ITEMS", result.data);
+      } else {
+        commit("SET_ERROR", result.message || result.errors);
+      }
+    } catch (error: any) {
+      commit("SET_ERROR", error.message);
+    } finally {
+      commit("SET_LOADING", false);
+    }
+  },
+
   async fetchSupplierById({ commit }: any, id: number) {
     commit("SET_LOADING", true);
     

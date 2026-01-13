@@ -23,15 +23,18 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [RequirePermission("Ingreso de Productos", "Leer")]
+        [RequirePermission("Entrada de Productos", "Leer")]
         public async Task<IActionResult> ListGoodsReceipt([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _goodsReceiptService.ListGoodsReceipt(filters);
+            if(response != null)
+            {
 
+            }
             if ((bool)filters.Download!)
             {
                 var columnNames = ExcelColumnNames.GetColumnsGoodsReceipt();
-                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
+                var fileBytes = _generateExcelService.GenerateToExcel(response!.Data!, columnNames);
                 return File(fileBytes, ContentType.ContentTypeExcel);
             }
 
@@ -39,7 +42,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{receiptId:int}")]
-        [RequirePermission("Ingreso de Productos", "Leer")]
+        [RequirePermission("Entrada de Productos", "Leer")]
         public async Task<IActionResult> GoodsReceiptById(int receiptId)
         {
             var response = await _goodsReceiptService.GoodsReceiptById(receiptId);
@@ -56,22 +59,22 @@ namespace Api.Controllers
         //}
 
         [HttpGet("ExportPdf/{receiptId:int}")]
-        [RequirePermission("Ingreso de Productos", "Leer")]
+        [RequirePermission("Entrada de Productos", "Leer")]
         [Produces("application/pdf")]
-        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ExportPdfGoodsReceipt(int receiptId)
         {
             var response = await _goodsReceiptService.GoodsReceiptById(receiptId);
             var fileBytes = _generatePdfService.GoodsReceiptGeneratePdf(response.Data!);
 
-            var fileName = $"Recibo_{response.Data!.Code}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var fileName = $"Entrada_{response.Data!.Code}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             return File(fileBytes, "application/pdf", fileName);
         }
 
         [HttpPost("Register")]
-        [RequirePermission("Ingreso de Productos", "Crear")]
+        [RequirePermission("Entrada de Productos", "Crear")]
         public async Task<IActionResult> RegisterGoodsReceipt([FromBody] GoodsReceiptRequestDto requestDto)
         {
             var response = await _goodsReceiptService.RegisterGoodsReceipt(AuthenticatedUserId, requestDto);
@@ -79,7 +82,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Cancel/{receiptId:int}")]
-        [RequirePermission("Ingreso de Productos", "Eliminar")]
+        [RequirePermission("Entrada de Productos", "Eliminar")]
         public async Task<IActionResult> CancelGoodsReceipt(int receiptId)
         {
             var response = await _goodsReceiptService.CancelGoodsReceipt(AuthenticatedUserId, receiptId);

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { BaseService } from "./baseService";
-import { GoodsReceipt, GoodsReceiptDetail, GoodsReceiptRegister } from '@/interfaces/goodsReceiptInterface'
+import { GoodsReceipt, GoodsReceiptRegister } from '@/interfaces/goodsReceiptInterface'
 import { BaseResponse } from '@/interfaces/baseInterface';
 
 class GoodsReceiptService extends BaseService<GoodsReceipt> {
@@ -9,12 +9,7 @@ class GoodsReceiptService extends BaseService<GoodsReceipt> {
       endpoint: 'GoodsReceipt',
       downloadFileName: 'Entradas',
       customEndpoints: {
-        create: 'GoodsReceipt/Register',
-        // No hay endpoints de actualización o habilitación/deshabilitación
-        update: undefined,
-        enable: undefined,
-        disable: undefined,
-        remove: undefined
+        create: 'GoodsReceipt/Register'
       }
     });
   }

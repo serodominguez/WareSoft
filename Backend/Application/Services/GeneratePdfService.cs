@@ -4,16 +4,28 @@ using Microsoft.Extensions.Configuration;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Globalization;
 
 namespace Application.Services
 {
     public class GeneratePdfService : IGeneratePdfService
     {
         private readonly IConfiguration _configuration;
+        private readonly CultureInfo _bolivianCulture;
 
         public GeneratePdfService(IConfiguration configuration)
         {
             _configuration = configuration;
+
+            // Configurar cultura boliviana con coma como separador de miles
+            _bolivianCulture = new CultureInfo("es-BO");
+            _bolivianCulture.NumberFormat.NumberGroupSeparator = ",";
+            _bolivianCulture.NumberFormat.NumberDecimalDigits = 0;
+        }
+
+        private string FormatCurrency(decimal value)
+        {
+            return value.ToString("N0", _bolivianCulture);
         }
 
         public byte[] GoodsReceiptGeneratePdf(GoodsReceiptWithDetailsResponseDto receipt)
@@ -35,14 +47,14 @@ namespace Application.Services
 
             void ComposeHeader(IContainer container)
             {
-                var titleStyle = TextStyle.Default.FontSize(15).Bold().FontColor(Colors.Black);
+                var titleStyle = TextStyle.Default.FontSize(12).Bold().FontColor(Colors.Black);
 
                 container.Column(column =>
                 {
                     column.Item().AlignCenter().Text(text =>
                     {
-                        text.Span("Número de ingreso: ").Style(titleStyle);
-                        text.Span(receipt.Code).Style(titleStyle);
+                        text.Span("Nota de Ingreso: ").Style(titleStyle);
+                        text.Span(receipt.StoreName).Style(titleStyle);
                     });
 
                     column.Item().PaddingTop(15);
@@ -53,16 +65,36 @@ namespace Application.Services
                         {
                             leftColumn.Item().Text(text =>
                             {
-                                text.Span("Fecha de Compra: ").SemiBold();
-                                text.Span($"{receipt.PurchaseDate:d}");
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Código: ").SemiBold();
+                                text.Span($"{receipt.Code}");
                             });
 
-                            leftColumn.Spacing(10);
+                            leftColumn.Spacing(5);
 
                             leftColumn.Item().Text(text =>
                             {
-                                text.Span("Proveedor: ").SemiBold();
-                                text.Span($"{receipt.CompanyName}");
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Tipo: ").SemiBold();
+                                text.Span($"{receipt.Type}");
+                            });
+
+                            leftColumn.Spacing(5);
+
+                            leftColumn.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Fecha de Registro: ").SemiBold();
+                                text.Span($"{receipt.AuditCreateDate:d}");
+                            });
+
+                            leftColumn.Spacing(5);
+
+                            leftColumn.Item().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Tipo de Documento: ").SemiBold();
+                                text.Span($"{receipt.DocumentType}");
                             });
                         });
 
@@ -70,16 +102,36 @@ namespace Application.Services
                         {
                             rightColumn.Item().AlignRight().Text(text =>
                             {
-                                text.Span("Tipo de Documento: ").SemiBold();
-                                text.Span($"{receipt.DocumentType}");
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Usuario: ").SemiBold();
+                                text.Span($"{receipt.AuditCreateName}");
                             });
 
-                            rightColumn.Spacing(10);
+                            rightColumn.Spacing(5);
 
                             rightColumn.Item().AlignRight().Text(text =>
                             {
-                                text.Span("Tienda: ").SemiBold();
-                                text.Span($"{receipt.StoreName}");
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Proveedor: ").SemiBold();
+                                text.Span($"{receipt.CompanyName}");
+                            });
+
+                            rightColumn.Spacing(5);
+
+                            rightColumn.Item().AlignRight().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Fecha del Documento: ").SemiBold();
+                                text.Span($"{receipt.DocumentDate:d}");
+                            });
+
+                            rightColumn.Spacing(5);
+
+                            rightColumn.Item().AlignRight().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(10));
+                                text.Span("Número de Documento: ").SemiBold();
+                                text.Span($"{receipt.DocumentNumber}");
                             });
                         });
                     });
@@ -100,12 +152,13 @@ namespace Application.Services
 
                     column.Item().AlignRight().Text(text =>
                     {
+                        text.DefaultTextStyle(x => x.FontSize(10));
                         text.Span("Total Bs.: ").SemiBold();
-                        text.Span($"{receipt.TotalAmount}").Bold();
+                        text.Span($"{FormatCurrency(receipt.TotalAmount)}").Bold();
                     });
 
-                    if (!string.IsNullOrWhiteSpace(receipt.Annotations))
-                        column.Item().PaddingTop(25).Element(ComposeComments);
+                    //if (!string.IsNullOrWhiteSpace(receipt.Annotations))
+                    column.Item().PaddingTop(25).Element(ComposeComments);
                 });
             }
 
@@ -117,20 +170,24 @@ namespace Application.Services
                     {
                         colums.RelativeColumn(1);
                         colums.RelativeColumn(2);
-                        colums.RelativeColumn(5);
-                        colums.RelativeColumn(1.5f);
-                        colums.RelativeColumn(1.5f);
+                        colums.RelativeColumn(4);
+                        colums.RelativeColumn(3);
+                        colums.RelativeColumn(3);
+                        colums.RelativeColumn((float)1.5);
+                        colums.RelativeColumn((float)1.5);
                         colums.RelativeColumn((float)1.5);
                     });
 
-                    table.Header(header => 
+                    table.Header(header =>
                     {
-                        header.Cell().Element(CellStyle).Text("Nº");
-                        header.Cell().Element(CellStyle).Text("Código");
-                        header.Cell().Element(CellStyle).Text("Descripción");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Cantidad");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Precio U.");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Subtotal");
+                        header.Cell().Element(CellStyle).Text("Nº").FontSize(10);
+                        header.Cell().Element(CellStyle).Text("Código").FontSize(10);
+                        header.Cell().Element(CellStyle).Text("Descripción").FontSize(10);
+                        header.Cell().Element(CellStyle).Text("Material").FontSize(10);
+                        header.Cell().Element(CellStyle).Text("Color").FontSize(10);
+                        header.Cell().Element(CellStyle).AlignRight().Text("Cantidad").FontSize(10);
+                        header.Cell().Element(CellStyle).AlignRight().Text("Precio U.").FontSize(10);
+                        header.Cell().Element(CellStyle).AlignRight().Text("Subtotal").FontSize(10);
 
                         static IContainer CellStyle(IContainer container)
                         {
@@ -144,12 +201,14 @@ namespace Application.Services
 
                     foreach (var item in receipt.GoodsReceiptDetails)
                     {
-                        table.Cell().Element(CellStyle).Text(item.Item.ToString());
-                        table.Cell().Element(CellStyle).Text(item.Code ?? string.Empty);
-                        table.Cell().Element(CellStyle).Text(item.Description ?? string.Empty);
-                        table.Cell().Element(CellStyle).AlignRight().Text(item.Quantity.ToString());
-                        table.Cell().Element(CellStyle).AlignRight().Text(item.UnitPrice.ToString("F2"));
-                        table.Cell().Element(CellStyle).AlignRight().Text(item.TotalPrice.ToString("F2"));
+                        table.Cell().Element(CellStyle).Text(item.Item.ToString()).FontSize(9);
+                        table.Cell().Element(CellStyle).Text(item.Code ?? string.Empty).FontSize(9);
+                        table.Cell().Element(CellStyle).Text(item.Description ?? string.Empty).FontSize(9);
+                        table.Cell().Element(CellStyle).Text(item.Material ?? string.Empty).FontSize(9);
+                        table.Cell().Element(CellStyle).Text(item.Color ?? string.Empty).FontSize(9);
+                        table.Cell().Element(CellStyle).AlignRight().Text(item.Quantity.ToString()).FontSize(9);
+                        table.Cell().Element(CellStyle).AlignRight().Text(FormatCurrency(item.UnitPrice)).FontSize(9);
+                        table.Cell().Element(CellStyle).AlignRight().Text(FormatCurrency(item.TotalPrice)).FontSize(9);
 
                         static IContainer CellStyle(IContainer container)
                         {
@@ -164,15 +223,43 @@ namespace Application.Services
 
             void ComposeComments(IContainer container)
             {
-                container
-                    .Background(Colors.Grey.Lighten3)
-                    .Padding(10)
-                    .Column(column =>
+                container.Column(column =>
+                {
+                    // Observaciones
+                    column.Item()
+                        .Background(Colors.Grey.Lighten3)
+                        .Padding(10)
+                        .Column(innerColumn =>
+                        {
+                            innerColumn.Spacing(5);
+                            innerColumn.Item().Text("Observaciones:").FontSize(10);
+                            innerColumn.Item().Text(receipt.Annotations ?? "").FontSize(9);
+                        });
+
+                    column.Item().PaddingTop(30);
+
+                    // Firmas
+                    column.Item().Row(row =>
                     {
-                        column.Spacing(5);
-                        column.Item().Text("Observaciones:").FontSize(14);
-                        column.Item().Text(receipt.Annotations);
+                        row.RelativeItem().Column(leftColumn =>
+                        {
+                            leftColumn.Item().Text("Entregado por:").FontSize(10).SemiBold();
+                            leftColumn.Item().PaddingTop(40);
+                            leftColumn.Item().BorderTop(1).BorderColor(Colors.Black).Text("").FontSize(9);
+                            leftColumn.Item().AlignCenter().Text("Nombre y Firma").FontSize(8);
+                        });
+
+                        row.ConstantItem(50);
+
+                        row.RelativeItem().Column(rightColumn =>
+                        {
+                            rightColumn.Item().Text("Recibido por:").FontSize(10).SemiBold();
+                            rightColumn.Item().PaddingTop(40);
+                            rightColumn.Item().BorderTop(1).BorderColor(Colors.Black).Text("").FontSize(9);
+                            rightColumn.Item().AlignCenter().Text("Nombre y Firma").FontSize(8);
+                        });
                     });
+                });
             }
 
             void ComposeFooter(IContainer container)

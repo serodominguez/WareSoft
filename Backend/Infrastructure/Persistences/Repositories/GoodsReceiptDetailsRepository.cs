@@ -34,6 +34,8 @@ namespace Infrastructure.Persistences.Repositories
                     {
                         Code = x.ProductEntity.Code,
                         Description = x.ProductEntity.Description,
+                        Material = x.ProductEntity.Material,
+                        Color = x.ProductEntity.Color,
                         Brand = new BrandEntity
                         {
                             BrandName = x.BrandEntity.BrandName

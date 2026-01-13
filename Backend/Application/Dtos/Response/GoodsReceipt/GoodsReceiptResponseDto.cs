@@ -6,7 +6,7 @@ namespace Application.Dtos.Response.GoodsReceipt
     {
         public int IdReceipt { get; set; }
         public string? Code { get; set; }
-        public string? PurchaseDate { get; set; }
+        public string? DocumentDate { get; set; }
         public string? Type { get; set; }
         public string? DocumentType { get; set; }
         public string? DocumentNumber { get; set; }

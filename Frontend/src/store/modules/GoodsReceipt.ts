@@ -49,7 +49,7 @@ const actions = {
 
     try {
       const result = await goodsReceiptService.fetchAll(params);
-      
+
       if (result.isSuccess) {
         commit("SET_ITEMS", result.data);
         commit("SET_TOTAL_ITEMS", result.totalRecords);
@@ -76,7 +76,7 @@ const actions = {
 
   // Obtener entrada por ID con detalles
   async fetchGoodsReceiptById({ commit }: any, receiptId: number) {
-  commit("SET_LOADING", true);
+    commit("SET_LOADING", true);
 
     try {
       const result = await goodsReceiptService.getReceiptWithDetails(receiptId);
@@ -89,12 +89,12 @@ const actions = {
           idProduct: detail.idProduct,
           code: detail.code,
           description: detail.description,
-          material: detail.material || 'N/A',      
-          color: detail.color || 'N/A',           
+          material: detail.material || 'N/A',
+          color: detail.color || 'N/A',
           categoryName: detail.categoryName,
           brandName: detail.brandName,
           quantity: detail.quantity,
-          cost: detail.unitPrice                   
+          cost: detail.unitPrice
         })) || [];
 
         commit("SET_SELECTED_RECEIPT_DETAILS", mappedDetails);
@@ -112,12 +112,12 @@ const actions = {
   async registerGoodsReceipt({ dispatch, state }: any, receiptData: any) {
     try {
       const result = await goodsReceiptService.register(receiptData);
-      
+
       if (result.isSuccess) {
         // Recargar lista con los últimos filtros
         dispatch("fetchGoodsReceipt", state.lastFilterParams || {});
       }
-      
+
       return result;
     } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };
@@ -128,12 +128,12 @@ const actions = {
   async cancelGoodsReceipt({ dispatch, state }: any, receiptId: number) {
     try {
       const result = await goodsReceiptService.cancel(receiptId);
-      
+
       if (result.isSuccess) {
         // Recargar lista con los últimos filtros
         dispatch("fetchGoodsReceipt", state.lastFilterParams || {});
       }
-      
+
       return result;
     } catch (error: any) {
       return { isSuccess: false, message: error.message, errors: error };

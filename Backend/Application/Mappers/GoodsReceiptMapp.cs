@@ -12,7 +12,7 @@ namespace Application.Mappers
         {
             return new GoodsReceiptEntity
             {
-                PurchaseDate = dto.PurchaseDate,
+                DocumentDate = dto.DocumentDate,
                 Type = dto.Type.NormalizeString(),
                 DocumentType = dto.DocumentType.NormalizeString(),
                 DocumentNumber = dto.DocumentNumber.NormalizeString(),
@@ -38,7 +38,7 @@ namespace Application.Mappers
             {
                 IdReceipt = entity.IdReceipt,
                 Code = entity.Code,
-                PurchaseDate = entity.PurchaseDate.ToString("dd/MM/yyyy HH:mm"),
+                DocumentDate = entity.DocumentDate.ToString("dd/MM/yyyy"),
                 Type = entity.Type.ToTitleCase(),
                 DocumentType = entity.DocumentType.ToTitleCase(),
                 DocumentNumber = entity.DocumentNumber,
@@ -61,16 +61,16 @@ namespace Application.Mappers
             {
                 IdReceipt = entity.IdReceipt,
                 Code = entity.Code,
-                PurchaseDate = entity.PurchaseDate.ToString("dd/MM/yyyy HH:mm"),
+                DocumentDate = entity.DocumentDate.ToString("dd/MM/yyyy"),
                 Type = entity.Type.ToTitleCase(),
                 DocumentType = entity.DocumentType.ToTitleCase(),
                 DocumentNumber = entity.DocumentNumber,
                 TotalAmount = entity.TotalAmount,
                 Annotations = entity.Annotations.NormalizeString(),
                 IdSupplier = entity.IdSupplier,
-                CompanyName = entity.Supplier.CompanyName,
+                CompanyName = entity.Supplier.CompanyName.ToTitleCase(),
                 IdStore = entity.IdStore,
-                StoreName = entity.Store.StoreName,
+                StoreName = entity.Store.StoreName.ToTitleCase(),
                 AuditCreateUser = entity.AuditCreateUser,
                 AuditCreateName = userName,
                 AuditCreateDate = entity.AuditCreateDate.HasValue ? entity.AuditCreateDate.Value.ToString("dd/MM/yyyy HH:mm") : null,
@@ -82,6 +82,8 @@ namespace Application.Mappers
                             IdProduct = d.IdProduct,
                             Code = d.Product.Code,
                             Description = d.Product.Description,
+                            Material = d.Product.Material,
+                            Color = d.Product.Color,
                             CategoryName = d.Product.Category.CategoryName,
                             BrandName = d.Product.Brand.BrandName,
                             Quantity = d.Quantity,
