@@ -21,7 +21,7 @@ namespace Api.Controllers
 
         [HttpGet]
         [RequirePermission("Productos", "Leer")]
-        public async Task<IActionResult> ListProduts([FromQuery] BaseFiltersRequest filters)
+        public async Task<IActionResult> ListProducts([FromQuery] BaseFiltersRequest filters)
         {
             var response = await _productService.ListProducts(filters);
 

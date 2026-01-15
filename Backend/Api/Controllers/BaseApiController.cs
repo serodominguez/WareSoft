@@ -58,7 +58,7 @@ namespace Api.Controllers
         {
             get
             {
-                var storeIdClaim = User.FindFirst("pk_store")?.Value;
+                var storeIdClaim = User.FindFirst("storeId")?.Value;
 
                 if (string.IsNullOrEmpty(storeIdClaim) || !int.TryParse(storeIdClaim, out int storeId))
                 {

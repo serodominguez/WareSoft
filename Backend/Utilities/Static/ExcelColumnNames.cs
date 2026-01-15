@@ -86,6 +86,27 @@
         }
         #endregion
 
+        #region ColumnsInventory
+        public static List<(string ColumnName, string PropertyName)> GetColumnsInventories()
+        {
+            var columnsProperties = new List<(string ColumnName, string PropertyName)>
+            {
+                ("SUCURSAL", "StoreName"),
+                ("CÓDIGO", "Code"),
+                ("DESCRIPCIÓN", "Description"),
+                ("PRECIO", "Price"),
+                ("MATERIAL", "Material"),
+                ("COLOR", "Color"),
+                ("UNIDAD DE MEDIDA", "UnitMeasure"),
+                ("CANTIDAD", "Stock"),
+                ("CATEGORÍA", "CategoryName"),
+                ("MARCA", "BrandName")
+            };
+
+            return columnsProperties;
+        }
+        #endregion
+
         #region ColumnsModule
         public static List<(string ColumnName, string PropertyName)> GetColumnsModules()
         {

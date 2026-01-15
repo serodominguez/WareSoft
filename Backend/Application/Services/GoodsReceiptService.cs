@@ -136,11 +136,11 @@ namespace Application.Services
 
                 foreach (var item in entity.GoodsReceiptDetails)
                 {
-                    var currentStock = await _unitOfWork.Inventory.GetStockById(item.IdProduct, requestDto.IdStore);
+                    var currentStock = await _unitOfWork.Inventory.GetStockByIdAsync(item.IdProduct, requestDto.IdStore);
                     if (currentStock is not null)
                     {
                         currentStock.Stock += item.Quantity;
-                        await _unitOfWork.Inventory.UpdateStockByProducts(currentStock);
+                        await _unitOfWork.Inventory.UpdateStockByProductsAsync(currentStock);
                     }
                     else 
                     {
@@ -151,7 +151,7 @@ namespace Application.Services
                             Stock = item.Quantity,
                             Price = 0
                         };
-                        await _unitOfWork.Inventory.RegisterStockByProducts(newStock);
+                        await _unitOfWork.Inventory.RegisterStockByProductsAsync(newStock);
                     }
 
                 }
@@ -198,7 +198,7 @@ namespace Application.Services
 
                 foreach (var item in details)
                 {
-                    var currentStock = await _unitOfWork.Inventory.GetStockById(item.IdProduct, receipt.IdStore);
+                    var currentStock = await _unitOfWork.Inventory.GetStockByIdAsync(item.IdProduct, receipt.IdStore);
 
                     if (currentStock is null)
                     {
@@ -209,7 +209,7 @@ namespace Application.Services
                     else
                     {
                         currentStock.Stock -= item.Quantity;
-                        await _unitOfWork.Inventory.UpdateStockByProducts(currentStock);
+                        await _unitOfWork.Inventory.UpdateStockByProductsAsync(currentStock);
                     }
                 }
 

@@ -1,9 +1,11 @@
 ﻿using Application.Commons.Bases.Request;
 using Application.Commons.Bases.Response;
 using Application.Commons.Ordering;
+using Application.Dtos.Request.Inventory;
 using Application.Dtos.Response.Inventory;
 using Application.Interfaces;
 using Application.Mappers;
+using FluentValidation;
 using Infrastructure.Persistences.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Utilities.Static;
@@ -13,20 +15,22 @@ namespace Application.Services
     public class InventoryService : IInventoryService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator<InventoryRequestDto> _validator;
         private readonly IOrderingQuery _orderingQuery;
 
-        public InventoryService(IUnitOfWork unitOfWork, IOrderingQuery orderingQuery)
+        public InventoryService(IUnitOfWork unitOfWork, IValidator<InventoryRequestDto> validator, IOrderingQuery orderingQuery)
         {
             _unitOfWork = unitOfWork;
+            _validator = validator;
             _orderingQuery = orderingQuery;
         }
 
-        public async Task<BaseResponse<IEnumerable<StockByStoreResponseDto>>> ListStockByStore(int storeId, BaseFiltersRequest filters)
+        public async Task<BaseResponse<IEnumerable<InventoryResponseDto>>> ListInventoryByStore(int authenticatedStoreId, BaseFiltersRequest filters)
         {
-            var response = new BaseResponse<IEnumerable<StockByStoreResponseDto>>();
+            var response = new BaseResponse<IEnumerable<InventoryResponseDto>>();
             try
             {
-                var inventory = _unitOfWork.Inventory.GetStockByStoreQueryable(storeId);
+                var inventory = _unitOfWork.Inventory.GetInventoryByStoreQueryable(authenticatedStoreId);
 
                 if (filters.NumberFilter is not null && !string.IsNullOrEmpty(filters.TextFilter))
                 {
@@ -48,12 +52,62 @@ namespace Application.Services
                 }
 
                 response.TotalRecords = await inventory.CountAsync();
-                filters.Sort ??= "Id";
+                filters.Sort ??= "IdProduct";
                 var items = await _orderingQuery.Ordering(filters, inventory, true).ToListAsync();
                 response.IsSuccess = true;
-                response.Data = items.Select(InventoryMapp.StockByStoreMapping);
+                response.Data = items.Select(InventoryMapp.InventoryByStoreMapping);
                 response.Message = ReplyMessage.MESSAGE_QUERY;
 
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.Message = ReplyMessage.MESSAGE_EXCEPTION + ex.Message;
+            }
+
+            return response;
+        }
+
+        public async Task<BaseResponse<bool>> UpdatePriceByProduct(int authenticatedUserId, int authenticatedStoreId, InventoryRequestDto requestDto)
+        {
+            var response = new BaseResponse<bool>();
+
+            try
+            {
+                var validationResult = await _validator.ValidateAsync(requestDto);
+                if (!validationResult.IsValid)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_VALIDATE;
+                    response.Errors = validationResult.Errors;
+                    return response;
+                }
+
+                var isValid = await _unitOfWork.Product.GetByIdAsync(requestDto.IdProduct);
+                if (isValid is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_NOT_FOUND;
+                    return response;
+
+                }
+                var inventory = InventoryMapp.InventoryMapping(requestDto);
+                inventory.IdStore = authenticatedStoreId;
+                inventory.AuditUpdateUser = authenticatedUserId;
+                inventory.AuditUpdateDate = DateTime.Now;
+
+                response.Data = await _unitOfWork.Inventory.UpdatePriceByProductsAsync(inventory);
+
+                if (response.Data)
+                {
+                    response.IsSuccess = true;
+                    response.Message = ReplyMessage.MESSAGE_UPDATE;
+                }
+                else
+                {
+                    response.IsSuccess = false;
+                    response.Message = ReplyMessage.MESSAGE_FAILED;
+                }
             }
             catch (Exception ex)
             {

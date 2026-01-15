@@ -28,6 +28,12 @@ namespace Infrastructure.Persistences.Contexts.Configurations
                 .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
+            builder.Property(e => e.AuditUpdateUser)
+                .HasColumnName("AUDIT_UPDATE_USER");
+
+            builder.Property(e => e.AuditUpdateDate)
+                .HasColumnName("AUDIT_UPDATE_DATE");
+
             builder.HasOne(s => s.Store)
                 .WithMany(i => i.Inventory)
                 .HasForeignKey(i => i.IdStore)

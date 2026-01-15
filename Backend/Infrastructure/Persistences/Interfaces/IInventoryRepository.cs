@@ -4,9 +4,10 @@ namespace Infrastructure.Persistences.Interfaces
 {
     public interface IInventoryRepository
     {
-        IQueryable<InventoryEntity> GetStockByStoreQueryable(int storeId);
-        Task<InventoryEntity> GetStockById(int productId, int storeId);
-        Task<bool> RegisterStockByProducts(InventoryEntity entity);
-        Task<bool> UpdateStockByProducts(InventoryEntity entity);
+        IQueryable<InventoryEntity> GetInventoryByStoreQueryable(int storeId);
+        Task<InventoryEntity> GetStockByIdAsync(int productId, int storeId);
+        Task<bool> RegisterStockByProductsAsync(InventoryEntity entity);
+        Task<bool> UpdateStockByProductsAsync(InventoryEntity entity);
+        Task<bool> UpdatePriceByProductsAsync(InventoryEntity entity);
     }
 }

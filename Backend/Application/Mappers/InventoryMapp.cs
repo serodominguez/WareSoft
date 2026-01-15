@@ -1,13 +1,23 @@
-﻿using Application.Dtos.Response.Inventory;
+﻿using Application.Dtos.Request.Inventory;
+using Application.Dtos.Response.Inventory;
 using Domain.Entities;
 
 namespace Application.Mappers
 {
     public static class InventoryMapp
     {
-        public static StockByStoreResponseDto StockByStoreMapping(InventoryEntity entity)
+        public static InventoryEntity InventoryMapping (InventoryRequestDto dto)
         {
-            return new StockByStoreResponseDto
+            return new InventoryEntity
+            {
+                IdProduct = dto.IdProduct,
+                Price = dto.Price
+            };
+        }
+
+        public static InventoryResponseDto InventoryByStoreMapping(InventoryEntity entity)
+        {
+            return new InventoryResponseDto
             {
                 IdStore = entity.IdStore,
                 IdProduct = entity.IdProduct,

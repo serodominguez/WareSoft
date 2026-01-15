@@ -14,7 +14,7 @@ namespace Infrastructure.Persistences.Repositories
             _context = context;
         }
 
-        public IQueryable<InventoryEntity> GetStockByStoreQueryable(int storeId)
+        public IQueryable<InventoryEntity> GetInventoryByStoreQueryable(int storeId)
         {
             return _context.Inventory
                 .AsNoTracking()
@@ -25,7 +25,7 @@ namespace Infrastructure.Persistences.Repositories
                 .Where(p => p.IdStore == storeId);
         }
 
-        public async Task<InventoryEntity> GetStockById(int productId, int storeId)
+        public async Task<InventoryEntity> GetStockByIdAsync(int productId, int storeId)
         {
             var stock = await _context.Inventory
                 .AsNoTracking()
@@ -34,17 +34,25 @@ namespace Infrastructure.Persistences.Repositories
             return stock!;
         }
 
-        public async Task<bool> RegisterStockByProducts(InventoryEntity entity)
+        public async Task<bool> RegisterStockByProductsAsync(InventoryEntity entity)
         {
             await _context.AddAsync(entity);
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
 
-        public async Task<bool> UpdateStockByProducts(InventoryEntity entity)
+        public async Task<bool> UpdateStockByProductsAsync(InventoryEntity entity)
         {
             _context.Update(entity);
             _context.Entry(entity).Property(x => x.Price).IsModified = false;
+            var recordsAffected = await _context.SaveChangesAsync();
+            return recordsAffected > 0;
+        }
+
+        public async Task<bool> UpdatePriceByProductsAsync(InventoryEntity entity)
+        {
+            _context.Update(entity);
+            _context.Entry(entity).Property(x => x.Stock).IsModified = false;
             var recordsAffected = await _context.SaveChangesAsync();
             return recordsAffected > 0;
         }
