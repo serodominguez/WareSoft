@@ -1,0 +1,94 @@
+﻿using Application.Commons.Bases.Request;
+using Application.Dtos.Request.Role;
+using Application.Interfaces;
+using Application.Security;
+using Microsoft.AspNetCore.Mvc;
+using Utilities.Static;
+
+namespace Api.Controllers
+{
+    [Route("api/[controller]")]
+    public class RoleController : BaseApiController
+    {
+        private readonly IRoleService _roleService;
+        private readonly IGenerateExcelService _generateExcelService;
+
+        public RoleController(IRoleService roleService, IGenerateExcelService generateExcelService)
+        {
+            _roleService = roleService;
+            _generateExcelService = generateExcelService;
+        }
+
+        [HttpGet]
+        [RequirePermission("Roles", "Leer")]
+        public async Task<IActionResult> ListRoles([FromQuery] BaseFiltersRequest filters)
+        {
+            var response = await _roleService.ListRoles(filters);
+
+            if ((bool)filters.Download!)
+            {
+                var columnNames = ExcelColumnNames.GetColumnsRoles();
+                var fileBytes = _generateExcelService.GenerateToExcel(response.Data!, columnNames);
+                return File(fileBytes, ContentType.ContentTypeExcel);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("Select")]
+        [RequirePermission("Roles", "Leer")]
+        public async Task<IActionResult> ListSelectRoles()
+        {
+            var response = await _roleService.ListSelectRoles();
+            return Ok(response);
+        }
+
+        [HttpGet("{roleId:int}")]
+        [RequirePermission("Roles", "Leer")]
+        public async Task<IActionResult> RoleById(int roleId)
+        {
+            var response = await _roleService.RoleById(roleId);
+            return Ok(response);
+        }
+
+        [HttpPost("Register")]
+        [RequirePermission("Roles", "Crear")]
+        public async Task<IActionResult> RegisterRole([FromBody] RoleRequestDto requestDto)
+        {
+            var response = await _roleService.RegisterRole(AuthenticatedUserId, requestDto);
+            return Ok(response);
+        }
+
+        [HttpPut("Edit/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
+        public async Task<IActionResult> EditRole(int roleId, [FromBody] RoleRequestDto requestDto)
+        {
+            var response = await _roleService.EditRole(AuthenticatedUserId, roleId, requestDto);
+            return Ok(response);
+        }
+
+        [HttpPut("Enable/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
+        public async Task<IActionResult> EnableRole(int roleId)
+        {
+            var response = await _roleService.EnableRole(AuthenticatedUserId, roleId);
+            return Ok(response);
+        }
+
+        [HttpPut("Disable/{roleId:int}")]
+        [RequirePermission("Roles", "Editar")]
+        public async Task<IActionResult> DisableRole(int roleId)
+        {
+            var response = await _roleService.DisableRole(AuthenticatedUserId, roleId);
+            return Ok(response);
+        }
+
+        [HttpPut("Remove/{roleId:int}")]
+        [RequirePermission("Roles", "Eliminar")]
+        public async Task<IActionResult> RemoveRole(int roleId)
+        {
+            var response = await _roleService.RemoveRole(AuthenticatedUserId, roleId);
+            return Ok(response);
+        }
+    }
+}
