@@ -18,33 +18,29 @@
   </v-data-table>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { PermissionsByModule } from '@/interfaces/permissionInterface';
 
-export default defineComponent({
-  name: 'PermissionList',
-  props: {
-    permissions: {
-      type: Array as PropType<PermissionsByModule[]>,
-      required: true
-    },
-    loading: {
-      type: Boolean,
-      required: true
-    }
-  },
-  emits: ['permission-changed'],
-  computed: {
-    headers() {
-      return [
-        { title: 'Módulo', key: 'module', sortable: false },
-        { title: 'Crear', key: 'permissions.crear', sortable: false },
-        { title: 'Leer', key: 'permissions.leer', sortable: false },
-        { title: 'Editar', key: 'permissions.editar', sortable: false },
-        { title: 'Eliminar', key: 'permissions.eliminar', sortable: false },
-      ];
-    }
-  }
-});
+// Props
+interface Props {
+  permissions: PermissionsByModule[];
+  loading: boolean;
+}
+
+const props = defineProps<Props>();
+
+// Emits
+const emit = defineEmits<{
+  'permission-changed': [];
+}>();
+
+// Computed
+const headers = computed(() => [
+  { title: 'Módulo', key: 'module', sortable: false },
+  { title: 'Crear', key: 'permissions.crear', sortable: false },
+  { title: 'Leer', key: 'permissions.leer', sortable: false },
+  { title: 'Editar', key: 'permissions.editar', sortable: false },
+  { title: 'Eliminar', key: 'permissions.eliminar', sortable: false },
+]);
 </script>

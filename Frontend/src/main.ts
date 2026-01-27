@@ -42,7 +42,7 @@ const toastOptions = {
 }
 
 // Inicialización
-function initializeApp() {
+ async function initializeApp() {
   // Crear la aplicación
   const app = createApp(App)
 
@@ -62,12 +62,10 @@ function initializeApp() {
     })
   }
 
-  // Esto restaura token + permisos desde localStorage (instantáneo)
-  store.dispatch('initializeAuth').catch((error) => {
-    console.error('Error inicializando autenticación:', error)
-  })
+  // Espera a que se cargue la autenticación
+   await store.dispatch('initializeAuth');
 
-  // Montar la app inmediatamente (no espera a initializeAuth)
+  // Montar la app después de que la autenticación esté lista
   app.mount('#app')
 
   // Ocultar loading screen

@@ -22,7 +22,7 @@
             <v-list-item>
                 <v-date-input v-model="endDateModel" label="Hasta:" prepend-icon="" variant="underlined"
                     persistent-placeholder></v-date-input>
-                <v-btn color="indigo" block @click="$emit('apply-filters')"> Aplicar </v-btn>
+                <v-btn color="indigo" block @click="emit('apply-filters')"> Aplicar </v-btn>
             </v-list-item>
             <v-list-item>
                 <v-btn color="indigo" block @click="clearFilters"> Limpiar </v-btn>
@@ -31,97 +31,42 @@
     </v-navigation-drawer>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, PropType } from 'vue';
+<script setup lang="ts">
+import { useFiltersSync } from '@/composables/useModelSync';
 
-export default defineComponent({
-    name: 'CommonFilters',
-    // Props recibidas del componente padre
-    props: {
-        // Controla la visibilidad del drawer (patrón v-model)
-        modelValue: {
-            type: Boolean,
-            required: true
-        },
-        // Array de opciones de filtros disponibles (ej: ['Marca', 'Producto', 'Categoría'])
-        filters: {
-            type: Array as PropType<string[]>,
-            required: true,
-            validator: (value: string[]) => value.length > 0 // Valida que haya al menos un filtro
-        },
-        // Filtro actualmente seleccionado
-        selectedFilter: {
-            type: String,
-            required: true
-        },
-        // Estado del filtro (Activos/Inactivos)
-        state: {
-            type: String,
-            default: 'Activos'
-        },
-        // Fecha de inicio del rango de filtrado
-        startDate: {
-            type: [Date, null] as any,
-            default: null
-        },
-        // Fecha de fin del rango de filtrado
-        endDate: {
-            type: [Date, null] as any,
-            default: null
-        }
-    },
-    // Todos los update:* son para implementar v-model en múltiples propiedades
-    emits: [
-        'update:modelValue',             // Actualiza visibilidad del drawer
-        'update:selectedFilter',        // Actualiza filtro seleccionado
-        'update:state',                // Actualiza estado (Activos/Inactivos)
-        'update:startDate',           // Actualiza fecha de inicio
-        'update:endDate',            // Actualiza fecha de fin
-        'apply-filters'             // Se dispara al hacer clic en "Aplicar"
-    ],
-    //  Define la lógica reactiva del componente
-    setup(props, { emit }) {
-        // Implementa el patrón v-model
-        const drawerModel = computed({
-            get: () => props.modelValue,
-            set: (value) => emit('update:modelValue', value)
-        });
-        // Permite cambiar dinámicamente el tipo de filtro (Marca, Producto, etc.)
-        const selectedFilterModel = computed({
-            get: () => props.selectedFilter,
-            set: (value) => emit('update:selectedFilter', value)
-        });
-        // Alterna entre "Activos" e "Inactivos"
-        const stateModel = computed({
-            get: () => props.state,
-            set: (value) => emit('update:state', value)
-        });
-        // Permite seleccionar desde qué fecha filtrar los registros
-        const startDateModel = computed({
-            get: () => props.startDate,
-            set: (value) => emit('update:startDate', value)
-        });
+// Props del componente
+interface Props {
+    modelValue: boolean;
+    filters: string[];
+    selectedFilter: string;
+    state?: string;
+    startDate?: Date | null;
+    endDate?: Date | null;
+}
 
-        const endDateModel = computed({
-            get: () => props.endDate,
-            set: (value) => emit('update:endDate', value)
-        });
-        // Limpia/resetea todos los filtros a sus valores por defecto
-        const clearFilters = () => {
-            selectedFilterModel.value = props.filters[0];
-            stateModel.value = 'Activos';
-            startDateModel.value = null;
-            endDateModel.value = null;
-        };
-        // Expone las propiedades y métodos al template
-        return {
-            drawerModel,
-            selectedFilterModel,
-            stateModel,
-            startDateModel,
-            endDateModel,
-            clearFilters
-        };
-    }
+const props = withDefaults(defineProps<Props>(), {
+    state: 'Activos',
+    startDate: null,
+    endDate: null
 });
+
+// Emits del componente
+const emit = defineEmits<{
+    'update:modelValue': [value: boolean];
+    'update:selectedFilter': [value: string];
+    'update:state': [value: string];
+    'update:startDate': [value: Date | null];
+    'update:endDate': [value: Date | null];
+    'apply-filters': [];
+}>();
+
+// Usa el composable para toda la lógica de sincronización
+const {
+    drawerModel,
+    selectedFilterModel,
+    stateModel,
+    startDateModel,
+    endDateModel,
+    clearFilters
+} = useFiltersSync(props, emit);
 </script>

@@ -13,14 +13,14 @@
           </v-col>
           <v-col cols="8" md="6" lg="6" xl="6" class="mb-2">
             <v-text-field append-inner-icon="search" density="compact" label="Búsqueda" variant="underlined"
-              hide-details single-line v-model="search" @click:append-inner="searchProducts"
-              @keyup.enter="searchProducts" />
+              hide-details single-line v-model="search" @click:append-inner="handleSearch"
+              @keyup.enter="handleSearch" />
           </v-col>
         </v-row>
-        <v-data-table-server :headers="headers" :items="products" :items-per-page-options="[5, 10]"
+        <v-data-table-server :key="tableKey" :headers="headers" :items="products" :items-per-page-options="[5, 10]"
           :items-per-page-text="pages" :items-per-page="itemsPerPage" :items-length="totalProducts" :loading="loading"
-          loading-text="Cargando... Espere por favor" @update:items-per-page="updateItemsPerPage"
-          @update:page="changePage">
+          loading-text="Cargando... Espere por favor" @update:items-per-page="handleItemsPerPageUpdate"
+          @update:page="handlePageChange">
           <template v-slot:item="{ item }">
             <tr>
               <td>{{ item.code }}</td>
@@ -30,7 +30,8 @@
               <td>{{ item.categoryName }}</td>
               <td>{{ item.brandName }}</td>
               <td class="text-center">
-                <v-btn color="blue" icon="add" variant="text" @click="addProduct(item)" size="small" title="Agregar" />
+                <v-btn color="blue" icon="add" variant="text" @click="handleProductAdd(item)" size="small"
+                  title="Agregar" />
               </td>
             </tr>
           </template>
@@ -43,144 +44,157 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="red" dark class="mb-2" elevation="4" @click="close">Cerrar</v-btn>
+        <v-btn color="red" dark class="mb-2" elevation="4" @click="handleClose">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { Product } from '@/interfaces/productInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
-export default defineComponent({
-  name: 'CommonProductIn',
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true
-    }
-  },
-  emits: ['update:modelValue', 'close', 'product-added'],
-  setup() {
-    const store = useStore();
-    return { store };
-  },
-  data() {
-    return {
-      pages: "Productos por Página",
-      currentPage: 1,
-      itemsPerPage: 5,
-      search: null as string | null,
-      selectedFilter: '',
-      filterOptions: ['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca'],
-      hasSearched: false,
-      products: [] as Product[],
-      totalProducts: 0,
-      loading: false
-    };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      return [
-        { title: 'Código', key: 'code', sortable: false },
-        { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Material', key: 'material', sortable: false },
-        { title: 'Color', key: 'color', sortable: false },
-        { title: 'Categoría', key: 'categoryName', sortable: false },
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Agregar', key: 'actions', sortable: false, align: 'center' },
-      ];
-    },
-    isOpen: {
-      get() {
-        return this.modelValue;
-      },
-      set(value: boolean) {
-        this.$emit('update:modelValue', value);
-      }
-    },
-    noDataMessage(): string {
-      return this.hasSearched ? 'No hay productos para mostrar' : 'Realice una búsqueda para ver los productos';
-    }
-  },
-  methods: {
-    close() {
-      this.resetModal();
-      this.$emit('update:modelValue', false);
-      this.$emit('close');
-    },
-    // Limpia todos los campos y la tabla
-    resetModal() {
-      this.search = null;
-      this.selectedFilter = '';
-      this.currentPage = 1;
-      this.itemsPerPage = 5;
-      this.hasSearched = false;
-      this.products = [];
-      this.totalProducts = 0;
-    },
-    // Obtiene los parámetros de filtro
-    getFilterParams() {
-      const filterMap: { [key: string]: number } = {
-        "Código": 1,
-        "Descripción": 2,
-        "Material": 3,
-        "Color": 4,
-        "Marca": 5,
-        "Categoría": 6
-      };
+// Props del componente
+interface Props {
+  modelValue: boolean;
+}
 
-      return {
-        textFilter: this.search?.trim() || null,
-        numberFilter: filterMap[this.selectedFilter],
-        stateFilter: 1
-      };
-    },
-    // Busca productos con filtros
-    async searchProducts() {
-      this.currentPage = 1;
-      await this.fetchProducts();
-    },
-    // Obtiene productos maneja estado local
-    async fetchProducts() {
-      try {
-        this.loading = true;
-        const response = await this.store.dispatch('product/fetchProducts', {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams()
-        });
+const props = defineProps<Props>();
 
-        // Obtiene los datos del store después de la acción
-        this.products = this.store.getters['product/products'] || [];
-        this.totalProducts = this.store.getters['product/totalProducts'] || 0;
-        this.hasSearched = true;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar productos');
-        this.products = [];
-        this.totalProducts = 0;
-      } finally {
-        this.loading = false;
-      }
-    },
-    // Actualiza items por página
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.fetchProducts();
-    },
-    // Refresca la lista manteniendo filtros
-    changePage(page: number) {
-      this.currentPage = page;
-      this.fetchProducts();
-    },
-    // Agrega un producto seleccionado
-    addProduct(product: Product) {
-      this.$emit('product-added', product);
-    }
-  }
+// Emits del componente
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'close': [];
+  'product-added': [product: Product];
+}>();
+
+// Inicialización del store
+const store = useStore();
+
+// Estado reactivo - Configuración de tabla
+const tableKey = ref(0);
+const pages = ref("Productos por Página");
+const currentPage = ref(1);
+const itemsPerPage = ref(5);
+
+// Estado reactivo - Filtros y búsqueda
+const search = ref<string | null>(null);
+const selectedFilter = ref('');
+const filterOptions = ref(['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']);
+
+// Estado reactivo - Datos y estado
+const hasSearched = ref(false);
+const products = ref<Product[]>([]);
+const totalProducts = ref(0);
+const loading = ref(false);
+
+// Mapa de filtros
+const FILTER_MAP: Record<string, number> = {
+  "Código": 1,
+  "Descripción": 2,
+  "Material": 3,
+  "Color": 4,
+  "Marca": 5,
+  "Categoría": 6
+};
+
+// Computed properties
+
+const headers = computed(() => [
+  { title: 'Código', key: 'code', sortable: false },
+  { title: 'Descripción', key: 'description', sortable: false },
+  { title: 'Material', key: 'material', sortable: false },
+  { title: 'Color', key: 'color', sortable: false },
+  { title: 'Categoría', key: 'categoryName', sortable: false },
+  { title: 'Marca', key: 'brandName', sortable: false },
+  { title: 'Agregar', key: 'actions', sortable: false, align: 'center' as const },
+]);
+
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value: boolean) => emit('update:modelValue', value)
 });
+
+const noDataMessage = computed(() => 
+  hasSearched.value 
+    ? 'No hay productos para mostrar' 
+    : 'Realice una búsqueda para ver los productos'
+);
+
+// Construye los parámetros de filtro para la petición
+const buildFilterParams = () => ({
+  textFilter: search.value?.trim() || null,
+  numberFilter: FILTER_MAP[selectedFilter.value],
+  stateFilter: 1
+});
+
+// Resetea todos los campos del modal a sus valores iniciales
+const resetModalState = () => {
+  search.value = null;
+  selectedFilter.value = '';
+  currentPage.value = 1;
+  itemsPerPage.value = 5;
+  hasSearched.value = false;
+  products.value = [];
+  totalProducts.value = 0;
+  tableKey.value++;
+};
+
+// Obtiene productos del store
+const fetchProducts = async () => {
+  try {
+    loading.value = true;
+    
+    await store.dispatch('product/fetchProducts', {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...buildFilterParams()
+    });
+
+    // Actualiza estado local con datos del store
+    products.value = store.getters['product/products'] || [];
+    totalProducts.value = store.getters['product/totalProducts'] || 0;
+    hasSearched.value = true;
+    
+  } catch (error) {
+    handleApiError(error, 'Error al buscar productos');
+    products.value = [];
+    totalProducts.value = 0;
+  } finally {
+    loading.value = false;
+  }
+};
+// Maneja la búsqueda de productos
+const handleSearch = async () => {
+  currentPage.value = 1;
+  await fetchProducts();
+};
+
+// Maneja el cambio de items por página
+const handleItemsPerPageUpdate = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  fetchProducts();
+};
+
+// Maneja el cambio de página
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  fetchProducts();
+};
+
+// Maneja el agregado de un producto
+const handleProductAdd = (product: Product) => {
+  emit('product-added', product);
+};
+
+// Maneja el cierre del modal
+const handleClose = () => {
+  resetModalState();
+  emit('update:modelValue', false);
+  emit('close');
+};
 </script>

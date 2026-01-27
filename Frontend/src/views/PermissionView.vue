@@ -27,134 +27,125 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { PermissionsByModule } from '@/interfaces/permissionInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 import PermissionList from '@/components/Permission/PermissionList.vue';
 
-export default defineComponent({
-  name: 'PermissionView',
-  components: {
-    PermissionList
+// Inicialización
+const store = useStore();
+const toast = useToast();
+
+// Estado reactivo
+const selectedRoleId = ref<number | null>(null);
+const localPermissions = ref<PermissionsByModule[]>([]);
+const originalPermissions = ref<PermissionsByModule[]>([]);
+const hasChanges = ref(false);
+const saving = ref(false);
+
+// Computed properties
+const roles = computed(() => {
+  const rolesFromStore = store.getters['role/roles'];
+  return Array.isArray(rolesFromStore) ? rolesFromStore : [];
+});
+
+const loadingRoles = computed<boolean>(() => store.getters['role/loading']);
+
+const permissionsByModule = computed<PermissionsByModule[]>(
+  () => store.getters['permission/permissionsByModule']
+);
+
+const permissions = computed(() => store.getters['permission/permissions']);
+
+const loading = computed<boolean>(() => store.getters['permission/loading']);
+
+// Watchers
+watch(
+  permissionsByModule,
+  (newPermissions) => {
+    localPermissions.value = JSON.parse(JSON.stringify(newPermissions));
+    originalPermissions.value = JSON.parse(JSON.stringify(newPermissions));
+    hasChanges.value = false;
   },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      selectedRoleId: null as number | null,
-      localPermissions: [] as PermissionsByModule[],
-      originalPermissions: [] as PermissionsByModule[],
-      hasChanges: false,
-      saving: false
-    };
-  },
-  computed: {
-    roles() {
-      const rolesFromStore = this.store.getters['role/roles'];
-      return Array.isArray(rolesFromStore) ? rolesFromStore : [];
-    },
-    loadingRoles(): boolean {
-      return this.store.getters['role/loading'];
-    },
-    permissionsByModule(): PermissionsByModule[] {
-      return this.store.getters['permission/permissionsByModule'];
-    },
-    permissions() {
-      return this.store.getters['permission/permissions'];
-    },
-    loading(): boolean {
-      return this.store.getters['permission/loading'];
-    }
-  },
-  watch: {
-    permissionsByModule: {
-      handler(newPermissions) {
-        this.localPermissions = JSON.parse(JSON.stringify(newPermissions));
-        this.originalPermissions = JSON.parse(JSON.stringify(newPermissions));
-        this.hasChanges = false;
-      },
-      deep: true
-    }
-  },
-  methods: {
-    async loadPermissions() {
-      if (!this.selectedRoleId) {
-        this.toast.warning('Por favor selecciona un rol');
-        return;
-      }
+  { deep: true }
+);
 
-      this.hasChanges = false;
-
-      try {
-        await this.store.dispatch('permission/fetchPermissionsByRole', this.selectedRoleId);
-      } catch (error) {
-        handleApiError(error, 'Error al cargar los permisos del rol');
-      }
-    },
-
-    markAsChanged() {
-      this.hasChanges = true;
-    },
-
-    async savePermissions() {
-      if (!this.hasChanges) {
-        this.toast.info('No hay cambios para guardar');
-        return;
-      }
-
-      this.saving = true;
-
-      try {
-        // Construir array de permisos actualizados
-        const updatedPermissions = this.permissions.map((perm: any) => {
-          const localModule = this.localPermissions.find(
-            (lp) => lp.module === perm.moduleName
-          );
-
-          if (localModule) {
-            const actionKey = perm.actionName.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
-            return {
-              idPermission: perm.idPermission,
-              status: localModule.permissions[actionKey]
-            };
-          }
-
-          return {
-            idPermission: perm.idPermission,
-            status: perm.status
-          };
-        });
-
-        // Llamar al store
-        const response = await this.store.dispatch('permission/updatePermissions', updatedPermissions);
-
-        if (response && response.success) {
-          this.toast.success('Permisos actualizados correctamente');
-          this.hasChanges = false;
-
-          // Recargar permisos para confirmar
-          if (this.selectedRoleId) {
-            await this.store.dispatch('permission/fetchPermissionsByRole', this.selectedRoleId);
-          }
-        } else {
-          const errorMsg = response?.message || 'Error al actualizar permisos';
-          this.toast.error(errorMsg);
-        }
-      } catch (error) {
-        const appError = handleApiError(error, 'Error al guardar los permisos');
-      } finally {
-        this.saving = false;
-      }
-    }
-  },
-  mounted() {
-    this.store.dispatch('role/selectRole');
+// Métodos
+const loadPermissions = async () => {
+  if (!selectedRoleId.value) {
+    toast.warning('Por favor selecciona un rol');
+    return;
   }
+
+  hasChanges.value = false;
+
+  try {
+    await store.dispatch('permission/fetchPermissionsByRole', selectedRoleId.value);
+  } catch (error) {
+    handleApiError(error, 'Error al cargar los permisos del rol');
+  }
+};
+
+const markAsChanged = () => {
+  hasChanges.value = true;
+};
+
+const savePermissions = async () => {
+  if (!hasChanges.value) {
+    toast.info('No hay cambios para guardar');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    // Construir array de permisos actualizados
+    const updatedPermissions = permissions.value.map((perm: any) => {
+      const localModule = localPermissions.value.find(
+        (lp) => lp.module === perm.moduleName
+      );
+
+      if (localModule) {
+        const actionKey = perm.actionName.toLowerCase() as 'crear' | 'leer' | 'editar' | 'eliminar';
+        return {
+          idPermission: perm.idPermission,
+          status: localModule.permissions[actionKey]
+        };
+      }
+
+      return {
+        idPermission: perm.idPermission,
+        status: perm.status
+      };
+    });
+
+    // Llamar al store
+    const response = await store.dispatch('permission/updatePermissions', updatedPermissions);
+
+    if (response && response.success) {
+      toast.success('Permisos actualizados correctamente');
+      hasChanges.value = false;
+
+      // Recargar permisos para confirmar
+      if (selectedRoleId.value) {
+        await store.dispatch('permission/fetchPermissionsByRole', selectedRoleId.value);
+      }
+    } else {
+      const errorMsg = response?.message || 'Error al actualizar permisos';
+      toast.error(errorMsg);
+    }
+  } catch (error) {
+    handleApiError(error, 'Error al guardar los permisos');
+  } finally {
+    saving.value = false;
+  }
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  store.dispatch('role/selectRole');
 });
 </script>

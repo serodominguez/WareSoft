@@ -13,15 +13,15 @@
             <td>{{ (item as Inventory).color }}</td>
             <td>{{ (item as Inventory).categoryName }}</td>
             <td>{{ (item as Inventory).brandName }}</td>
-           <td class="text-center" :class="{ 'text-red': ((item as Inventory).stock ?? 0) <= 0 }">
+            <td class="text-center" :class="{ 'text-red': ((item as Inventory).stock ?? 0) <= 0 }">
               {{ (item as Inventory).stock }}
             </td>
             <td class="text-center" :class="{ 'text-red': ((item as Inventory).price ?? 0) <= 0 }">
               {{ (item as Inventory).price }}
             </td>
             <td class="text-center">
-              <v-btn v-if="canEdit" color="indigo" icon="currency_exchange"
-                variant="text" @click="$emit('edit-inventory', item)" size="small" title="Precio">
+              <v-btn v-if="canEdit" color="indigo" icon="currency_exchange" variant="text"
+                @click="$emit('edit-inventory', item)" size="small" title="Precio">
               </v-btn>
             </td>
           </tr>
@@ -30,8 +30,10 @@
           <v-toolbar>
             <v-toolbar-title>Gestión de Inventario</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="canRead" icon="mdi:mdi-file-pdf-box" @click="handleDownloadPdf" :loading="downloadingPdf" title="Descargar Planilla"></v-btn>
-            <v-btn v-if="canRead" icon="mdi:mdi-microsoft-excel" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
+            <v-btn v-if="canRead" icon="mdi:mdi-file-pdf-box" @click="handleDownloadPdf" :loading="downloadingPdf"
+              title="Descargar Planilla"></v-btn>
+            <v-btn v-if="canRead" icon="mdi:mdi-microsoft-excel" @click="handleDownloadExcel"
+              :loading="downloadingExcel" title="Descargar Excel"></v-btn>
             <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
               <v-text-field v-if="canRead" append-inner-icon="search" density="compact" label="Búsqueda" variant="solo"
@@ -52,178 +54,147 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { Inventory } from '@/interfaces/inventoryInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
-export default defineComponent({
-  name: 'InventoryList',
-  components: {
-    CommonFilters
-  },
-  props: {
-    inventories: {
-      type: Array as PropType<Inventory[]>,
-      required: true
-    },
-    loading: {
-      type: Boolean,
-      required: true
-    },
-    totalInventories: {
-      type: Number,
-      required: true
-    },
-    canRead: {
-      type: Boolean,
-      required: true
-    },
-    canEdit: {
-      type: Boolean,
-      required: true
-    },
-    drawer: {
-      type: Boolean,
-      default: false
-    },
-    selectedFilter: {
-      type: String,
-      default: 'Código'
-    },
-    state: {
-      type: String,
-      default: 'Activos'
-    },
-    startDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    endDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    downloadingExcel: {
-      type: Boolean,
-      default: false
-    },
-    downloadingPdf: {
-      type: Boolean,
-      default: false
-    },
-    itemsPerPage: {
-      type: Number,
-      default: 10
-    }
-  },
-  emits: [
-    'open-form',
-    'open-modal',
-    'edit-inventory',
-    'fetch-inventories',
-    'search-inventories',
-    'update-items-per-page',
-    'change-page',
-    'download-excel',
-    'download-pdf',
-    'update:drawer',
-    'update:selectedFilter',
-    'update:state',
-    'update:startDate',
-    'update:endDate'
-  ],
-  data() {
-    return {
-      pages: "Productos por Página",
-      search: null as string | null,
-      filterOptions: ['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']
-    };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      return [
-        { title: 'Código', key: 'code', sortable: false },
-        { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Material', key: 'material', sortable: false },
-        { title: 'Color', key: 'color', sortable: false },
-        { title: 'Categoría', key: 'categoryName', sortable: false },
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Cantidad', key: 'stock', sortable: false, align: 'center' },
-        { title: 'Precio', key: 'price', sortable: false, align: 'center' },
-        { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
-      ];
-    },
-    drawerModel: {
-      get() {
-        return this.drawer;
-      },
-      set(value: boolean) {
-        this.$emit('update:drawer', value);
-      }
-    },
-    selectedFilterModel: {
-      get() {
-        return this.selectedFilter;
-      },
-      set(value: string) {
-        this.$emit('update:selectedFilter', value);
-      }
-    },
-    stateModel: {
-      get() {
-        return this.state;
-      },
-      set(value: string) {
-        this.$emit('update:state', value);
-      }
-    },
-    startDateModel: {
-      get() {
-        return this.startDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:startDate', value);
-      }
-    },
-    endDateModel: {
-      get() {
-        return this.endDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:endDate', value);
-      }
-    }
-  },
-  methods: {
-    handleSearch() {
-      this.$emit('search-inventories', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        state: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    },
+// Props
+interface Props {
+  inventories: Inventory[];
+  loading: boolean;
+  totalInventories: number;
+  canRead: boolean;
+  canEdit: boolean;
+  drawer?: boolean;
+  selectedFilter?: string;
+  state?: string;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  downloadingExcel?: boolean;
+  downloadingPdf?: boolean;
+  itemsPerPage?: number;
+}
 
-    handleDownloadExcel() {
-      this.$emit('download-excel', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        stateFilter: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    },
-
-    handleDownloadPdf() {
-      this.$emit('download-pdf', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        stateFilter: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    }
-  }
+const props = withDefaults(defineProps<Props>(), {
+  drawer: false,
+  selectedFilter: 'Código',
+  state: 'Activos',
+  startDate: null,
+  endDate: null,
+  downloadingExcel: false,
+  downloadingPdf: false,
+  itemsPerPage: 10
 });
+
+// Emits
+const emit = defineEmits<{
+  'open-form': [];
+  'open-modal': [payload: { inventory: Inventory; action: 0 | 1 | 2 }];
+  'edit-inventory': [inventory: Inventory];
+  'fetch-inventories': [];
+  'search-inventories': [params: {
+    search: string | null;
+    selectedFilter: string;
+    state: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update-items-per-page': [itemsPerPage: number];
+  'change-page': [page: number];
+  'download-excel': [params: {
+    search: string | null;
+    selectedFilter: string;
+    stateFilter: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'download-pdf': [params: {
+    search: string | null;
+    selectedFilter: string;
+    stateFilter: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update:drawer': [value: boolean];
+  'update:selectedFilter': [value: string];
+  'update:state': [value: string];
+  'update:startDate': [value: Date | null];
+  'update:endDate': [value: Date | null];
+}>();
+
+// Estado reactivo
+const pages = ref("Productos por Página");
+const search = ref<string | null>(null);
+const filterOptions = ref(['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']);
+
+// Computed properties
+const headers = computed(() => [
+  { title: 'Código', key: 'code', sortable: false },
+  { title: 'Descripción', key: 'description', sortable: false },
+  { title: 'Material', key: 'material', sortable: false },
+  { title: 'Color', key: 'color', sortable: false },
+  { title: 'Categoría', key: 'categoryName', sortable: false },
+  { title: 'Marca', key: 'brandName', sortable: false },
+  { title: 'Cantidad', key: 'stock', sortable: false, align: 'center' as const },
+  { title: 'Precio', key: 'price', sortable: false, align: 'center' as const },
+  { title: 'Acciones', key: 'actions', sortable: false, align: 'center' as const },
+]);
+
+// Computed bidireccionales para v-model
+const drawerModel = computed({
+  get: () => props.drawer,
+  set: (value: boolean) => emit('update:drawer', value)
+});
+
+const selectedFilterModel = computed({
+  get: () => props.selectedFilter,
+  set: (value: string) => emit('update:selectedFilter', value)
+});
+
+const stateModel = computed({
+  get: () => props.state,
+  set: (value: string) => emit('update:state', value)
+});
+
+const startDateModel = computed({
+  get: () => props.startDate,
+  set: (value: Date | null) => emit('update:startDate', value)
+});
+
+const endDateModel = computed({
+  get: () => props.endDate,
+  set: (value: Date | null) => emit('update:endDate', value)
+});
+
+// Métodos
+const handleSearch = () => {
+  emit('search-inventories', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    state: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
+
+const handleDownloadExcel = () => {
+  emit('download-excel', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    stateFilter: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
+
+const handleDownloadPdf = () => {
+  emit('download-pdf', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    stateFilter: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
 </script>

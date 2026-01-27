@@ -2,11 +2,11 @@
   <v-dialog v-model="isOpen" max-width="500px" persistent>
     <v-card>
       <v-card-title class="bg-surface-light pt-4">
-        <span>{{'Editar Precio'}}</span>
+        <span>Editar Precio</span>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
@@ -21,7 +21,7 @@
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localInventory.unitMeasure" label="Unidad de Medida" readonly />
               </v-col>
-             <v-col cols="6" md="6" lg="6" xl="12">
+              <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localInventory.brandName" label="Marca" readonly />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
@@ -30,10 +30,10 @@
               <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model="localInventory.stock" label="Cantidad" readonly />
               </v-col>
-             <v-col cols="6" md="6" lg="6" xl="12">
+              <v-col cols="6" md="6" lg="6" xl="12">
                 <v-text-field color="indigo" variant="underlined" v-model.number="localInventory.price" counter="5" type="number"
-                  :rules="[rules.required]" :maxlength="5" label="Precio" ref="priceField" 
-                  @focus="$event.target.select()" required />
+                  :rules="[rules.required]" :maxlength="5" label="Precio" ref="priceFieldRef" 
+                  @focus="($event.target as HTMLInputElement).select()" required />
               </v-col>
             </v-row>
           </v-container>
@@ -50,111 +50,122 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, reactive, computed, watch, nextTick } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Inventory } from '@/interfaces/inventoryInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
-interface FormRef {
-  validate: () => boolean;
+// Props
+interface Props {
+  modelValue: boolean;
+  inventory?: Inventory | null;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
-}
-
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    inventory: {
-      type: Object as PropType<Inventory | null>,
-      default: () => ({
-        idStore: null,
-        idProduct: null,
-        code: '',
-        description: '',
-        material: '',
-        color: '',
-        unitMeasure: '',
-        stock: null,
-        price: null,
-        brandName: '',
-        categoryName: ''
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localInventory: { ...this.inventory } as Inventory,
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue; // Añadir esta línea
-    },
-    isOpen(newValue: boolean) {
-      if (newValue) {
-        // Espera a que el modal se renderice completamente
-        this.$nextTick(() => {
-          const priceField = this.$refs.priceField as any; // Asigna un ref al campo
-          if (priceField) {
-            priceField.focus();
-          }
-        });
-      }
-
-      this.$emit('update:modelValue', newValue);
-    },
-    inventory: {
-      handler(newInventory: Inventory) {
-        this.localInventory = { ...newInventory };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async savePrice() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-
-      try {
-        this.saving = true;
-
-        const result = await this.$store.dispatch('inventory/editInventoryPrice', { inventory: { ...this.localInventory }});
-
-        if (result.isSuccess) {
-          this.toast.success('Precio actualizado con éxito!');
-          this.$emit('saved', { ...this.localInventory });
-          this.close();
-        }
-
-      } catch (error: any) {
-        handleApiError(error, 'Error al actualizar el precio');
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  inventory: () => ({
+    idStore: null,
+    idProduct: null,
+    code: '',
+    description: '',
+    material: '',
+    color: '',
+    unitMeasure: '',
+    stock: null,
+    price: null,
+    brandName: '',
+    categoryName: ''
+  })
 });
+
+// Emits
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [inventory: Inventory];
+}>();
+
+// Servicios
+const store = useStore();
+const toast = useToast();
+
+// Referencias del template
+const formRef = ref<{ validate: () => Promise<{ valid: boolean }> }>();
+const priceFieldRef = ref<HTMLInputElement>();
+
+// Estado reactivo
+const valid = ref(false);
+const saving = ref(false);
+const localInventory = reactive<Inventory>({ ...props.inventory } as Inventory);
+
+// Reglas de validación
+const rules = {
+  required: (value: string | number) => !!value || 'Este campo es requerido.',
+  onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
+};
+
+// Computed bidireccional para v-model
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value: boolean) => emit('update:modelValue', value)
+});
+
+// Watchers
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue) {
+      // Espera a que el modal se renderice completamente
+      nextTick(() => {
+        if (priceFieldRef.value) {
+          priceFieldRef.value.focus();
+        }
+      });
+    }
+  }
+);
+
+watch(
+  () => props.inventory,
+  (newInventory) => {
+    if (newInventory) {
+      Object.assign(localInventory, { ...newInventory });
+    }
+  },
+  { deep: true }
+);
+
+// Métodos
+const close = () => {
+  isOpen.value = false;
+};
+
+const savePrice = async () => {
+  if (!formRef.value) return;
+
+  const { valid: isValid } = await formRef.value.validate();
+  
+  if (!isValid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  try {
+    saving.value = true;
+
+    const result = await store.dispatch('inventory/editInventoryPrice', { 
+      inventory: { ...localInventory }
+    });
+
+    if (result.isSuccess) {
+      toast.success('Precio actualizado con éxito!');
+      emit('saved', { ...localInventory });
+      close();
+    }
+  } catch (error: any) {
+    handleApiError(error, 'Error al actualizar el precio');
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

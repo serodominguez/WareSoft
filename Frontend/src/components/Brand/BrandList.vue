@@ -56,188 +56,127 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { Brand } from '@/interfaces/brandInterface';
+import { BaseListProps } from '@/interfaces/listInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
-export default defineComponent({
-  name: 'BrandList',
-  components: {
-    CommonFilters // Componente de filtros reutilizable
-  },
-  // Props recibidas del componente padre incluye datos, permisos y configuración de filtros
-  props: {
-    // Array de la entidad a mostrar en la tabla
-    brands: {
-      type: Array as PropType<Brand[]>,
-      required: true
-    },
-    // Indica si los datos están cargando
-    loading: {
-      type: Boolean,
-      required: true
-    },
-    // Total de la entidad (para paginación del servidor)
-    totalBrands: {
-      type: Number,
-      required: true
-    },
-    // Permisos CRUD del usuario actual
-    canCreate: {
-      type: Boolean,
-      required: true
-    },
-    canRead: {
-      type: Boolean,
-      required: true
-    },
-    canEdit: {
-      type: Boolean,
-      required: true
-    },
-    canDelete: {
-      type: Boolean,
-      required: true
-    },
-    // Estado del drawer de filtros
-    drawer: {
-      type: Boolean,
-      default: false
-    },
-    // Filtro seleccionado actualmente
-    selectedFilter: {
-      type: String,
-      default: 'Marca'
-    },
-    // Estado de filtro (Activos/Inactivos/Todos)
-    state: {
-      type: String,
-      default: 'Activos'
-    },
-    // Rango de fechas para filtrar
-    startDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    endDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    // Estado de descarga de Excel
-    downloadingExcel: {
-      type: Boolean,
-      default: false
-    },
-    itemsPerPage: {
-    type: Number,
-    default: 10
-  }
-  },
-  /**
-   * Eventos que este componente puede emitir al padre
-   * Sigue el patrón de comunicación padre-hijo de Vue
-   */
-  emits: [
-    'open-form',                        // Abrir formulario para crear
-    'open-modal',                      // Abrir modal de confirmación (activar/desactivar/eliminar)
-    'edit-brand',                     // Editar marca existente
-    'fetch-brands',                  // Recargar/obtener marca
-    'search-brands',                // Recargar/obtener marca
-    'update-items-per-page',       // Cambiar cantidad de items por página
-    'change-page',                // Cambiar de página
-    'download-excel',            // Descargar reporte Excel
-    'update:drawer',            // Actualizar estado del drawer (patrón v-model)
-    'update:selectedFilter',   // Actualizar filtro seleccionado
-    'update:state',           // Actualizar estado de filtro
-    'update:startDate',      // Actualizar fecha inicio
-    'update:endDate'        // Actualizar fecha fin
-  ],
-  data() {
-    return {
-      pages: "Marcas por Página",      // Texto para selector de items por página
-      search: null as string | null,  // Término de búsqueda actual
-      filterOptions: ['Marca']       // Opciones disponibles para filtrar
-    };
-  },
-  // Propiedades computadas
-  computed: {
-    // Define las columnas/encabezados de la tabla
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      return [
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
-        { title: 'Estado', key: 'statusBrand', sortable: false },
-        { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
-      ];
-    },
-    // Computed property bidireccional para el drawer de filtros
-    drawerModel: {
-      get() {
-        return this.drawer;
-      },
-      set(value: boolean) {
-        this.$emit('update:drawer', value);
-      }
-    },
-    // Computed property bidireccional para el filtro seleccionado
-    selectedFilterModel: {
-      get() {
-        return this.selectedFilter;
-      },
-      set(value: string) {
-        this.$emit('update:selectedFilter', value);
-      }
-    },
-    // Computed property bidireccional para el estado del filtro
-    stateModel: {
-      get() {
-        return this.state;
-      },
-      set(value: string) {
-        this.$emit('update:state', value);
-      }
-    },
-    // Computed property bidireccional para la fecha de inicio
-    startDateModel: {
-      get() {
-        return this.startDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:startDate', value);
-      }
-    },
-    // Computed property bidireccional para la fecha de fin
-    endDateModel: {
-      get() {
-        return this.endDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:endDate', value);
-      }
-    }
-  },
-  methods: {
-    // Maneja la búsqueda de marcas con todos los filtros activos
-    handleSearch() {
-      this.$emit('search-brands', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        state: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    },
-    // Maneja la descarga del reporte Excel
-    handleDownloadExcel() {
-      this.$emit('download-excel', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        stateFilter: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    }
-  }
+/**
+ * Props recibidas del componente padre
+ * Incluye datos, permisos y configuración de filtros
+ */
+interface Props extends Omit<BaseListProps<Brand>, 'items' | 'totalItems'> {
+  brands: Brand[];      // En lugar de 'items'
+  totalBrands: number;  // En lugar de 'totalItems'
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  drawer: false,
+  selectedFilter: 'Marca',
+  state: 'Activos',
+  startDate: null,
+  endDate: null,
+  downloadingExcel: false,
+  itemsPerPage: 10
 });
+
+/**
+ * Eventos que este componente puede emitir al padre
+ * Sigue el patrón de comunicación padre-hijo de Vue
+ */
+const emit = defineEmits<{
+  'open-form': [];
+  'open-modal': [payload: { brand: Brand; action: 0 | 1 | 2 }]
+  'edit-brand': [brand: Brand];
+  'fetch-brands': [];
+  'search-brands': [params: {
+    search: string | null;
+    selectedFilter: string;
+    state: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update-items-per-page': [itemsPerPage: number];
+  'change-page': [page: number];
+  'download-excel': [params: {
+    search: string | null;
+    selectedFilter: string;
+    stateFilter: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update:drawer': [value: boolean];
+  'update:selectedFilter': [value: string];
+  'update:state': [value: string];
+  'update:startDate': [value: Date | null];
+  'update:endDate': [value: Date | null];
+}>();
+
+// Estado reactivo
+const pages = ref("Marcas por Página");
+const search = ref<string | null>(null);
+const filterOptions = ref(['Marca']);
+
+// Define las columnas/encabezados de la tabla
+const headers = computed(() => [
+  { title: 'Marca', key: 'brandName', sortable: false },
+  { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+  { title: 'Estado', key: 'statusBrand', sortable: false },
+  { title: 'Acciones', key: 'actions', sortable: false, align: 'center' as const },
+]);
+
+// Computed properties bidireccionales para v-model
+
+// Drawer de filtros
+const drawerModel = computed({
+  get: () => props.drawer,
+  set: (value: boolean) => emit('update:drawer', value)
+});
+
+// Filtro seleccionado
+const selectedFilterModel = computed({
+  get: () => props.selectedFilter,
+  set: (value: string) => emit('update:selectedFilter', value)
+});
+
+// Estado del filtro
+const stateModel = computed({
+  get: () => props.state,
+  set: (value: string) => emit('update:state', value)
+});
+
+// Fecha de inicio
+const startDateModel = computed({
+  get: () => props.startDate,
+  set: (value: Date | null) => emit('update:startDate', value)
+});
+
+// Fecha de fin
+const endDateModel = computed({
+  get: () => props.endDate,
+  set: (value: Date | null) => emit('update:endDate', value)
+});
+
+// Maneja la búsqueda de marcas con todos los filtros activos
+const handleSearch = () => {
+  emit('search-brands', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    state: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
+
+// Maneja la descarga del reporte Excel
+const handleDownloadExcel = () => {
+  emit('download-excel', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    stateFilter: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
 </script>

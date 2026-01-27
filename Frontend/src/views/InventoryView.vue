@@ -13,211 +13,186 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Inventory } from '@/interfaces/inventoryInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import InventoryList from '@/components/Inventory/InventoryList.vue';
 import PriceForm from '@/components/Inventory/PriceForm.vue';
 
-export default defineComponent({
-  name: 'InventoryView',
-  components: {
-    InventoryList,
-    PriceForm
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedInventory: null as Inventory | null,
-      action: 0,
-      selectedFilter: 'Código',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false,
-      downloadingPdf: false
-    };
-  },
-  computed: {
-    inventories() {
-      return this.store.getters['inventory/inventories'];
-    },
-    loading() {
-      return this.store.getters['inventory/loading'];
-    },
-    totalInventories() {
-      return this.store.getters['inventory/totalInventories'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
+// Inicialización
+const store = useStore();
+const toast = useToast();
 
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('inventario', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('inventario', 'editar');
-    },
-  },
-  methods: {
-    openModal(payload: { inventory: Inventory, action: number }) {
-      this.selectedInventory = payload.inventory;
-      this.action = payload.action;
-      this.modal = true;
-    },
+// Composable de filtros
+const filterMap: Record<string, number> = {
+  "Código": 1,
+  "Descripción": 2,
+  "Material": 3,
+  "Color": 4,
+  "Marca": 5,
+  "Categoría": 6
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Código', filterMap);
 
-    openForm(inventory?: Inventory) {
-      this.selectedInventory = inventory ? { ...inventory } : {
-        idStore: null,
-        idProduct: null,
-        code: '',
-        description: '',
-        material: '',
-        color: '',
-        unitMeasure: '',
-        stock: null,
-        price: null,
-        brandName: '',
-        categoryName: ''
-      };
-      this.form = true;
-    },
+// Control de paginación
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    async fetchInventories(params?: any) {
-      try {
-        await this.store.dispatch('inventory/fetchInventories', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+// Control de búsqueda
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Código": 1,
-        "Descripción": 2,
-        "Material": 3,
-        "Color": 4,
-        "Marca": 5,
-        "Categoría": 6
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+// Control de modales y formularios
+const form = ref(false);
+const modal = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+// Inventario seleccionado
+const selectedInventory = ref<Inventory | null>(null);
 
-    async searchInventories(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+// Tipo de acción
+const action = ref<0 | 1 | 2>(0);
 
-      try {
-        await this.store.dispatch("inventory/fetchInventories", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar productos');
-      }
-    },
+// Estado de descargas
+const downloadingExcel = ref(false);
+const downloadingPdf = ref(false);
 
-    refreshInventories() {
-      if (this.search?.trim()) {
-        this.searchInventories({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchInventories();
-      }
-    },
+// Computed properties
+const inventories = computed(() => store.getters['inventory/inventories']);
+const loading = computed(() => store.getters['inventory/loading']);
+const totalInventories = computed(() => store.getters['inventory/totalInventories']);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshInventories();
-    },
+const stateFilter = computed<number>(() => state.value === 'Activos' ? 1 : 0);
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshInventories();
-    },
+// Permisos
+const canRead = computed((): boolean => store.getters.hasPermission('inventario', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('inventario', 'editar'));
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("inventory/downloadInventoriesExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
+// Métodos
+const openModal = (payload: { inventory: Inventory; action: 0 | 1 | 2 }) => {
+  selectedInventory.value = payload.inventory;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-    async downloadPdf(params: any) {
-      this.downloadingPdf = true;
-      try {
-        await this.store.dispatch("inventory/downloadInventoriesPdf", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo PDF descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo PDF');
-      } finally {
-        this.downloadingPdf = false;
-      }
-    },
+const openForm = (inventory?: Inventory) => {
+  selectedInventory.value = inventory ? { ...inventory } : {
+    idStore: null,
+    idProduct: null,
+    code: '',
+    description: '',
+    material: '',
+    color: '',
+    unitMeasure: '',
+    stock: null,
+    price: null,
+    brandName: '',
+    categoryName: ''
+  };
+  form.value = true;
+};
 
-    handleSaved() {
-      this.fetchInventories();
-    },
-
-    handleActionCompleted() {
-      this.fetchInventories();
-    }
-  },
-  mounted() {
-    this.fetchInventories();
+const fetchInventories = async (params?: any) => {
+  try {
+    await store.dispatch('inventory/fetchInventories', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: stateFilter.value
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchInventories = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("inventory/fetchInventories", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar productos');
+  }
+};
+
+const refreshInventories = () => {
+  if (search.value?.trim()) {
+    searchInventories({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchInventories();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshInventories();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshInventories();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("inventory/downloadInventoriesExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const downloadPdf = async (params: any) => {
+  downloadingPdf.value = true;
+  try {
+    await store.dispatch("inventory/downloadInventoriesPdf", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo PDF descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo PDF');
+  } finally {
+    downloadingPdf.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchInventories();
+};
+
+const handleActionCompleted = () => {
+  fetchInventories();
+};
+
+// Lifecycle
+onMounted(() => {
+  fetchInventories();
 });
 </script>
