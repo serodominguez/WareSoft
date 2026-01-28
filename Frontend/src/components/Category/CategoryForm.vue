@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
@@ -33,109 +33,117 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Category } from '@/interfaces/categoryInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  category?: Category | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    category: {
-      type: Object as PropType<Category | null>,
-      default: () => ({
-        idCategory: null,
-        categoryName: '',
-        description: ''
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localCategory: { ...this.category } as Category,
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    category: {
-      handler(newCategory: Category) {
-        this.localCategory = { ...newCategory };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async saveCategory() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      this.saving = true;
-      try {
-        const isEditing = !!this.localCategory.idCategory;
-        let result;
-
-        if (isEditing) {
-          result = await this.$store.dispatch('category/editCategory', {
-            id: this.localCategory.idCategory,
-            category: { ...this.localCategory }
-          });
-        } else {
-          result = await this.$store.dispatch('category/registerCategory', { ...this.localCategory });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Categoría actualizada con éxito!'
-            : 'Categoría registrada con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localCategory });
-          this.close();
-        }
-      } catch (error: any) {
-        const isEditing = !!this.localCategory.idCategory;
-        const customMessage = isEditing
-          ? 'Error en actualizar la categoría'
-          : 'Error en guardar la categoría';
-
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  category: () => ({
+    idCategory: null,
+    categoryName: '',
+    description: '',
+    auditCreateDate: '',
+    statusCategory: ''
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [category: Category];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localCategory = ref<Category>({ ...props.category } as Category);
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.'
+};
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.category, (newCategory) => {
+  if (newCategory) {
+    localCategory.value = { ...newCategory } as Category;
+  }
+}, { deep: true });
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveCategory = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localCategory.value.idCategory;
+    let result;
+
+    if (isEditing) {
+      result = await store.dispatch('category/editCategory', {
+        id: localCategory.value.idCategory,
+        category: { ...localCategory.value }
+      });
+    } else {
+      result = await store.dispatch('category/registerCategory', { ...localCategory.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Categoría actualizada con éxito!'
+        : 'Categoría registrada con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localCategory.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localCategory.value.idCategory;
+    const customMessage = isEditing
+      ? 'Error en actualizar la categoría'
+      : 'Error en guardar la categoría';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

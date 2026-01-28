@@ -1,7 +1,7 @@
 <template>
   <div>
     <InventoryList :inventories="inventories" :loading="loading" :totalInventories="totalInventories"
-      :downloadingExcel="downloadingExcel" :downloadingPdf="downloadingPdf" :canRead="canRead" :canEdit="canEdit"
+      :downloadingExcel="downloadingExcel" :downloadingPdf="downloadingPdf" :canCreate="canCreate" :canRead="canRead" :canEdit="canEdit" :canDelete="canDelete"
       :items-per-page="itemsPerPage" v-model:drawer="drawer"
       v-model:selectedFilter="selectedFilter" v-model:state="state" v-model:startDate="startDate"
       v-model:endDate="endDate" @open-form="openForm" @open-modal="openModal" @edit-inventory="openForm"
@@ -68,8 +68,10 @@ const totalInventories = computed(() => store.getters['inventory/totalInventorie
 const stateFilter = computed<number>(() => state.value === 'Activos' ? 1 : 0);
 
 // Permisos
+const canCreate = computed(() => store.getters.hasPermission('inventario', 'crear'));
 const canRead = computed((): boolean => store.getters.hasPermission('inventario', 'leer'));
 const canEdit = computed((): boolean => store.getters.hasPermission('inventario', 'editar'));
+const canDelete = computed(() => store.getters.hasPermission('inventario', 'eliminar'));
 
 // Métodos
 const openModal = (payload: { inventory: Inventory; action: 0 | 1 | 2 }) => {

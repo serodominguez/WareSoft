@@ -57,26 +57,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Inventory } from '@/interfaces/inventoryInterface';
+import { BaseListProps } from '@/interfaces/baselistInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
 // Props
-interface Props {
+interface Props extends Omit<BaseListProps<Inventory>, 'items' | 'totalItems'> {
   inventories: Inventory[];
-  loading: boolean;
   totalInventories: number;
-  canRead: boolean;
-  canEdit: boolean;
-  drawer?: boolean;
-  selectedFilter?: string;
-  state?: string;
-  startDate?: Date | null;
-  endDate?: Date | null;
-  downloadingExcel?: boolean;
   downloadingPdf?: boolean;
-  itemsPerPage?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  canCreate: false,
+  canDelete: false,
   drawer: false,
   selectedFilter: 'Código',
   state: 'Activos',

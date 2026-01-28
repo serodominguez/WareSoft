@@ -64,7 +64,6 @@ interface Props {
 const props = defineProps<Props>();
 
 // Emits del componente
-
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
   'close': [];
@@ -102,7 +101,6 @@ const FILTER_MAP: Record<string, number> = {
 };
 
 // Computed properties
-
 const headers = computed(() => [
   { title: 'Código', key: 'code', sortable: false },
   { title: 'Descripción', key: 'description', sortable: false },

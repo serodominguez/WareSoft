@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
@@ -29,109 +29,116 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Module } from '@/interfaces/moduleInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  module?: Module | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    module: {
-      type: Object as PropType<Module | null>,
-      default: () => ({
-        idModule: null,
-        moduleName: ''
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localModule: { ...this.module } as Module,
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    module: {
-      handler(newModule: Module) {
-        this.localModule = { ...newModule };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async saveModule() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      this.saving = true;
-      try {
-        const isEditing = !!this.localModule.idModule;
-        let result;
-
-        if (isEditing) {
-          result = await this.$store.dispatch('module/editModule', {
-            id: this.localModule.idModule,
-            module: { ...this.localModule }
-          });
-        } else {
-          result = await this.$store.dispatch('module/registerModule', { ...this.localModule });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Módulo actualizado con éxito!'
-            : 'Módulo registrado con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localModule });
-          this.close();
-        }
-
-      } catch (error: any) {
-        const isEditing = !!this.localModule.idModule;
-        const customMessage = isEditing
-          ? 'Error en actualizar el módulo'
-          : 'Error en guardar el módulo';
-
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  module: () => ({
+    idModule: null,
+    moduleName: '',
+    auditCreateDate: '',
+    statusModule: ''
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [module: Module];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localModule = ref<Module>({ ...props.module } as Module);
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.'
+};
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.module, (newModule) => {
+  if (newModule) {
+    localModule.value = { ...newModule } as Module;
+  }
+}, { deep: true });
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveModule = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localModule.value.idModule;
+    let result;
+
+    if (isEditing) {
+      result = await store.dispatch('module/editModule', {
+        id: localModule.value.idModule,
+        module: { ...localModule.value }
+      });
+    } else {
+      result = await store.dispatch('module/registerModule', { ...localModule.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Módulo actualizado con éxito!'
+        : 'Módulo registrado con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localModule.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localModule.value.idModule;
+    const customMessage = isEditing
+      ? 'Error en actualizar el módulo'
+      : 'Error en guardar el módulo';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

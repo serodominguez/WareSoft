@@ -7,7 +7,6 @@ export interface ListPermissions {
 }
 
 // Estado de filtros para componentes de lista
- 
 export interface ListState {
   drawer: boolean;
   selectedFilter: string;
@@ -17,7 +16,6 @@ export interface ListState {
 }
 
 // Props base para componentes de lista
-
 export interface BaseListProps<T> extends ListPermissions, ListState {
   items: T[];
   loading: boolean;
@@ -25,3 +23,4 @@ export interface BaseListProps<T> extends ListPermissions, ListState {
   downloadingExcel?: boolean;
   itemsPerPage?: number;
 }
+

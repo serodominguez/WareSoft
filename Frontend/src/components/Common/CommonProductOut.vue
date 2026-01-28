@@ -72,15 +72,6 @@ const emit = defineEmits<{
 
 const store = useStore();
 
-const FILTER_MAP: Record<string, number> = {
-  "Código": 1,
-  "Descripción": 2,
-  "Material": 3,
-  "Color": 4,
-  "Marca": 5,
-  "Categoría": 6
-};
-
 const tableKey = ref(0);
 const pages = ref("Productos por Página");
 const currentPage = ref(1);
@@ -94,6 +85,15 @@ const hasSearched = ref(false);
 const products = ref<Inventory[]>([]);
 const totalProducts = ref(0);
 const loading = ref(false);
+
+const FILTER_MAP: Record<string, number> = {
+  "Código": 1,
+  "Descripción": 2,
+  "Material": 3,
+  "Color": 4,
+  "Marca": 5,
+  "Categoría": 6
+};
 
 const headers = computed(() => [
   { title: 'Código', key: 'code', sortable: false },

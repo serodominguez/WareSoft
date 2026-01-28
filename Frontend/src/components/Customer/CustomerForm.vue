@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
@@ -41,112 +41,124 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Customer } from '@/interfaces/customerInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  customer?: Customer | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    customer: {
-      type: Object as PropType<Customer | null>,
-      default: () => ({
-        idCustomer: null,
-        names: '',
-        lastNames: '',
-        identificationNumber: '',
-        phoneNumber: null
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localCustomer: { ...this.customer } as Customer,
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-        onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    customer: {
-      handler(newCustomer: Customer) {
-        this.localCustomer = { ...newCustomer };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async saveCustomer() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      this.saving = true;
-      try {
-        const isEditing = !!this.localCustomer.idCustomer;
-        let result;
-
-        if (isEditing) {
-          result = await this.$store.dispatch('customer/editCustomer', {
-            id: this.localCustomer.idCustomer,
-            customer: { ...this.localCustomer }
-          });
-        } else {
-          result = await this.$store.dispatch('customer/registerCustomer', { ...this.localCustomer });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Cliente actualizado con éxito!'
-            : 'Cliente registrado con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localCustomer });
-          this.close();
-        }
-      } catch (error: any) {
-        const isEditing = !!this.localCustomer.idCustomer;
-        const customMessage = isEditing
-          ? 'Error en actualizar al cliente'
-          : 'Error en guardar al cliente';
-
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  customer: () => ({
+    idCustomer: null,
+    names: '',
+    lastNames: '',
+    identificationNumber: '',
+    phoneNumber: null,
+    auditCreateDate: '',
+    statusCustomer: ''
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [customer: Customer];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localCustomer = ref<Customer>({ ...props.customer } as Customer);
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) =>
+    !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) ||
+    'Solo se permiten letras.',
+  onlyNumbers: (value: string) =>
+    !value || /^[0-9]+$/.test(value) ||
+    'Solo se permiten números.'
+};
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.customer, (newCustomer) => {
+  if (newCustomer) {
+    localCustomer.value = { ...newCustomer } as Customer;
+  }
+}, { deep: true });
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveCustomer = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localCustomer.value.idCustomer;
+    let result;
+
+    if (isEditing) {
+      result = await store.dispatch('customer/editCustomer', {
+        id: localCustomer.value.idCustomer,
+        customer: { ...localCustomer.value }
+      });
+    } else {
+      result = await store.dispatch('customer/registerCustomer', { ...localCustomer.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Cliente actualizado con éxito!'
+        : 'Cliente registrado con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localCustomer.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localCustomer.value.idCustomer;
+    const customMessage = isEditing
+      ? 'Error en actualizar al cliente'
+      : 'Error en guardar al cliente';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

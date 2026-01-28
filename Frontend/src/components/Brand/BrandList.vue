@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Brand } from '@/interfaces/brandInterface';
-import { BaseListProps } from '@/interfaces/listInterface';
+import { BaseListProps } from '@/interfaces/baselistInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
 /**

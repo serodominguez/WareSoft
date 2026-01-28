@@ -15,187 +15,145 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Module } from '@/interfaces/moduleInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import ModuleList from '@/components/Module/ModuleList.vue';
 import ModuleForm from '@/components/Module/ModuleForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'ModuleView',
-  components: {
-    ModuleList,
-    ModuleForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedModule: null as Module | null,
-      action: 0,
-      selectedFilter: 'Módulo',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    modules() {
-      return this.store.getters['module/modules'];
-    },
-    loading() {
-      return this.store.getters['module/loading'];
-    },
-    totalModules() {
-      return this.store.getters['module/totalModules'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('modulos', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('modulos', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('modulos', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('modulos', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { module: Module, action: number }) {
-      this.selectedModule = payload.module;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(module?: Module) {
-      this.selectedModule = module ? { ...module } : {
-        idModule: null,
-        moduleName: '',
-        auditCreateDate: '',
-        statusModule: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = { "Módulo": 1 };
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Módulo', filterMap);
 
-    async fetchModules(params?: any) {
-      try {
-        await this.store.dispatch('module/fetchModules', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = { "Módulo": 1 };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const form = ref(false);
+const modal = ref(false);
 
-    async searchModules(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const selectedModule = ref<Module | null>(null);
 
-      try {
-        await this.store.dispatch("module/fetchModules", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar módulos');
-      }
-    },
+const action = ref<0 | 1 | 2>(0);
 
-    refreshModules() {
-      if (this.search?.trim()) {
-        this.searchModules({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchModules();
-      }
-    },
+const downloadingExcel = ref(false);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshModules();
-    },
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshModules();
-    },
+const modules = computed(() => store.getters['module/modules']);
+const loading = computed(() => store.getters['module/loading']);
+const totalModules = computed(() => store.getters['module/totalModules']);
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("module/downloadModulesExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
-    
-    handleSaved() {
-      this.fetchModules();
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('modulos', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('modulos', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('modulos', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('modulos', 'eliminar'));
 
-    handleActionCompleted() {
-      this.fetchModules();
-    }
-  },
-  mounted() {
-    this.fetchModules();
+const openModal = (payload: { module: Module, action: 0 | 1 | 2 }) => {
+  selectedModule.value = payload.module;
+  action.value = payload.action;
+  modal.value = true;
+};
+
+const openForm = (module?: Module) => {
+  selectedModule.value = module ? { ...module } : {
+    idModule: null,
+    moduleName: '',
+    auditCreateDate: '',
+    statusModule: ''
+  };
+  form.value = true;
+};
+
+const fetchModules = async (params?: any) => {
+  try {
+    await store.dispatch('module/fetchModules', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchModules = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("module/fetchModules", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar módulos');
+  }
+};
+
+const refreshModules = () => {
+  if (search.value?.trim()) {
+    searchModules({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchModules();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshModules();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshModules();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("module/downloadModulesExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchModules();
+};
+
+const handleActionCompleted = () => {
+  fetchModules();
+};
+
+onMounted(() => {
+  fetchModules();
 });
 </script>

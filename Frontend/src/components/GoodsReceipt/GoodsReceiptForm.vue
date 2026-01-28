@@ -7,7 +7,7 @@
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card-text>
-      <v-form ref="form" v-model="valid">
+      <v-form ref="formRef" v-model="valid">
       <v-container class="px-4" max-width="1700px">
         <v-row justify="center">
           <v-col cols="12" md="2">
@@ -113,282 +113,283 @@
   </v-card>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductIn from '@/components/Common/CommonProductIn.vue';
 import { GoodsReceipt, GoodsReceiptDetail } from '@/interfaces/goodsReceiptInterface';
 
-
 interface FormRef {
   validate: () => boolean;
 }
 
-export default defineComponent({
-  name: 'GoodsReceiptForm',
-  components: {
-    CommonProductIn
-  },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true
-    },
-    receipt: {
-      type: Object as PropType<GoodsReceipt | null>,
-      default: () => ({
-        idReceipt: null,
-        code: '',
-        type: '',
-        storeName: '',
-        documentType: '',
-        documentNumber: '',
-        documentDate: '',
-        idSupplier: null,
-        companyName: '',
-        annotations: '',
-        auditCreateDate: '',
-        statusReceipt: ''
-      })
-    },
-    receiptDetails: {
-      type: Array as PropType<GoodsReceiptDetail[]>,
-      default: () => []
+interface Props {
+  modelValue: boolean;
+  receipt?: GoodsReceipt | null;
+  receiptDetails?: GoodsReceiptDetail[];
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  receipt: () => ({
+    idReceipt: null,
+    code: '',
+    type: '',
+    storeName: '',
+    documentType: '',
+    documentNumber: '',
+    documentDate: '',
+    idSupplier: null,
+    companyName: '',
+    totalAmount: 0,
+    annotations: '',
+    auditCreateDate: '',
+    statusReceipt: ''
+  } as GoodsReceipt),
+  receiptDetails: () => []
+});
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [];
+  'close': [];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+// Refs
+const formRef = ref<FormRef | null>(null);
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const downloading = ref(false);
+const productModal = ref(false);
+const localReceipt = ref<GoodsReceipt>({ ...props.receipt } as GoodsReceipt);
+const details = ref<GoodsReceiptDetail[]>([]);
+const documentTypes = ref<string[]>([]);
+
+// Constants
+const receiptTypes = ['ADQUISICIÓN', 'REGULARIZACIÓN'];
+const typesPurchases = ['FACTURA', 'RECIBO'];
+const typesImports = ['ENTRADA'];
+
+const rules = {
+  required: (value: any) => !!value || 'Este campo es requerido',
+  minValue: (value: number) => value > 0 || 'Debe ser mayor a 0',
+  minValueOrZero: (value: number) => (value !== null && value !== undefined && value >= 0) || 'Debe ser mayor o igual a 0'
+};
+
+// Computed
+const headers = computed(() => {
+  const baseHeaders: Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> = [
+    { title: 'Item', key: 'item', sortable: false, align: 'center' },
+    { title: 'Código', key: 'code', sortable: false },
+    { title: 'Descripción', key: 'description', sortable: false },
+    { title: 'Material', key: 'material', sortable: false },
+    { title: 'Color', key: 'color', sortable: false },
+    { title: 'Categoría', key: 'categoryName', sortable: false },
+    { title: 'Marca', key: 'brandName', sortable: false },
+    { title: 'Cantidad', key: 'quantity', sortable: false },
+    { title: 'Costo U.', key: 'cost', sortable: false },
+    { title: 'SubTotal', key: 'subtotal', sortable: false }
+  ];
+
+  if (!localReceipt.value.idReceipt) {
+    baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false, align: 'center' });
+  }
+
+  return baseHeaders;
+});
+
+const documentNumberRules = computed(() => {
+  if (localReceipt.value.type === 'ADQUISICIÓN') {
+    return [rules.required];
+  }
+  return [];
+});
+
+const totalCost = computed(() => {
+  return details.value.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
+});
+
+const suppliers = computed(() => {
+  const suppliersFromStore = store.getters['supplier/suppliers'];
+  return Array.isArray(suppliersFromStore) ? suppliersFromStore : [];
+});
+
+const loadingSuppliers = computed(() => store.getters['supplier/loading']);
+
+// Watchers
+watch(() => props.modelValue, (newValue) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.receipt, (newReceipt) => {
+  if (newReceipt) {
+    localReceipt.value = { ...newReceipt };
+  }
+  details.value = [...props.receiptDetails];
+  updateDocuments();
+}, { deep: true });
+
+// Methods
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('es-BO', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+    useGrouping: true
+  }).format(value).replace(/\./g, ',');
+};
+
+const updateDocuments = () => {
+  localReceipt.value.documentType = '';
+
+  if (localReceipt.value.type === 'ADQUISICIÓN') {
+    documentTypes.value = typesPurchases;
+  } else if (localReceipt.value.type === 'REGULARIZACIÓN') {
+    documentTypes.value = typesImports;
+  } else {
+    documentTypes.value = [];
+  }
+};
+
+const openProductModal = () => {
+  productModal.value = true;
+};
+
+const handleProductAdded = (product: any) => {
+  const exists = details.value.find(d => d.idProduct === product.idProduct);
+
+  if (exists) {
+    toast.warning('Este producto ya está en la lista');
+    return;
+  }
+
+  details.value.push({
+    idProduct: product.idProduct,
+    code: product.code,
+    description: product.description,
+    material: product.material,
+    color: product.color,
+    categoryName: product.categoryName,
+    brandName: product.brandName,
+    quantity: 1,
+    unitCost: 0,
+    totalCost: 0
+  });
+
+  toast.success('Producto agregado a la lista');
+};
+
+const removeProduct = (product: GoodsReceiptDetail) => {
+  const index = details.value.findIndex(d => d.idProduct === product.idProduct);
+
+  if (index !== -1) {
+    details.value.splice(index, 1);
+    toast.error(`Producto ${product.code} eliminado de la lista`);
+  }
+};
+
+const saveReceipt = async () => {
+  if (!formRef.value?.validate()) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  const invalidProducts = details.value.filter(d => {
+    if (localReceipt.value.type === 'REGULARIZACIÓN') {
+      return d.quantity <= 0 || d.unitCost === null || d.unitCost === undefined || d.unitCost < 0;
+    } else {
+      return d.quantity <= 0 || d.unitCost <= 0;
     }
-  },
-  emits: ['update:modelValue', 'saved', 'close'],
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      downloading: false,
-      productModal: false,
-      localReceipt: { ...this.receipt } as GoodsReceipt,
-      details: [] as GoodsReceiptDetail[],
-      documentTypes: [] as string[],
-      receiptTypes: ['ADQUISICIÓN', 'REGULARIZACIÓN'],
-      typesPurchases: ['FACTURA', 'RECIBO'],
-      typesImports: ['ENTRADA'],
-      rules: {
-        required: (value: any) => !!value || 'Este campo es requerido',
-        minValue: (value: number) => value > 0 || 'Debe ser mayor a 0',
-        minValueOrZero: (value: number) => (value !== null && value !== undefined && value >= 0) || 'Debe ser mayor o igual a 0'
-      }
+  });
+
+  if (invalidProducts.length > 0) {
+    if (localReceipt.value.type === 'REGULARIZACIÓN') {
+      toast.warning('Todos los productos deben tener cantidad mayor a 0 y costo mayor o igual a 0');
+    } else {
+      toast.warning('Todos los productos deben tener cantidad y costo válidos mayores a 0');
+    }
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const receiptData = {
+      documentDate: formatDateForApi(localReceipt.value.documentDate),
+      type: localReceipt.value.type,
+      documentType: localReceipt.value.documentType,
+      documentNumber: localReceipt.value.documentNumber,
+      totalAmount: totalCost.value,
+      annotations: localReceipt.value.annotations || '',
+      idSupplier: localReceipt.value.idSupplier,
+      idStore: store.state.currentUser.storeId,
+      goodsReceiptDetails: details.value.map((d, index) => ({
+        item: index + 1,
+        idProduct: d.idProduct,
+        quantity: d.quantity,
+        unitCost: d.unitCost,
+        totalCost: d.quantity * d.unitCost
+      }))
     };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      const baseHeaders: Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> = [
-        { title: 'Item', key: 'item', sortable: false, align: 'center' },
-        { title: 'Código', key: 'code', sortable: false },
-        { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Material', key: 'material', sortable: false },
-        { title: 'Color', key: 'color', sortable: false },
-        { title: 'Categoría', key: 'categoryName', sortable: false },
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Cantidad', key: 'quantity', sortable: false },
-        { title: 'Costo U.', key: 'cost', sortable: false },
-        { title: 'SubTotal', key: 'subtotal', sortable: false }
-      ];
 
-      if (!this.localReceipt.idReceipt) {
-        baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false, align: 'center' });
-      }
+    const result = await store.dispatch('goodsreceipt/registerGoodsReceipt', receiptData);
 
-      return baseHeaders;
-    },
-    documentNumberRules() {
-      if (this.localReceipt.type === 'ADQUISICIÓN') {
-        return [this.rules.required];
-      }
-      return [];
-    },
-    totalCost(): number {
-      return this.details.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
-    },
-    suppliers() {
-      const suppliersFromStore = this.store.getters['supplier/suppliers'];
-      return Array.isArray(suppliersFromStore) ? suppliersFromStore : [];
-    },
-    loadingSuppliers(): boolean {
-      return this.store.getters['supplier/loading'];
+    if (result.isSuccess) {
+      toast.success('Entrada registrada con éxito');
+      emit('saved');
+      close();
     }
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    receipt: {
-      handler(newReceipt: GoodsReceipt) {
-        this.localReceipt = { ...newReceipt };
-        this.details = [...this.receiptDetails];
-        this.updateDocuments();
-      },
-      deep: true
-    }
-  },
-  methods: {
-    formatCurrency(value: number): string {
-      return new Intl.NumberFormat('es-BO', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-        useGrouping: true
-      }).format(value).replace(/\./g, ',');
-    },
-    updateDocuments() {
-      this.localReceipt.documentType = '';
+  } catch (error) {
+    handleApiError(error, 'Error al registrar la entrada');
+  } finally {
+    saving.value = false;
+  }
+};
 
-      if (this.localReceipt.type === 'ADQUISICIÓN') {
-        this.documentTypes = this.typesPurchases;
-      } else if (this.localReceipt.type === 'REGULARIZACIÓN') {
-        this.documentTypes = this.typesImports;
-      } else {
-        this.documentTypes = [];
-      }
-    },
-    async openProductModal() {
-      this.productModal = true;
-    },
-    handleProductAdded(product: any) {
-      // Verifica si el producto ya está en la lista
-      const exists = this.details.find(d => d.idProduct === product.idProduct);
+const downloadPdf = async () => {
+  if (!localReceipt.value.idReceipt) return;
 
-      if (exists) {
-        this.toast.warning('Este producto ya está en la lista');
-        return;
-      }
+  downloading.value = true;
+  try {
+    await store.dispatch('goodsreceipt/exportGoodsReceiptPdf', localReceipt.value.idReceipt);
+    toast.success('PDF descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el PDF');
+  } finally {
+    downloading.value = false;
+  }
+};
 
-      // Agrega el producto a los detalles
-      this.details.push({
-        idProduct: product.idProduct,
-        code: product.code,
-        description: product.description,
-        material: product.material,
-        color: product.color,
-        categoryName: product.categoryName,
-        brandName: product.brandName,
-        quantity: 1,  // Cantidad inicial
-        unitCost: 0,       // Precio inicial
-        totalCost: 0
-      });
+const formatDateForApi = (date: string | null): string | null => {
+  if (!date) return null;
 
-      this.toast.success('Producto agregado a la lista');
-    },
-    removeProduct(product: GoodsReceiptDetail) {
-      const index = this.details.findIndex(d => d.idProduct === product.idProduct);
+  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
+    return date.split('T')[0];
+  }
 
-      if (index !== -1) {
-        this.details.splice(index, 1);
-        this.toast.error(`Producto ${product.code} eliminado de la lista`);
-      }
-    },
-    async saveReceipt() {
-      const form = this.$refs.form as FormRef;
+  return date;
+};
 
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
+const close = () => {
+  isOpen.value = false;
+  emit('close');
+};
 
-      const invalidProducts = this.details.filter(d => {
-        if (this.localReceipt.type === 'REGULARIZACIÓN') {
-          // Para REGULARIZACIÓN: cantidad > 0 y costo >= 0 (permite 0)
-          return d.quantity <= 0 || d.unitCost === null || d.unitCost === undefined || d.unitCost < 0;
-        } else {
-          // Para ADQUISICIÓN: cantidad > 0 y costo > 0
-          return d.quantity <= 0 || d.unitCost <= 0;
-        }
-      });
-
-      if (invalidProducts.length > 0) {
-        if (this.localReceipt.type === 'REGULARIZACIÓN') {
-          this.toast.warning('Todos los productos deben tener cantidad mayor a 0 y costo mayor o igual a 0');
-        } else {
-          this.toast.warning('Todos los productos deben tener cantidad y costo válidos mayores a 0');
-        }
-        return;
-      }
-      
-      this.saving = true;
-
-      try {
-        const receiptData = {
-          documentDate: this.formatDateForApi(this.localReceipt.documentDate),
-          type: this.localReceipt.type,
-          documentType: this.localReceipt.documentType,
-          documentNumber: this.localReceipt.documentNumber,
-          totalAmount: this.totalCost,
-          annotations: this.localReceipt.annotations || '',
-          idSupplier: this.localReceipt.idSupplier,
-          idStore: this.store.state.currentUser.storeId,
-          goodsReceiptDetails: this.details.map((d, index) => ({
-            item: index + 1,
-            idProduct: d.idProduct,
-            quantity: d.quantity,
-            unitCost: d.unitCost,
-            totalCost: d.quantity * d.unitCost
-          }))
-        };
-
-        const result = await this.store.dispatch('goodsreceipt/registerGoodsReceipt', receiptData);
-
-        if (result.isSuccess) {
-          this.toast.success('Entrada registrada con éxito');
-          this.$emit('saved');
-          this.close();
-        }
-      } catch (error) {
-        handleApiError(error, 'Error al registrar la entrada');
-      } finally {
-        this.saving = false;
-      }
-    },
-    async downloadPdf() {
-      if (!this.localReceipt.idReceipt) return;
-
-      this.downloading = true;
-      try {
-        await this.$store.dispatch('goodsreceipt/exportGoodsReceiptPdf', this.localReceipt.idReceipt);
-        this.toast.success('PDF descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el PDF');
-      } finally {
-        this.downloading = false;
-      }
-    },
-    formatDateForApi(date: string | null): string | null {
-      if (!date) return null;
-
-      // Si ya es un string en formato correcto (YYYY-MM-DD), retornarlo directamente
-      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
-        return date.split('T')[0]; // Por si viene con timestamp
-      }
-
-      return date;
-    },
-    close() {
-      this.isOpen = false;
-      this.$emit('close');
-    }
-  },
-  mounted() {
-    this.details = [...this.receiptDetails];
-    this.store.dispatch('supplier/selectSupplier');
-    if (!this.localReceipt.idReceipt) {
-      this.localReceipt.documentDate = '';
-      this.updateDocuments();
-    }
+// Lifecycle
+onMounted(() => {
+  details.value = [...props.receiptDetails];
+  store.dispatch('supplier/selectSupplier');
+  if (!localReceipt.value.idReceipt) {
+    localReceipt.value.documentDate = '';
+    updateDocuments();
   }
 });
 </script>

@@ -16,194 +16,151 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Customer } from '@/interfaces/customerInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import CustomerList from '@/components/Customer/CustomerList.vue';
 import CustomerForm from '@/components/Customer/CustomerForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'CustomerView',
-  components: {
-    CustomerList,
-    CustomerForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedCustomer: null as Customer | null,
-      action: 0,
-      selectedFilter: 'Nombres',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    customers() {
-      return this.store.getters['customer/customers'];
-    },
-    loading() {
-      return this.store.getters['customer/loading'];
-    },
-    totalCustomers() {
-      return this.store.getters['customer/totalCustomers'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('clientes', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('clientes', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('clientes', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('clientes', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { customer: Customer, action: number }) {
-      this.selectedCustomer = payload.customer;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(customer?: Customer) {
-      this.selectedCustomer = customer ? { ...customer } : {
-        idCustomer: null,
-        names: '',
-        lastNames: '',
-        identificationNumber: '',
-        phoneNumber: null,
-        auditCreateDate: '',
-        statusCustomer: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = {
+  "Nombres": 1,
+  "Apellidos": 2,
+  "Carnet": 3
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Nombres', filterMap);
 
-    async fetchCustomers(params?: any) {
-      try {
-        await this.store.dispatch('customer/fetchCustomers', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Nombres": 1,
-        "Apellidos": 2,
-        "Carnet": 3
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const form = ref(false);
+const modal = ref(false);
 
-    async searchCustomers(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const selectedCustomer = ref<Customer | null>(null);
 
-      try {
-        await this.store.dispatch("customer/fetchCustomers", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar clientes');
-      }
-    },
+const action = ref<0 | 1 | 2>(0);
 
-    refreshCustomers() {
-      if (this.search?.trim()) {
-        this.searchCustomers({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchCustomers();
-      }
-    },
+const downloadingExcel = ref(false);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshCustomers();
-    },
+const customers = computed(() => store.getters['customer/customers']);
+const loading = computed(() => store.getters['customer/loading']);
+const totalCustomers = computed(() => store.getters['customer/totalCustomers']);
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshCustomers();
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('clientes', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('clientes', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('clientes', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('clientes', 'eliminar'));
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("customer/downloadCustomersExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
+const openModal = (payload: { customer: Customer; action: 0 | 1 | 2  }) => {
+  selectedCustomer.value = payload.customer;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-    handleSaved() {
-      this.fetchCustomers();
-    },
+const openForm = (customer?: Customer) => {
+  selectedCustomer.value = customer ? { ...customer } : {
+    idCustomer: null,
+    names: '',
+    lastNames: '',
+    identificationNumber: '',
+    phoneNumber: null,
+    auditCreateDate: '',
+    statusCustomer: ''
+  };
+  form.value = true;
+};
 
-    handleActionCompleted() {
-      this.fetchCustomers();
-    }
-  },
-  mounted() {
-    this.fetchCustomers();
+const fetchCustomers = async (params?: any) => {
+  try {
+    await store.dispatch('customer/fetchCustomers', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchCustomers = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("customer/fetchCustomers", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar clientes');
+  }
+};
+
+const refreshCustomers = () => {
+  if (search.value?.trim()) {
+    searchCustomers({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchCustomers();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshCustomers();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshCustomers();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("customer/downloadCustomersExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchCustomers();
+};
+
+const handleActionCompleted = () => {
+  fetchCustomers();
+};
+
+onMounted(() => {
+  fetchCustomers();
 });
 </script>

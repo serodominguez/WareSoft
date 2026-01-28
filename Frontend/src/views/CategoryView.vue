@@ -16,191 +16,149 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Category } from '@/interfaces/categoryInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import CategoryList from '@/components/Category/CategoryList.vue';
 import CategoryForm from '@/components/Category/CategoryForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'CategoryView',
-  components: {
-    CategoryList,
-    CategoryForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedCategory: null as Category | null,
-      action: 0,
-      selectedFilter: 'Categoría',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    categories() {
-      return this.store.getters['category/categories'];
-    },
-    loading() {
-      return this.store.getters['category/loading'];
-    },
-    totalCategories() {
-      return this.store.getters['category/totalCategories'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('categorias', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('categorias', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('categorias', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('categorias', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { category: Category, action: number }) {
-      this.selectedCategory = payload.category;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(category?: Category) {
-      this.selectedCategory = category ? { ...category } : {
-        idCategory: null,
-        categoryName: '',
-        description: '',
-        auditCreateDate: '',
-        statusCategory: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = {
+  "Categoría": 1,
+  "Descripción": 2
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Categoría', filterMap);
 
-    async fetchCategories(params?: any) {
-      try {
-        await this.store.dispatch('category/fetchCategories', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Categoría": 1,
-        "Descripción": 2
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const form = ref(false);
+const modal = ref(false);
 
-    async searchCategories(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const selectedCategory = ref<Category | null>(null);
 
-      try {
-        await this.store.dispatch("category/fetchCategories", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar categorías');
-      }
-    },
+const action = ref<0 | 1 | 2>(0);
 
-    refreshCategories() {
-      if (this.search?.trim()) {
-        this.searchCategories({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchCategories();
-      }
-    },
+const downloadingExcel = ref(false);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshCategories();
-    },
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshCategories();
-    },
+const categories = computed(() => store.getters['category/categories']);
+const loading = computed(() => store.getters['category/loading']);
+const totalCategories = computed(() => store.getters['category/totalCategories']);
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("category/downloadCategoriesExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('categorias', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('categorias', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('categorias', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('categorias', 'eliminar'));
 
-    handleSaved() {
-      this.fetchCategories();
-    },
+const openModal = (payload: { category: Category, action: 0 | 1 | 2 }) => {
+  selectedCategory.value = payload.category;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-    handleActionCompleted() {
-      this.fetchCategories();
-    }
-  },
-  mounted() {
-    this.fetchCategories();
+const openForm = (category?: Category) => {
+  selectedCategory.value = category ? { ...category } : {
+    idCategory: null,
+    categoryName: '',
+    description: '',
+    auditCreateDate: '',
+    statusCategory: ''
+  };
+  form.value = true;
+};
+
+const fetchCategories = async (params?: any) => {
+  try {
+    await store.dispatch('category/fetchCategories', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchCategories = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("category/fetchCategories", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar categorías');
+  }
+};
+
+const refreshCategories = () => {
+  if (search.value?.trim()) {
+    searchCategories({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchCategories();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshCategories();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshCategories();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("category/downloadCategoriesExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchCategories();
+};
+
+const handleActionCompleted = () => {
+  fetchCategories();
+};
+
+onMounted(() => {
+  fetchCategories();
 });
 </script>
