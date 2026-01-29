@@ -8,3 +8,14 @@ export const formatDate = (date: Date | null): string | null => {
 
   return `${year}-${month}-${day}`;
 };
+
+// Formatea un texto al formato YYYY-MM-DD
+export const formatDateForApi = (date: string | null): string | null => {
+  if (!date) return null;
+
+  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
+    return date.split('T')[0];
+  }
+
+  return date;
+};

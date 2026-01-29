@@ -119,6 +119,8 @@ import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductIn from '@/components/Common/CommonProductIn.vue';
+import { formatDateForApi } from '@/utils/date';
+import { formatCurrency } from '@/utils/currency';
 import { GoodsReceipt, GoodsReceiptDetail } from '@/interfaces/goodsReceiptInterface';
 
 interface FormRef {
@@ -239,13 +241,7 @@ watch(() => props.receipt, (newReceipt) => {
 }, { deep: true });
 
 // Methods
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('es-BO', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-    useGrouping: true
-  }).format(value).replace(/\./g, ',');
-};
+
 
 const updateDocuments = () => {
   localReceipt.value.documentType = '';
@@ -323,8 +319,8 @@ const saveReceipt = async () => {
 
   try {
     const receiptData = {
-      documentDate: formatDateForApi(localReceipt.value.documentDate),
       type: localReceipt.value.type,
+      documentDate: formatDateForApi(localReceipt.value.documentDate),
       documentType: localReceipt.value.documentType,
       documentNumber: localReceipt.value.documentNumber,
       totalAmount: totalCost.value,
@@ -368,15 +364,7 @@ const downloadPdf = async () => {
   }
 };
 
-const formatDateForApi = (date: string | null): string | null => {
-  if (!date) return null;
 
-  if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
-    return date.split('T')[0];
-  }
-
-  return date;
-};
 
 const close = () => {
   isOpen.value = false;

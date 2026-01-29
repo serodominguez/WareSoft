@@ -1,5 +1,3 @@
-// composables/useModelSync.ts
-
 import { computed, WritableComputedRef } from 'vue';
 
 /**

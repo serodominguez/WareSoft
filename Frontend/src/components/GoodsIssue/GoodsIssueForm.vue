@@ -7,7 +7,7 @@
       <v-spacer></v-spacer>
     </v-toolbar>
     <v-card-text>
-      <v-form ref="form" v-model="valid">
+      <v-form ref="formRef" v-model="valid">
         <v-row>
           <v-col cols="12" md="2">
             <v-select v-if="!localIssue.idIssue" color="indigo" variant="underlined" v-model="localIssue.type"
@@ -89,245 +89,228 @@
   </v-card>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductOut from '@/components/Common/CommonProductOut.vue';
+import { formatCurrency } from '@/utils/currency';
 import { GoodsIssue, GoodsIssueDetail } from '@/interfaces/goodsIssueInterface';
-
 
 interface FormRef {
   validate: () => boolean;
 }
 
-export default defineComponent({
-  name: 'GoodsIssueForm',
-  components: {
-    CommonProductOut
-  },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true
-    },
-    issue: {
-      type: Object as PropType<GoodsIssue | null>,
-      default: () => ({
-        idIssue: null,
-        code: '',
-        type: '',
-        storeName: '',
-        idUser: null,
-        userName: '',
-        annotations: '',
-        auditCreateDate: '',
-        statusIssue: ''
-      })
-    },
-    issueDetails: {
-      type: Array as PropType<GoodsIssueDetail[]>,
-      default: () => []
-    }
-  },
-  emits: ['update:modelValue', 'saved', 'close'],
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      downloading: false,
-      productModal: false,
-      localIssue: { ...this.issue } as GoodsIssue,
-      details: [] as GoodsIssueDetail[],
-      documentTypes: [] as string[],
-      issueTypes: ['CONSIGNACIÓN', 'REGULARIZACIÓN'],
-      rules: {
-        required: (value: any) => !!value || 'Este campo es requerido',
-        minValue: (value: number) => value > 0 || 'Debe ser mayor a 0',
-        minValueOrZero: (value: number) => (value !== null && value !== undefined && value >= 0) || 'Debe ser mayor o igual a 0'
-      }
-    };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      const baseHeaders: Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> = [
-        { title: 'Item', key: 'item', sortable: false, align: 'center' },
-        { title: 'Código', key: 'code', sortable: false },
-        { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Material', key: 'material', sortable: false },
-        { title: 'Color', key: 'color', sortable: false },
-        { title: 'Categoría', key: 'categoryName', sortable: false },
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Cantidad', key: 'quantity', sortable: false },
-        { title: 'Precio U.', key: 'price', sortable: false },
-        { title: 'SubTotal', key: 'subtotal', sortable: false }
-      ];
+interface Props {
+  modelValue: boolean;
+  issue?: GoodsIssue | null;
+  issueDetails?: GoodsIssueDetail[];
+}
 
-      if (!this.localIssue.idIssue) {
-        baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false, align: 'center' });
-      }
+const props = withDefaults(defineProps<Props>(), {
+  issue: () => ({
+    idIssue: null,
+    code: '',
+    type: '',
+    storeName: '',
+    idUser: null,
+    userName: '',
+    totalAmount: 0,
+    annotations: '',
+    auditCreateDate: '',
+    statusIssue: ''
+  } as GoodsIssue),
+  issueDetails: () => []
+});
 
-      return baseHeaders;
-    },
-    totalPrice(): number {
-      return this.details.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-    },
-    users() {
-      const usersFromStore = this.store.getters['user/users'];
-      return Array.isArray(usersFromStore) ? usersFromStore : [];
-    },
-    loadingUsers(): boolean {
-      return this.store.getters['user/loading'];
-    }
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    issue: {
-      handler(newIssue: GoodsIssue) {
-        this.localIssue = { ...newIssue };
-        this.details = [...this.issueDetails];
-      },
-      deep: true
-    }
-  },
-  methods: {
-    formatCurrency(value: number): string {
-      return new Intl.NumberFormat('es-BO', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-        useGrouping: true
-      }).format(value).replace(/\./g, ',');
-    },
-    async openProductModal() {
-      this.productModal = true;
-    },
-    handleProductAdded(product: any) {
-      const exists = this.details.find(d => d.idProduct === product.idProduct);
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [];
+  'close': [];
+}>();
 
-      if (exists) {
-        this.toast.warning('Este producto ya está en la lista');
-        return;
-      }
-      this.details.push({
-        idProduct: product.idProduct,
-        code: product.code,
-        description: product.description,
-        material: product.material,
-        color: product.color,
-        categoryName: product.categoryName,
-        brandName: product.brandName,
-        quantity: 1,
-        unitPrice: product.price,
-        totalPrice: 0
-      });
+const store = useStore();
+const toast = useToast();
 
-      this.toast.success('Producto agregado a la lista');
-    },
-    removeProduct(product: GoodsIssueDetail) {
-      const index = this.details.findIndex(d => d.idProduct === product.idProduct);
+const formRef = ref<FormRef | null>(null);
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const downloading = ref(false);
+const productModal = ref(false);
+const localIssue = ref<GoodsIssue>({ ...props.issue } as GoodsIssue);
+const details = ref<GoodsIssueDetail[]>([]);
+const documentTypes = ref<string[]>([]);
 
-      if (index !== -1) {
-        this.details.splice(index, 1);
-        this.toast.error(`Producto ${product.code} eliminado de la lista`);
-      }
-    },
-    async saveIssue() {
-      const form = this.$refs.form as FormRef;
+const issueTypes = ['CONSIGNACIÓN', 'REGULARIZACIÓN'];
 
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
+const rules = {
+  required: (value: any) => !!value || 'Este campo es requerido',
+  minValue: (value: number) => value > 0 || 'Debe ser mayor a 0',
+  minValueOrZero: (value: number) => (value !== null && value !== undefined && value >= 0) || 'Debe ser mayor o igual a 0'
+};
 
-      const invalidProducts = this.details.filter(d => {
-        if (this.localIssue.type === 'REGULARIZACIÓN') {
-          return d.quantity <= 0 || d.unitPrice === null || d.unitPrice === undefined || d.unitPrice < 0;
-        } else {
-          return d.quantity <= 0 || d.unitPrice <= 0;
-        }
-      });
+const headers = computed(() => {
+  const baseHeaders: Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> = [
+    { title: 'Item', key: 'item', sortable: false, align: 'center' },
+    { title: 'Código', key: 'code', sortable: false },
+    { title: 'Descripción', key: 'description', sortable: false },
+    { title: 'Material', key: 'material', sortable: false },
+    { title: 'Color', key: 'color', sortable: false },
+    { title: 'Categoría', key: 'categoryName', sortable: false },
+    { title: 'Marca', key: 'brandName', sortable: false },
+    { title: 'Cantidad', key: 'quantity', sortable: false },
+    { title: 'Precio U.', key: 'price', sortable: false },
+    { title: 'SubTotal', key: 'subtotal', sortable: false }
+  ];
 
-      if (invalidProducts.length > 0) {
-        if (this.localIssue.type === 'REGULARIZACIÓN') {
-          this.toast.warning('Todos los productos deben tener cantidad mayor a 0 y costo mayor o igual a 0');
-        } else {
-          this.toast.warning('Todos los productos deben tener cantidad y costo válidos mayores a 0');
-        }
-        return;
-      }
-      
-      this.saving = true;
-
-      try {
-        const issueData = {
-          type: this.localIssue.type,
-          totalAmount: this.totalPrice,
-          annotations: this.localIssue.annotations || '',
-          idUser: this.localIssue.idUser,
-          idStore: this.store.state.currentUser.storeId,
-          goodsIssueDetails: this.details.map((d, index) => ({
-            item: index + 1,
-            idProduct: d.idProduct,
-            quantity: d.quantity,
-            unitPrice: d.unitPrice,
-            totalPrice: d.quantity * d.unitPrice
-          }))
-        };
-
-        const result = await this.store.dispatch('goodsissue/registerGoodsIssue', issueData);
-
-        if (result.isSuccess) {
-          this.toast.success('Salida registrada con éxito');
-          this.$emit('saved');
-          this.close();
-        }
-      } catch (error) {
-        handleApiError(error, 'Error al registrar la salida');
-      } finally {
-        this.saving = false;
-      }
-    },
-    async downloadPdf() {
-      if (!this.localIssue.idIssue) return;
-
-      this.downloading = true;
-      try {
-        await this.$store.dispatch('goodsissue/exportGoodsIssuePdf', this.localIssue.idIssue);
-        this.toast.success('PDF descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el PDF');
-      } finally {
-        this.downloading = false;
-      }
-    },
-    formatDateForApi(date: string | null): string | null {
-      if (!date) return null;
-      if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}/)) {
-        return date.split('T')[0];
-      }
-
-      return date;
-    },
-    close() {
-      this.isOpen = false;
-      this.$emit('close');
-    }
-  },
-  mounted() {
-    this.details = [...this.issueDetails];
-    this.store.dispatch('user/selectUser');
+  if (!localIssue.value.idIssue) {
+    baseHeaders.push({ title: 'Acciones', key: 'actions', sortable: false, align: 'center' });
   }
+
+  return baseHeaders;
+});
+
+const totalPrice = computed(() => {
+  return details.value.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+});
+
+const users = computed(() => {
+  const usersFromStore = store.getters['user/users'];
+  return Array.isArray(usersFromStore) ? usersFromStore : [];
+});
+
+const loadingUsers = computed(() => store.getters['user/loading']);
+
+watch(() => props.modelValue, (newValue) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.issue, (newIssue) => {
+  if (newIssue) {
+    localIssue.value = { ...newIssue };
+  }
+  details.value = [...props.issueDetails];
+}, { deep: true });
+
+const openProductModal = () => {
+  productModal.value = true;
+};
+
+const handleProductAdded = (product: any) => {
+  const exists = details.value.find(d => d.idProduct === product.idProduct);
+
+  if (exists) {
+    toast.warning('Este producto ya está en la lista');
+    return;
+  }
+
+  details.value.push({
+    idProduct: product.idProduct,
+    code: product.code,
+    description: product.description,
+    material: product.material,
+    color: product.color,
+    categoryName: product.categoryName,
+    brandName: product.brandName,
+    quantity: 1,
+    unitPrice: product.price,
+    totalPrice: 0
+  });
+
+  toast.success('Producto agregado a la lista');
+};
+
+const removeProduct = (product: GoodsIssueDetail) => {
+  const index = details.value.findIndex(d => d.idProduct === product.idProduct);
+
+  if (index !== -1) {
+    details.value.splice(index, 1);
+    toast.error(`Producto ${product.code} eliminado de la lista`);
+  }
+};
+
+const saveIssue = async () => {
+  if (!formRef.value?.validate()) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  const invalidProducts = details.value.filter(d => {
+    if (localIssue.value.type === 'REGULARIZACIÓN') {
+      return d.quantity <= 0 || d.unitPrice === null || d.unitPrice === undefined || d.unitPrice < 0;
+    } else {
+      return d.quantity <= 0 || d.unitPrice <= 0;
+    }
+  });
+
+  if (invalidProducts.length > 0) {
+    if (localIssue.value.type === 'REGULARIZACIÓN') {
+      toast.warning('Todos los productos deben tener cantidad mayor a 0 y precio mayor o igual a 0');
+    } else {
+      toast.warning('Todos los productos deben tener cantidad y precio válidos mayores a 0');
+    }
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const issueData = {
+      type: localIssue.value.type,
+      totalAmount: totalPrice.value,
+      annotations: localIssue.value.annotations || '',
+      idUser: localIssue.value.idUser,
+      idStore: store.state.currentUser.storeId,
+      goodsIssueDetails: details.value.map((d, index) => ({
+        item: index + 1,
+        idProduct: d.idProduct,
+        quantity: d.quantity,
+        unitPrice: d.unitPrice,
+        totalPrice: d.quantity * d.unitPrice
+      }))
+    };
+
+    const result = await store.dispatch('goodsissue/registerGoodsIssue', issueData);
+
+    if (result.isSuccess) {
+      toast.success('Salida registrada con éxito');
+      emit('saved');
+      close();
+    }
+  } catch (error) {
+    handleApiError(error, 'Error al registrar la salida');
+  } finally {
+    saving.value = false;
+  }
+};
+
+const downloadPdf = async () => {
+  if (!localIssue.value.idIssue) return;
+
+  downloading.value = true;
+  try {
+    await store.dispatch('goodsissue/exportGoodsIssuePdf', localIssue.value.idIssue);
+    toast.success('PDF descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el PDF');
+  } finally {
+    downloading.value = false;
+  }
+};
+
+const close = () => {
+  isOpen.value = false;
+  emit('close');
+};
+
+onMounted(() => {
+  details.value = [...props.issueDetails];
+  store.dispatch('user/selectUser');
 });
 </script>

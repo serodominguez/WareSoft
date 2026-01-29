@@ -138,7 +138,7 @@ const searchGoodsReceipt = async (params: any) => {
     });
     currentPage.value = 1;
   } catch (error) {
-    handleApiError(error, 'Error al buscar ingresos');
+    handleApiError(error, 'Error al buscar las entradas');
   }
 };
 
