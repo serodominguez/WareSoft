@@ -17,8 +17,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useStoreStore } from '@/stores/storeStore';
+import { useAuthStore } from '@/stores/auth';
 import { Store } from '@/interfaces/storeInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -26,7 +27,9 @@ import StoreList from '@/components/Store/StoreList.vue';
 import StoreForm from '@/components/Store/StoreForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const storeStore = useStoreStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -47,14 +50,14 @@ const selectedStore = ref<Store | null>(null);
 const action = ref<0 | 1 | 2>(0);
 const downloadingExcel = ref(false);
 
-const stores = computed(() => store.getters['store/stores']);
-const loading = computed(() => store.getters['store/loading']);
-const totalStores = computed(() => store.getters['store/totalStores']);
+const stores = computed(() => storeStore.stores);
+const loading = computed(() => storeStore.loading);
+const totalStores = computed(() => storeStore.totalStores);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('tiendas', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('tiendas', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('tiendas', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('tiendas', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('tiendas', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('tiendas', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('tiendas', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('tiendas', 'eliminar'));
 
 const openModal = (payload: { store: Store, action: 0 | 1 | 2 }) => {
   selectedStore.value = payload.store;
@@ -80,7 +83,7 @@ const openForm = (storeData?: Store) => {
 
 const fetchStores = async (params?: any) => {
   try {
-    await store.dispatch('store/fetchStores', params || {
+    await storeStore.fetchStores(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -98,7 +101,7 @@ const searchStores = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("store/fetchStores", {
+    await storeStore.fetchStores({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -137,7 +140,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("store/downloadStoresExcel", {
+    await storeStore.downloadStoresExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

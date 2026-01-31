@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { useProductStore } from '@/stores/productStore';
 import { Product } from '@/interfaces/productInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -71,7 +71,7 @@ const emit = defineEmits<{
 }>();
 
 // Inicialización del store
-const store = useStore();
+const productStore = useProductStore();
 
 // Estado reactivo - Configuración de tabla
 const tableKey = ref(0);
@@ -145,18 +145,17 @@ const resetModalState = () => {
 const fetchProducts = async () => {
   try {
     loading.value = true;
-    
-    await store.dispatch('product/fetchProducts', {
+
+    await productStore.fetchProducts({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...buildFilterParams()
     });
 
-    // Actualiza estado local con datos del store
-    products.value = store.getters['product/products'] || [];
-    totalProducts.value = store.getters['product/totalProducts'] || 0;
+    products.value = productStore.products || [];
+    totalProducts.value = productStore.totalProducts || 0;
     hasSearched.value = true;
-    
+
   } catch (error) {
     handleApiError(error, 'Error al buscar productos');
     products.value = [];
@@ -165,6 +164,7 @@ const fetchProducts = async () => {
     loading.value = false;
   }
 };
+
 // Maneja la búsqueda de productos
 const handleSearch = async () => {
   currentPage.value = 1;

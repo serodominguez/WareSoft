@@ -18,8 +18,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useProductStore } from '@/stores/productStore';
+import { useAuthStore } from '@/stores/auth';
 import { Product } from '@/interfaces/productInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -27,7 +28,9 @@ import ProductList from '@/components/Product/ProductList.vue';
 import ProductForm from '@/components/Product/ProductForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const productStore = useProductStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -55,14 +58,14 @@ const action = ref<0 | 1 | 2>(0);
 
 const downloadingExcel = ref(false);
 
-const products = computed(() => store.getters['product/products']);
-const loading = computed(() => store.getters['product/loading']);
-const totalProducts = computed(() => store.getters['product/totalProducts']);
+const products = computed(() => productStore.products);
+const loading = computed(() => productStore.loading);
+const totalProducts = computed(() => productStore.totalProducts);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('productos', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('productos', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('productos', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('productos', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('productos', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('productos', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('productos', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('productos', 'eliminar'));
 
 const openModal = (payload: { product: Product, action: 0 | 1 | 2 }) => {
   selectedProduct.value = payload.product;
@@ -90,7 +93,7 @@ const openForm = (product?: Product) => {
 
 const fetchProducts = async (params?: any) => {
   try {
-    await store.dispatch('product/fetchProducts', params || {
+    await productStore.fetchProducts(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -108,7 +111,7 @@ const searchProducts = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("product/fetchProducts", {
+    await productStore.fetchProducts({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -135,7 +138,7 @@ const refreshProducts = () => {
 
 const updateItemsPerPage = (newItemsPerPage: number) => {
   itemsPerPage.value = newItemsPerPage;
-  currentPage.value = 1; 
+  currentPage.value = 1;
   refreshProducts();
 };
 
@@ -147,7 +150,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("product/downloadProductsExcel", {
+    await productStore.downloadProductsExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

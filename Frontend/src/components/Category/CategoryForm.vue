@@ -35,8 +35,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useCategoryStore } from '@/stores/categoryStore';
 import { Category } from '@/interfaces/categoryInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -64,7 +64,7 @@ const emit = defineEmits<{
   'saved': [category: Category];
 }>();
 
-const store = useStore();
+const categoryStore = useCategoryStore();
 const toast = useToast();
 
 const formRef = ref<FormRef | null>(null);
@@ -116,13 +116,13 @@ const saveCategory = async () => {
     const isEditing = !!localCategory.value.idCategory;
     let result;
 
-    if (isEditing) {
-      result = await store.dispatch('category/editCategory', {
-        id: localCategory.value.idCategory,
-        category: { ...localCategory.value }
-      });
+    if (isEditing && localCategory.value.idCategory !== null) {
+      result = await categoryStore.editCategory(
+        localCategory.value.idCategory,
+        { ...localCategory.value }
+      );
     } else {
-      result = await store.dispatch('category/registerCategory', { ...localCategory.value });
+      result = await categoryStore.registerCategory({ ...localCategory.value });
     }
 
     if (result.isSuccess) {

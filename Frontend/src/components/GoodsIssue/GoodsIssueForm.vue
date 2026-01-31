@@ -16,7 +16,7 @@
               readonly />
           </v-col>
           <v-col cols="12" md="2">
-            <v-autocomplete v-if="!localIssue.idIssue" color="indigo" variant="underlined" :items="users"
+            <v-autocomplete v-if="!localIssue.idIssue" color="indigo" variant="underlined" :items="usersArray"
               v-model="localIssue.idUser" item-title="userName" item-value="idUser"
               :rules="[rules.required]" no-data-text="No hay datos disponibles" label="Personal"
               :loading="loadingUsers" />
@@ -91,8 +91,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toastification';
+import { useGoodsIssueStore } from '@/stores/goodsIssueStore';
+import { useUserStore } from '@/stores/userStore';
+import { useAuthStore } from '@/stores/auth';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductOut from '@/components/Common/CommonProductOut.vue';
 import { formatCurrency } from '@/utils/currency';
@@ -130,8 +133,12 @@ const emit = defineEmits<{
   'close': [];
 }>();
 
-const store = useStore();
+const goodsIssueStore = useGoodsIssueStore();
+const userStore = useUserStore();
+const authStore = useAuthStore();
 const toast = useToast();
+
+const { users, loading: loadingUsers } = storeToRefs(userStore);
 
 const formRef = ref<FormRef | null>(null);
 const isOpen = ref(props.modelValue);
@@ -176,12 +183,7 @@ const totalPrice = computed(() => {
   return details.value.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
 });
 
-const users = computed(() => {
-  const usersFromStore = store.getters['user/users'];
-  return Array.isArray(usersFromStore) ? usersFromStore : [];
-});
-
-const loadingUsers = computed(() => store.getters['user/loading']);
+const usersArray = computed(() => Array.isArray(users.value) ? users.value : []);
 
 watch(() => props.modelValue, (newValue) => {
   isOpen.value = newValue;
@@ -266,7 +268,7 @@ const saveIssue = async () => {
       totalAmount: totalPrice.value,
       annotations: localIssue.value.annotations || '',
       idUser: localIssue.value.idUser,
-      idStore: store.state.currentUser.storeId,
+      idStore: authStore.currentUser?.storeId,
       goodsIssueDetails: details.value.map((d, index) => ({
         item: index + 1,
         idProduct: d.idProduct,
@@ -276,7 +278,7 @@ const saveIssue = async () => {
       }))
     };
 
-    const result = await store.dispatch('goodsissue/registerGoodsIssue', issueData);
+    const result = await goodsIssueStore.registerGoodsIssue(issueData);
 
     if (result.isSuccess) {
       toast.success('Salida registrada con éxito');
@@ -295,7 +297,7 @@ const downloadPdf = async () => {
 
   downloading.value = true;
   try {
-    await store.dispatch('goodsissue/exportGoodsIssuePdf', localIssue.value.idIssue);
+    await goodsIssueStore.exportGoodsIssuePdf(localIssue.value.idIssue);
     toast.success('PDF descargado correctamente');
   } catch (error) {
     handleApiError(error, 'Error al descargar el PDF');
@@ -311,6 +313,6 @@ const close = () => {
 
 onMounted(() => {
   details.value = [...props.issueDetails];
-  store.dispatch('user/selectUser');
+  userStore.selectUser();
 });
 </script>

@@ -1,26 +1,26 @@
 import { useBrandStore } from '@/stores/brandStore';
-// import { useCategoryStore } from '@/stores/categoryStore';
-// import { useCustomerStore } from '@/stores/customerStore';
-// import { useProductStore } from '@/stores/productStore';
-// import { useSupplierStore } from '@/stores/supplierStore';
-// import { useStoreStore } from '@/stores/storeStore';
-// import { useUserStore } from '@/stores/userStore';
-// import { useRoleStore } from '@/stores/roleStore';
-// import { useModuleStore } from '@/stores/moduleStore';
+import { useCategoryStore } from '@/stores/categoryStore';
+import { useCustomerStore } from '@/stores/customerStore';
+import { useModuleStore } from '@/stores/moduleStore';
+import { useProductStore } from '@/stores/productStore';
+import { useRoleStore } from '@/stores/roleStore';
+import { useStoreStore } from '@/stores/storeStore';
+import { useSupplierStore } from '@/stores/supplierStore';
+import { useUserStore } from '@/stores/userStore';
 // ... importa los demás stores
 
 export const useStoreMapper = () => {
     // Mapa de stores
     const storeMap: Record<string, any> = {
         brand: useBrandStore(),
-/*         category: useCategoryStore(),
+        category: useCategoryStore(),
         customer: useCustomerStore(),
+        module: useModuleStore(),
         product: useProductStore(),
-        supplier: useSupplierStore(),
-        store: useStoreStore(),
-        user: useUserStore(),
         role: useRoleStore(),
-        module: useModuleStore(), */
+        store: useStoreStore(),
+        supplier: useSupplierStore(),
+        user: useUserStore(),
         // ... agrega los demás módulos
     };
 

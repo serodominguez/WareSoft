@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { useInventoryStore } from '@/stores/inventoryStore';
 import { Inventory } from '@/interfaces/inventoryInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -70,7 +70,7 @@ const emit = defineEmits<{
   'product-added': [product: Inventory];
 }>();
 
-const store = useStore();
+const inventoryStore = useInventoryStore();
 
 const tableKey = ref(0);
 const pages = ref("Productos por Página");
@@ -138,17 +138,17 @@ const resetModalState = () => {
 const fetchProducts = async () => {
   try {
     loading.value = true;
-    
-    await store.dispatch('inventory/fetchInventories', {
+
+    await inventoryStore.fetchInventories({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...buildFilterParams()
     });
 
-    products.value = store.getters['inventory/inventories'] || [];
-    totalProducts.value = store.getters['inventory/totalInventories'] || 0;
+    products.value = inventoryStore.inventories || [];
+    totalProducts.value = inventoryStore.totalInventories || 0;
     hasSearched.value = true;
-    
+
   } catch (error) {
     handleApiError(error, 'Error al buscar productos');
     products.value = [];

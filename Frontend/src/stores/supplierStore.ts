@@ -1,31 +1,28 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { Brand } from '@/interfaces/brandInterface';
-import { brandService } from '@/services/brandService';
+import { Supplier } from '@/interfaces/supplierInterface';
+import { supplierService } from '@/services/supplierService';
 import { FilterParams } from '@/interfaces/baseInterface';
 
-export const useBrandStore = defineStore('brand', () => {
-  // Estado
-  const items = ref<Brand[]>([]);
-  const selectedItem = ref<Brand | null>(null);
+export const useSupplierStore = defineStore('supplier', () => {
+  const items = ref<Supplier[]>([]);
+  const selectedItem = ref<Supplier | null>(null);
   const totalItems = ref<number>(0);
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const lastFilterParams = ref<FilterParams | undefined>(undefined);
 
-  // Getters
-  const brands = computed(() => items.value);
-  const selectedBrand = computed(() => selectedItem.value);
-  const totalBrands = computed(() => totalItems.value || 0);
+  const suppliers = computed(() => items.value);
+  const selectedSupplier = computed(() => selectedItem.value);
+  const totalSuppliers = computed(() => totalItems.value || 0);
 
-  // Acciones
-  async function fetchBrands(params: FilterParams = {}) {
+  async function fetchSuppliers(params: FilterParams = {}) {
     loading.value = true;
     items.value = [];
     lastFilterParams.value = params;
 
     try {
-      const result = await brandService.fetchAll(params);
+      const result = await supplierService.fetchAll(params);
       if (result.isSuccess) {
         items.value = result.data;
         totalItems.value = result.totalRecords;
@@ -39,22 +36,22 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function downloadBrandsExcel(params?: FilterParams) {
+  async function downloadSuppliersExcel(params?: FilterParams) {
     try {
       const filterParams = params || lastFilterParams.value || {};
-      await brandService.downloadExcel(filterParams);
+      await supplierService.downloadExcel(filterParams);
     } catch (err: any) {
       console.error('Error al descargar Excel:', err);
       throw err;
     }
   }
 
-  async function selectBrand() {
+  async function selectSupplier() {
     loading.value = true;
     items.value = [];
 
     try {
-      const result = await brandService.select();
+      const result = await supplierService.select();
       if (result.isSuccess) {
         items.value = result.data;
       } else {
@@ -67,11 +64,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function fetchBrandById(id: number) {
+  async function fetchSupplierById(id: number) {
     loading.value = true;
 
     try {
-      const result = await brandService.fetchById(id);
+      const result = await supplierService.fetchById(id);
       if (result.isSuccess) {
         selectedItem.value = result.data;
       } else {
@@ -84,11 +81,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function registerBrand(brand: Brand) {
+  async function registerSupplier(supplier: Supplier) {
     try {
-      const result = await brandService.create(brand);
+      const result = await supplierService.create(supplier);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchSuppliers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -96,11 +93,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function editBrand(id: number, brand: Brand) {
+  async function editSupplier(id: number, supplier: Supplier) {
     try {
-      const result = await brandService.update(id, brand);
+      const result = await supplierService.update(id, supplier);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchSuppliers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -108,11 +105,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function enableBrand(id: number) {
+  async function enableSupplier(id: number) {
     try {
-      const result = await brandService.enable(id);
+      const result = await supplierService.enable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchSuppliers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -120,11 +117,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function disableBrand(id: number) {
+  async function disableSupplier(id: number) {
     try {
-      const result = await brandService.disable(id);
+      const result = await supplierService.disable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchSuppliers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -132,11 +129,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function removeBrand(id: number) {
+  async function removeSupplier(id: number) {
     try {
-      const result = await brandService.remove(id);
+      const result = await supplierService.remove(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchSuppliers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -145,7 +142,6 @@ export const useBrandStore = defineStore('brand', () => {
   }
 
   return {
-    // State
     items,
     selectedItem,
     totalItems,
@@ -153,20 +149,18 @@ export const useBrandStore = defineStore('brand', () => {
     error,
     lastFilterParams,
 
-    // Getters
-    brands,
-    selectedBrand,
-    totalBrands,
+    suppliers,
+    selectedSupplier,
+    totalSuppliers,
 
-    // Actions
-    fetchBrands,
-    downloadBrandsExcel,
-    selectBrand,
-    fetchBrandById,
-    registerBrand,
-    editBrand,
-    enableBrand,
-    disableBrand,
-    removeBrand,
+    fetchSuppliers,
+    downloadSuppliersExcel,
+    selectSupplier,
+    fetchSupplierById,
+    registerSupplier,
+    editSupplier,
+    enableSupplier,
+    disableSupplier,
+    removeSupplier,
   };
 });

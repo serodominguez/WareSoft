@@ -39,7 +39,7 @@
               readonly />
           </v-col>
           <v-col cols="12" md="2">
-            <v-autocomplete v-if="!localReceipt.idReceipt" color="indigo" variant="underlined" :items="suppliers"
+            <v-autocomplete v-if="!localReceipt.idReceipt" color="indigo" variant="underlined" :items="suppliersArray"
               v-model="localReceipt.idSupplier" item-title="companyName" item-value="idSupplier"
               :rules="[rules.required]" no-data-text="No hay datos disponibles" label="Proveedor"
               :loading="loadingSuppliers" />
@@ -115,8 +115,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toastification';
+import { useGoodsReceiptStore } from '@/stores/goodsReceiptStore';
+import { useSupplierStore } from '@/stores/supplierStore';
+import { useAuthStore } from '@/stores/auth';
 import { handleApiError } from '@/helpers/errorHandler';
 import CommonProductIn from '@/components/Common/CommonProductIn.vue';
 import { formatDateForApi } from '@/utils/date';
@@ -158,8 +161,12 @@ const emit = defineEmits<{
   'close': [];
 }>();
 
-const store = useStore();
+const goodsReceiptStore = useGoodsReceiptStore();
+const supplierStore = useSupplierStore();
+const authStore = useAuthStore();
 const toast = useToast();
+
+const { suppliers, loading: loadingSuppliers } = storeToRefs(supplierStore);
 
 // Refs
 const formRef = ref<FormRef | null>(null);
@@ -216,12 +223,7 @@ const totalCost = computed(() => {
   return details.value.reduce((sum, item) => sum + (item.quantity * item.unitCost), 0);
 });
 
-const suppliers = computed(() => {
-  const suppliersFromStore = store.getters['supplier/suppliers'];
-  return Array.isArray(suppliersFromStore) ? suppliersFromStore : [];
-});
-
-const loadingSuppliers = computed(() => store.getters['supplier/loading']);
+const suppliersArray = computed(() => Array.isArray(suppliers.value) ? suppliers.value : []);
 
 // Watchers
 watch(() => props.modelValue, (newValue) => {
@@ -241,8 +243,6 @@ watch(() => props.receipt, (newReceipt) => {
 }, { deep: true });
 
 // Methods
-
-
 const updateDocuments = () => {
   localReceipt.value.documentType = '';
 
@@ -326,7 +326,7 @@ const saveReceipt = async () => {
       totalAmount: totalCost.value,
       annotations: localReceipt.value.annotations || '',
       idSupplier: localReceipt.value.idSupplier,
-      idStore: store.state.currentUser.storeId,
+      idStore: authStore.currentUser?.storeId,
       goodsReceiptDetails: details.value.map((d, index) => ({
         item: index + 1,
         idProduct: d.idProduct,
@@ -336,7 +336,7 @@ const saveReceipt = async () => {
       }))
     };
 
-    const result = await store.dispatch('goodsreceipt/registerGoodsReceipt', receiptData);
+    const result = await goodsReceiptStore.registerGoodsReceipt(receiptData);
 
     if (result.isSuccess) {
       toast.success('Entrada registrada con éxito');
@@ -355,7 +355,7 @@ const downloadPdf = async () => {
 
   downloading.value = true;
   try {
-    await store.dispatch('goodsreceipt/exportGoodsReceiptPdf', localReceipt.value.idReceipt);
+    await goodsReceiptStore.exportGoodsReceiptPdf(localReceipt.value.idReceipt);
     toast.success('PDF descargado correctamente');
   } catch (error) {
     handleApiError(error, 'Error al descargar el PDF');
@@ -363,8 +363,6 @@ const downloadPdf = async () => {
     downloading.value = false;
   }
 };
-
-
 
 const close = () => {
   isOpen.value = false;
@@ -374,7 +372,7 @@ const close = () => {
 // Lifecycle
 onMounted(() => {
   details.value = [...props.receiptDetails];
-  store.dispatch('supplier/selectSupplier');
+  supplierStore.selectSupplier();
   if (!localReceipt.value.idReceipt) {
     localReceipt.value.documentDate = '';
     updateDocuments();

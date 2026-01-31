@@ -1,31 +1,28 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { Brand } from '@/interfaces/brandInterface';
-import { brandService } from '@/services/brandService';
+import { User } from '@/interfaces/userInterface';
+import { userService } from '@/services/userService';
 import { FilterParams } from '@/interfaces/baseInterface';
 
-export const useBrandStore = defineStore('brand', () => {
-  // Estado
-  const items = ref<Brand[]>([]);
-  const selectedItem = ref<Brand | null>(null);
+export const useUserStore = defineStore('user', () => {
+  const items = ref<User[]>([]);
+  const selectedItem = ref<User | null>(null);
   const totalItems = ref<number>(0);
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const lastFilterParams = ref<FilterParams | undefined>(undefined);
 
-  // Getters
-  const brands = computed(() => items.value);
-  const selectedBrand = computed(() => selectedItem.value);
-  const totalBrands = computed(() => totalItems.value || 0);
+  const users = computed(() => items.value);
+  const selectedUser = computed(() => selectedItem.value);
+  const totalUsers = computed(() => totalItems.value || 0);
 
-  // Acciones
-  async function fetchBrands(params: FilterParams = {}) {
+  async function fetchUsers(params: FilterParams = {}) {
     loading.value = true;
     items.value = [];
     lastFilterParams.value = params;
 
     try {
-      const result = await brandService.fetchAll(params);
+      const result = await userService.fetchAll(params);
       if (result.isSuccess) {
         items.value = result.data;
         totalItems.value = result.totalRecords;
@@ -39,22 +36,22 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function downloadBrandsExcel(params?: FilterParams) {
+  async function downloadUsersExcel(params?: FilterParams) {
     try {
       const filterParams = params || lastFilterParams.value || {};
-      await brandService.downloadExcel(filterParams);
+      await userService.downloadExcel(filterParams);
     } catch (err: any) {
       console.error('Error al descargar Excel:', err);
       throw err;
     }
   }
 
-  async function selectBrand() {
+  async function selectUser() {
     loading.value = true;
     items.value = [];
 
     try {
-      const result = await brandService.select();
+      const result = await userService.select();
       if (result.isSuccess) {
         items.value = result.data;
       } else {
@@ -67,11 +64,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function fetchBrandById(id: number) {
+  async function fetchUserById(id: number) {
     loading.value = true;
 
     try {
-      const result = await brandService.fetchById(id);
+      const result = await userService.fetchById(id);
       if (result.isSuccess) {
         selectedItem.value = result.data;
       } else {
@@ -84,11 +81,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function registerBrand(brand: Brand) {
+  async function registerUser(user: User) {
     try {
-      const result = await brandService.create(brand);
+      const result = await userService.create(user);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchUsers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -96,11 +93,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function editBrand(id: number, brand: Brand) {
+  async function editUser(id: number, user: User) {
     try {
-      const result = await brandService.update(id, brand);
+      const result = await userService.update(id, user);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchUsers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -108,11 +105,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function enableBrand(id: number) {
+  async function enableUser(id: number) {
     try {
-      const result = await brandService.enable(id);
+      const result = await userService.enable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchUsers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -120,11 +117,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function disableBrand(id: number) {
+  async function disableUser(id: number) {
     try {
-      const result = await brandService.disable(id);
+      const result = await userService.disable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchUsers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -132,11 +129,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function removeBrand(id: number) {
+  async function removeUser(id: number) {
     try {
-      const result = await brandService.remove(id);
+      const result = await userService.remove(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchUsers(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -145,7 +142,6 @@ export const useBrandStore = defineStore('brand', () => {
   }
 
   return {
-    // State
     items,
     selectedItem,
     totalItems,
@@ -153,20 +149,18 @@ export const useBrandStore = defineStore('brand', () => {
     error,
     lastFilterParams,
 
-    // Getters
-    brands,
-    selectedBrand,
-    totalBrands,
+    users,
+    selectedUser,
+    totalUsers,
 
-    // Actions
-    fetchBrands,
-    downloadBrandsExcel,
-    selectBrand,
-    fetchBrandById,
-    registerBrand,
-    editBrand,
-    enableBrand,
-    disableBrand,
-    removeBrand,
+    fetchUsers,
+    downloadUsersExcel,
+    selectUser,
+    fetchUserById,
+    registerUser,
+    editUser,
+    enableUser,
+    disableUser,
+    removeUser,
   };
 });

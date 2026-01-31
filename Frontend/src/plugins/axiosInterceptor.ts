@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import store from '@/store';
+import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
 import { ErrorHandler } from '@/helpers/errorHandler';
 
@@ -69,7 +69,8 @@ export function setupAxiosInterceptors() {
           });
           
           // Limpiar sesión y redirigir
-          store.dispatch("logout");
+          const authStore = useAuthStore();
+          await authStore.logout();
         }
         return Promise.reject(error);
       }
@@ -88,7 +89,8 @@ export function setupAxiosInterceptors() {
           });
 
           // Limpiar sesión y redirigir
-          await store.dispatch("logout");
+          const authStore = useAuthStore();
+          await authStore.logout();
         }
         return Promise.reject(error);
       }

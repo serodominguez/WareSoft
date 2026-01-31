@@ -43,8 +43,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useSupplierStore } from '@/stores/supplierStore';
 import { Supplier } from '@/interfaces/supplierInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -74,7 +74,7 @@ const emit = defineEmits<{
   'saved': [supplier: Supplier];
 }>();
 
-const store = useStore();
+const supplierStore = useSupplierStore();
 const toast = useToast();
 
 const formRef = ref<FormRef | null>(null);
@@ -127,13 +127,13 @@ const saveSupplier = async () => {
     const isEditing = !!localSupplier.value.idSupplier;
     let result;
 
-    if (isEditing) {
-      result = await store.dispatch('supplier/editSupplier', {
-        id: localSupplier.value.idSupplier,
-        supplier: { ...localSupplier.value }
-      });
+    if (isEditing && localSupplier.value.idSupplier !== null) {
+      result = await supplierStore.editSupplier(
+        localSupplier.value.idSupplier,
+        { ...localSupplier.value }
+      );
     } else {
-      result = await store.dispatch('supplier/registerSupplier', { ...localSupplier.value });
+      result = await supplierStore.registerSupplier({ ...localSupplier.value });
     }
 
     if (result.isSuccess) {

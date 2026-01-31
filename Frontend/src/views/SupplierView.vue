@@ -18,8 +18,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useSupplierStore } from '@/stores/supplierStore';
+import { useAuthStore } from '@/stores/auth';
 import { Supplier } from '@/interfaces/supplierInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -27,7 +28,9 @@ import SupplierList from '@/components/Supplier/SupplierList.vue';
 import SupplierForm from '@/components/Supplier/SupplierForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const supplierStore = useSupplierStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -46,14 +49,14 @@ const selectedSupplier = ref<Supplier | null>(null);
 const action = ref<0 | 1 | 2>(0);
 const downloadingExcel = ref(false);
 
-const suppliers = computed(() => store.getters['supplier/suppliers']);
-const loading = computed(() => store.getters['supplier/loading']);
-const totalSuppliers = computed(() => store.getters['supplier/totalSuppliers']);
+const suppliers = computed(() => supplierStore.suppliers);
+const loading = computed(() => supplierStore.loading);
+const totalSuppliers = computed(() => supplierStore.totalSuppliers);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('proveedores', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('proveedores', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('proveedores', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('proveedores', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('proveedores', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('proveedores', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('proveedores', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('proveedores', 'eliminar'));
 
 const openModal = (payload: { supplier: Supplier, action: 0 | 1 | 2 }) => {
   selectedSupplier.value = payload.supplier;
@@ -76,7 +79,7 @@ const openForm = (supplier?: Supplier) => {
 
 const fetchSuppliers = async (params?: any) => {
   try {
-    await store.dispatch('supplier/fetchSuppliers', params || {
+    await supplierStore.fetchSuppliers(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -94,7 +97,7 @@ const searchSuppliers = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("supplier/fetchSuppliers", {
+    await supplierStore.fetchSuppliers({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -133,7 +136,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("supplier/downloadSuppliersExcel", {
+    await supplierStore.downloadSuppliersExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

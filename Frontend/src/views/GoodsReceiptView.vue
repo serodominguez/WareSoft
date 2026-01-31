@@ -20,8 +20,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toastification';
+import { useGoodsReceiptStore } from '@/stores/goodsReceiptStore';
+import { useAuthStore } from '@/stores/auth';
 import { GoodsReceipt } from '@/interfaces/goodsReceiptInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -29,8 +31,12 @@ import GoodsReceiptList from '@/components/GoodsReceipt/GoodsReceiptList.vue';
 import GoodsReceiptForm from '@/components/GoodsReceipt/GoodsReceiptForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const goodsReceiptStore = useGoodsReceiptStore();
+const authStore = useAuthStore();
 const toast = useToast();
+
+// Destructuring store con storeToRefs para mantener la reactividad
+const { goodsreceipt, selectedGoodsReceipt, selectedReceiptDetails, loading, totalGoodsReceipt } = storeToRefs(goodsReceiptStore);
 
 // Composable de filtros
 const filterMap = {
@@ -48,24 +54,19 @@ const search = ref<string | null>(null);
 const drawer = ref(false);
 const form = ref(false);
 const modal = ref(false);
-const selectedGoodsReceipt = ref<GoodsReceipt | null>(null);
 const action = ref<0 | 1 | 2>(0);
 const downloadingExcel = ref(false);
 
 // Computed
-const goodsreceipt = computed(() => store.getters['goodsreceipt/goodsreceipt']);
-const selectedReceiptDetails = computed(() => store.getters['goodsreceipt/selectedReceiptDetails']);
-const loading = computed(() => store.getters['goodsreceipt/loading']);
-const totalGoodsReceipt = computed(() => store.getters['goodsreceipt/totalGoodsReceipt']);
 const stateFilter = computed(() => state.value === 'Activos' ? 1 : 0);
-const canCreate = computed(() => store.getters.hasPermission('entrada de productos', 'crear'));
-const canRead = computed(() => store.getters.hasPermission('entrada de productos', 'leer'));
-const canEdit = computed(() => store.getters.hasPermission('entrada de productos', 'editar'));
-const canDelete = computed(() => store.getters.hasPermission('entrada de productos', 'eliminar'));
+const canCreate = computed(() => authStore.hasPermission('entrada de productos', 'crear'));
+const canRead = computed(() => authStore.hasPermission('entrada de productos', 'leer'));
+const canEdit = computed(() => authStore.hasPermission('entrada de productos', 'editar'));
+const canDelete = computed(() => authStore.hasPermission('entrada de productos', 'eliminar'));
 
 // Methods
 const openModal = (payload: { goodsreceipt: GoodsReceipt, action: 0 | 1 | 2 }) => {
-  selectedGoodsReceipt.value = payload.goodsreceipt;
+  goodsReceiptStore.selectedItem = payload.goodsreceipt;
   action.value = payload.action;
   modal.value = true;
 };
@@ -73,14 +74,13 @@ const openModal = (payload: { goodsreceipt: GoodsReceipt, action: 0 | 1 | 2 }) =
 const openForm = async (goodsreceipt?: GoodsReceipt) => {
   if (goodsreceipt?.idReceipt) {
     try {
-      await store.dispatch('goodsreceipt/fetchGoodsReceiptById', goodsreceipt.idReceipt);
-      selectedGoodsReceipt.value = store.getters['goodsreceipt/selectedGoodsReceipt'];
+      await goodsReceiptStore.fetchGoodsReceiptById(goodsreceipt.idReceipt);
     } catch (error) {
       handleApiError(error, 'Error al cargar los detalles de la entrada');
       return;
     }
   } else {
-    selectedGoodsReceipt.value = {
+    goodsReceiptStore.selectedItem = {
       idReceipt: null,
       code: '',
       type: '',
@@ -101,15 +101,14 @@ const openForm = async (goodsreceipt?: GoodsReceipt) => {
 };
 
 const closeForm = () => {
-  store.commit('goodsreceipt/SET_SELECTED_RECEIPT_DETAILS', []);
-  store.commit('goodsreceipt/SET_SELECTED_ITEM', null);
-  selectedGoodsReceipt.value = null;
+  goodsReceiptStore.selectedReceiptDetails = [];
+  goodsReceiptStore.selectedItem = null;
   form.value = false;
 };
 
 const fetchGoodsReceipt = async (params?: any) => {
   try {
-    await store.dispatch('goodsreceipt/fetchGoodsReceipt', params || {
+    await goodsReceiptStore.fetchGoodsReceipt(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: stateFilter.value,
@@ -129,7 +128,7 @@ const searchGoodsReceipt = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("goodsreceipt/fetchGoodsReceipt", {
+    await goodsReceiptStore.fetchGoodsReceipt({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       sort: 'IdReceipt',
@@ -170,7 +169,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("goodsreceipt/downloadGoodsReceiptExcel", {
+    await goodsReceiptStore.downloadGoodsReceiptExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       sort: 'IdReceipt',
@@ -189,7 +188,7 @@ const printPdf = async (goodsreceipt: GoodsReceipt) => {
   if (!goodsreceipt.idReceipt) return;
 
   try {
-    const result = await store.dispatch('goodsreceipt/openGoodsReceiptPdf', goodsreceipt.idReceipt);
+    const result = await goodsReceiptStore.openGoodsReceiptPdf(goodsreceipt.idReceipt);
 
     if (result.isSuccess) {
       toast.success('PDF abierto correctamente');

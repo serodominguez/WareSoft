@@ -17,8 +17,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useUserStore } from '@/stores/userStore';
+import { useAuthStore } from '@/stores/auth';
 import { User } from '@/interfaces/userInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -26,7 +27,9 @@ import UserList from '@/components/User/UserList.vue';
 import UserForm from '@/components/User/UserForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const userStore = useUserStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -48,14 +51,14 @@ const selectedUser = ref<User | null>(null);
 const action = ref<0 | 1 | 2>(0);
 const downloadingExcel = ref(false);
 
-const users = computed(() => store.getters['user/users']);
-const loading = computed(() => store.getters['user/loading']);
-const totalUsers = computed(() => store.getters['user/totalUsers']);
+const users = computed(() => userStore.users);
+const loading = computed(() => userStore.loading);
+const totalUsers = computed(() => userStore.totalUsers);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('usuarios', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('usuarios', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('usuarios', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('usuarios', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('usuarios', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('usuarios', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('usuarios', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('usuarios', 'eliminar'));
 
 const openModal = (payload: { user: User, action: 0 | 1 | 2 }) => {
   selectedUser.value = payload.user;
@@ -86,7 +89,7 @@ const openForm = (user?: User) => {
 
 const fetchUsers = async (params?: any) => {
   try {
-    await store.dispatch('user/fetchUsers', params || {
+    await userStore.fetchUsers(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -104,7 +107,7 @@ const searchUsers = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("user/fetchUsers", {
+    await userStore.fetchUsers({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -143,7 +146,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("user/downloadUsersExcel", {
+    await userStore.downloadUsersExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

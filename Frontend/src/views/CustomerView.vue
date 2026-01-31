@@ -18,8 +18,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useCustomerStore } from '@/stores/customerStore';
+import { useAuthStore } from '@/stores/auth';
 import { Customer } from '@/interfaces/customerInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -27,7 +28,9 @@ import CustomerList from '@/components/Customer/CustomerList.vue';
 import CustomerForm from '@/components/Customer/CustomerForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const customerStore = useCustomerStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -52,16 +55,16 @@ const action = ref<0 | 1 | 2>(0);
 
 const downloadingExcel = ref(false);
 
-const customers = computed(() => store.getters['customer/customers']);
-const loading = computed(() => store.getters['customer/loading']);
-const totalCustomers = computed(() => store.getters['customer/totalCustomers']);
+const customers = computed(() => customerStore.customers);
+const loading = computed(() => customerStore.loading);
+const totalCustomers = computed(() => customerStore.totalCustomers);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('clientes', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('clientes', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('clientes', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('clientes', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('clientes', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('clientes', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('clientes', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('clientes', 'eliminar'));
 
-const openModal = (payload: { customer: Customer; action: 0 | 1 | 2  }) => {
+const openModal = (payload: { customer: Customer; action: 0 | 1 | 2 }) => {
   selectedCustomer.value = payload.customer;
   action.value = payload.action;
   modal.value = true;
@@ -82,7 +85,7 @@ const openForm = (customer?: Customer) => {
 
 const fetchCustomers = async (params?: any) => {
   try {
-    await store.dispatch('customer/fetchCustomers', params || {
+    await customerStore.fetchCustomers(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -100,7 +103,7 @@ const searchCustomers = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("customer/fetchCustomers", {
+    await customerStore.fetchCustomers({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -139,7 +142,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("customer/downloadCustomersExcel", {
+    await customerStore.downloadCustomersExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

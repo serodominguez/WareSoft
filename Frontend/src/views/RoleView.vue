@@ -16,8 +16,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useRoleStore } from '@/stores/roleStore';
+import { useAuthStore } from '@/stores/auth';
 import { Role } from '@/interfaces/roleInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -25,7 +26,9 @@ import RoleList from '@/components/Role/RoleList.vue';
 import RoleForm from '@/components/Role/RoleForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const roleStore = useRoleStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = { "Rol": 1 };
@@ -46,14 +49,14 @@ const action = ref<0 | 1 | 2>(0);
 
 const downloadingExcel = ref(false);
 
-const roles = computed(() => store.getters['role/roles']);
-const loading = computed(() => store.getters['role/loading']);
-const totalRoles = computed(() => store.getters['role/totalRoles']);
+const roles = computed(() => roleStore.roles);
+const loading = computed(() => roleStore.loading);
+const totalRoles = computed(() => roleStore.totalRoles);
 
-const canCreate = computed((): boolean => store.getters.hasPermission('roles', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('roles', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('roles', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('roles', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('roles', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('roles', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('roles', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('roles', 'eliminar'));
 
 const openModal = (payload: { role: Role, action: 0 | 1 | 2 }) => {
   selectedRole.value = payload.role;
@@ -73,7 +76,7 @@ const openForm = (role?: Role) => {
 
 const fetchRoles = async (params?: any) => {
   try {
-    await store.dispatch('role/fetchRoles', params || {
+    await roleStore.fetchRoles(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -91,7 +94,7 @@ const searchRoles = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("role/fetchRoles", {
+    await roleStore.fetchRoles({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -130,7 +133,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("role/downloadRolesExcel", {
+    await roleStore.downloadRolesExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

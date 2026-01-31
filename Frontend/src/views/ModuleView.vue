@@ -17,8 +17,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useModuleStore } from '@/stores/moduleStore';
+import { useAuthStore } from '@/stores/auth';
 import { Module } from '@/interfaces/moduleInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -26,7 +27,9 @@ import ModuleList from '@/components/Module/ModuleList.vue';
 import ModuleForm from '@/components/Module/ModuleForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const moduleStore = useModuleStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = { "Módulo": 1 };
@@ -47,15 +50,14 @@ const action = ref<0 | 1 | 2>(0);
 
 const downloadingExcel = ref(false);
 
+const modules = computed(() => moduleStore.modules);
+const loading = computed(() => moduleStore.loading);
+const totalModules = computed(() => moduleStore.totalModules);
 
-const modules = computed(() => store.getters['module/modules']);
-const loading = computed(() => store.getters['module/loading']);
-const totalModules = computed(() => store.getters['module/totalModules']);
-
-const canCreate = computed((): boolean => store.getters.hasPermission('modulos', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('modulos', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('modulos', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('modulos', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('modulos', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('modulos', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('modulos', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('modulos', 'eliminar'));
 
 const openModal = (payload: { module: Module, action: 0 | 1 | 2 }) => {
   selectedModule.value = payload.module;
@@ -75,7 +77,7 @@ const openForm = (module?: Module) => {
 
 const fetchModules = async (params?: any) => {
   try {
-    await store.dispatch('module/fetchModules', params || {
+    await moduleStore.fetchModules(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -93,7 +95,7 @@ const searchModules = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("module/fetchModules", {
+    await moduleStore.fetchModules({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -132,7 +134,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("module/downloadModulesExcel", {
+    await moduleStore.downloadModulesExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

@@ -18,8 +18,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useCategoryStore } from '@/stores/categoryStore';
+import { useAuthStore } from '@/stores/auth';
 import { Category } from '@/interfaces/categoryInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -27,7 +28,9 @@ import CategoryList from '@/components/Category/CategoryList.vue';
 import CategoryForm from '@/components/Category/CategoryForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const categoryStore = useCategoryStore();
+const authStore = useAuthStore();
+
 const toast = useToast();
 
 const filterMap: Record<string, number> = {
@@ -51,15 +54,14 @@ const action = ref<0 | 1 | 2>(0);
 
 const downloadingExcel = ref(false);
 
+const categories = computed(() => categoryStore.categories);
+const loading = computed(() => categoryStore.loading);
+const totalCategories = computed(() => categoryStore.totalCategories);
 
-const categories = computed(() => store.getters['category/categories']);
-const loading = computed(() => store.getters['category/loading']);
-const totalCategories = computed(() => store.getters['category/totalCategories']);
-
-const canCreate = computed((): boolean => store.getters.hasPermission('categorias', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('categorias', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('categorias', 'editar'));
-const canDelete = computed((): boolean => store.getters.hasPermission('categorias', 'eliminar'));
+const canCreate = computed((): boolean => authStore.hasPermission('categorias', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('categorias', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('categorias', 'editar'));
+const canDelete = computed((): boolean => authStore.hasPermission('categorias', 'eliminar'));
 
 const openModal = (payload: { category: Category, action: 0 | 1 | 2 }) => {
   selectedCategory.value = payload.category;
@@ -80,7 +82,7 @@ const openForm = (category?: Category) => {
 
 const fetchCategories = async (params?: any) => {
   try {
-    await store.dispatch('category/fetchCategories', params || {
+    await categoryStore.fetchCategories(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: state.value === 'Activos' ? 1 : 0
@@ -98,7 +100,7 @@ const searchCategories = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("category/fetchCategories", {
+    await categoryStore.fetchCategories({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -137,7 +139,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("category/downloadCategoriesExcel", {
+    await categoryStore.downloadCategoriesExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useRoleStore } from '@/stores/roleStore';
 import { Role } from '@/interfaces/roleInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -59,7 +59,7 @@ const emit = defineEmits<{
   'saved': [role: Role];
 }>();
 
-const store = useStore();
+const roleStore = useRoleStore();
 const toast = useToast();
 
 const formRef = ref<FormRef | null>(null);
@@ -110,13 +110,13 @@ const saveRole = async () => {
     const isEditing = !!localRole.value.idRole;
     let result;
 
-    if (isEditing) {
-      result = await store.dispatch('role/editRole', {
-        id: localRole.value.idRole,
-        role: { ...localRole.value }
-      });
+    if (isEditing && localRole.value.idRole !== null) {
+      result = await roleStore.editRole(
+        localRole.value.idRole,
+        { ...localRole.value }
+      );
     } else {
-      result = await store.dispatch('role/registerRole', { ...localRole.value });
+      result = await roleStore.registerRole({ ...localRole.value });
     }
 
     if (result.isSuccess) {

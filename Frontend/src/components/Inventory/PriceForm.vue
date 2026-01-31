@@ -52,8 +52,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useInventoryStore } from '@/stores/inventoryStore';
 import { Inventory } from '@/interfaces/inventoryInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -86,7 +86,7 @@ const emit = defineEmits<{
 }>();
 
 // Servicios
-const store = useStore();
+const inventoryStore = useInventoryStore();
 const toast = useToast();
 
 // Referencias del template
@@ -153,9 +153,7 @@ const savePrice = async () => {
   try {
     saving.value = true;
 
-    const result = await store.dispatch('inventory/editInventoryPrice', { 
-      inventory: { ...localInventory }
-    });
+    const result = await inventoryStore.editInventoryPrice({ ...localInventory });
 
     if (result.isSuccess) {
       toast.success('Precio actualizado con éxito!');

@@ -29,14 +29,16 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useRoleStore } from '@/stores/roleStore';
+import { usePermissionStore } from '@/stores/permissionStore';
 import { PermissionsByModule } from '@/interfaces/permissionInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 import PermissionList from '@/components/Permission/PermissionList.vue';
 
 // Inicialización
-const store = useStore();
+const roleStore = useRoleStore();
+const permissionStore = usePermissionStore();
 const toast = useToast();
 
 // Estado reactivo
@@ -48,19 +50,18 @@ const saving = ref(false);
 
 // Computed properties
 const roles = computed(() => {
-  const rolesFromStore = store.getters['role/roles'];
-  return Array.isArray(rolesFromStore) ? rolesFromStore : [];
+  return Array.isArray(roleStore.roles) ? roleStore.roles : [];
 });
 
-const loadingRoles = computed<boolean>(() => store.getters['role/loading']);
+const loadingRoles = computed<boolean>(() => roleStore.loading);
 
 const permissionsByModule = computed<PermissionsByModule[]>(
-  () => store.getters['permission/permissionsByModule']
+  () => permissionStore.permissionsByModule
 );
 
-const permissions = computed(() => store.getters['permission/permissions']);
+const permissions = computed(() => permissionStore.permissions);
 
-const loading = computed<boolean>(() => store.getters['permission/loading']);
+const loading = computed<boolean>(() => permissionStore.loading);
 
 // Watchers
 watch(
@@ -83,7 +84,7 @@ const loadPermissions = async () => {
   hasChanges.value = false;
 
   try {
-    await store.dispatch('permission/fetchPermissionsByRole', selectedRoleId.value);
+    await permissionStore.fetchPermissionsByRole(selectedRoleId.value);
   } catch (error) {
     handleApiError(error, 'Error al cargar los permisos del rol');
   }
@@ -123,7 +124,7 @@ const savePermissions = async () => {
     });
 
     // Llamar al store
-    const response = await store.dispatch('permission/updatePermissions', updatedPermissions);
+    const response = await permissionStore.updatePermissions(updatedPermissions);
 
     if (response && response.success) {
       toast.success('Permisos actualizados correctamente');
@@ -131,7 +132,7 @@ const savePermissions = async () => {
 
       // Recargar permisos para confirmar
       if (selectedRoleId.value) {
-        await store.dispatch('permission/fetchPermissionsByRole', selectedRoleId.value);
+        await permissionStore.fetchPermissionsByRole(selectedRoleId.value);
       }
     } else {
       const errorMsg = response?.message || 'Error al actualizar permisos';
@@ -146,6 +147,6 @@ const savePermissions = async () => {
 
 // Lifecycle hooks
 onMounted(() => {
-  store.dispatch('role/selectRole');
+  roleStore.selectRole();
 });
 </script>

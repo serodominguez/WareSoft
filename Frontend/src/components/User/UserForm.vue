@@ -36,12 +36,12 @@
                   :rules="[rules.onlyNumbers]" :maxlength="8" label="Teléfono" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="indigo" variant="underlined" :items="roles" v-model="localUser.idRole"
+                <v-autocomplete color="indigo" variant="underlined" :items="rolesArray" v-model="localUser.idRole"
                   item-title="roleName" item-value="idRole" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Rol" required :loading="loadingRoles" />
               </v-col>
               <v-col cols="6" md="6" lg="6" xl="12">
-                <v-autocomplete color="indigo" variant="underlined" :items="stores" v-model="localUser.idStore"
+                <v-autocomplete color="indigo" variant="underlined" :items="storesArray" v-model="localUser.idStore"
                   item-title="storeName" item-value="idStore" :rules="[rules.required]"
                   no-data-text="No hay datos disponibles" label="Tienda" required :loading="loadingStores" />
               </v-col>
@@ -62,8 +62,11 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { useStore } from 'vuex';
+import { storeToRefs } from 'pinia';
 import { useToast } from 'vue-toastification';
+import { useUserStore } from '@/stores/userStore';
+import { useRoleStore } from '@/stores/roleStore';
+import { useStoreStore } from '@/stores/storeStore';
 import { User } from '@/interfaces/userInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -101,8 +104,13 @@ const emit = defineEmits<{
   'saved': [user: User];
 }>();
 
-const store = useStore();
+const userStore = useUserStore();
+const roleStore = useRoleStore();
+const storeStore = useStoreStore();
 const toast = useToast();
+
+const { roles, loading: loadingRoles } = storeToRefs(roleStore);
+const { stores, loading: loadingStores } = storeToRefs(storeStore);
 
 const formRef = ref<FormRef | null>(null);
 const isOpen = ref(props.modelValue);
@@ -117,25 +125,14 @@ const rules = {
   onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
 };
 
-const roles = computed(() => {
-  const rolesFromStore = store.getters['role/roles'];
-  return Array.isArray(rolesFromStore) ? rolesFromStore : [];
-});
-
-const loadingRoles = computed((): boolean => store.getters['role/loading']);
-
-const stores = computed(() => {
-  const storesFromStore = store.getters['store/stores'];
-  return Array.isArray(storesFromStore) ? storesFromStore : [];
-});
-
-const loadingStores = computed((): boolean => store.getters['store/loading']);
+const rolesArray = computed(() => Array.isArray(roles.value) ? roles.value : []);
+const storesArray = computed(() => Array.isArray(stores.value) ? stores.value : []);
 
 watch(() => props.modelValue, (newValue: boolean) => {
   isOpen.value = newValue;
   if (newValue) {
-    store.dispatch('role/selectRole');
-    store.dispatch('store/selectStore');
+    roleStore.selectRole();
+    storeStore.selectStore();
   }
 });
 
@@ -181,7 +178,7 @@ const saveUser = async () => {
     const isEditing = !!localUser.value.idUser;
     let result;
 
-    if (isEditing) {
+    if (isEditing && localUser.value.idUser !== null) {
       if (localUser.value.passwordHash !== oldPassword.value) {
         localUser.value.updatePassword = true;
         localUser.value.password = localUser.value.passwordHash;
@@ -189,13 +186,13 @@ const saveUser = async () => {
         localUser.value.updatePassword = false;
         localUser.value.password = localUser.value.passwordHash;
       }
-      result = await store.dispatch('user/editUser', {
-        id: localUser.value.idUser,
-        user: { ...localUser.value }
-      });
+      result = await userStore.editUser(
+        localUser.value.idUser,
+        { ...localUser.value }
+      );
     } else {
       localUser.value.password = localUser.value.passwordHash;
-      result = await store.dispatch('user/registerUser', { ...localUser.value });
+      result = await userStore.registerUser({ ...localUser.value });
     }
 
     if (result.isSuccess) {

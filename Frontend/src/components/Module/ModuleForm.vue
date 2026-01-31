@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useModuleStore } from '@/stores/moduleStore';
 import { Module } from '@/interfaces/moduleInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -59,7 +59,7 @@ const emit = defineEmits<{
   'saved': [module: Module];
 }>();
 
-const store = useStore();
+const moduleStore = useModuleStore();
 const toast = useToast();
 
 const formRef = ref<FormRef | null>(null);
@@ -111,13 +111,13 @@ const saveModule = async () => {
     const isEditing = !!localModule.value.idModule;
     let result;
 
-    if (isEditing) {
-      result = await store.dispatch('module/editModule', {
-        id: localModule.value.idModule,
-        module: { ...localModule.value }
-      });
+    if (isEditing && localModule.value.idModule !== null) {
+      result = await moduleStore.editModule(
+        localModule.value.idModule,
+        { ...localModule.value }
+      );
     } else {
-      result = await store.dispatch('module/registerModule', { ...localModule.value });
+      result = await moduleStore.registerModule({ ...localModule.value });
     }
 
     if (result.isSuccess) {

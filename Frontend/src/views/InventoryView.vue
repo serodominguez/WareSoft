@@ -15,8 +15,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useInventoryStore } from '@/stores/inventoryStore';
+import { useAuthStore } from '@/stores/auth';
 import { Inventory } from '@/interfaces/inventoryInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -24,7 +25,8 @@ import InventoryList from '@/components/Inventory/InventoryList.vue';
 import PriceForm from '@/components/Inventory/PriceForm.vue';
 
 // Inicialización
-const store = useStore();
+const inventoryStore = useInventoryStore();
+const authStore = useAuthStore();
 const toast = useToast();
 
 // Composable de filtros
@@ -61,17 +63,17 @@ const downloadingExcel = ref(false);
 const downloadingPdf = ref(false);
 
 // Computed properties
-const inventories = computed(() => store.getters['inventory/inventories']);
-const loading = computed(() => store.getters['inventory/loading']);
-const totalInventories = computed(() => store.getters['inventory/totalInventories']);
+const inventories = computed(() => inventoryStore.inventories);
+const loading = computed(() => inventoryStore.loading);
+const totalInventories = computed(() => inventoryStore.totalInventories);
 
 const stateFilter = computed<number>(() => state.value === 'Activos' ? 1 : 0);
 
 // Permisos
-const canCreate = computed(() => store.getters.hasPermission('inventario', 'crear'));
-const canRead = computed((): boolean => store.getters.hasPermission('inventario', 'leer'));
-const canEdit = computed((): boolean => store.getters.hasPermission('inventario', 'editar'));
-const canDelete = computed(() => store.getters.hasPermission('inventario', 'eliminar'));
+const canCreate = computed(() => authStore.hasPermission('inventario', 'crear'));
+const canRead = computed((): boolean => authStore.hasPermission('inventario', 'leer'));
+const canEdit = computed((): boolean => authStore.hasPermission('inventario', 'editar'));
+const canDelete = computed(() => authStore.hasPermission('inventario', 'eliminar'));
 
 // Métodos
 const openModal = (payload: { inventory: Inventory; action: 0 | 1 | 2 }) => {
@@ -99,7 +101,7 @@ const openForm = (inventory?: Inventory) => {
 
 const fetchInventories = async (params?: any) => {
   try {
-    await store.dispatch('inventory/fetchInventories', params || {
+    await inventoryStore.fetchInventories(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: stateFilter.value
@@ -117,7 +119,7 @@ const searchInventories = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("inventory/fetchInventories", {
+    await inventoryStore.fetchInventories({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -156,7 +158,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("inventory/downloadInventoriesExcel", {
+    await inventoryStore.downloadInventoriesExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)
@@ -172,7 +174,7 @@ const downloadExcel = async (params: any) => {
 const downloadPdf = async (params: any) => {
   downloadingPdf.value = true;
   try {
-    await store.dispatch("inventory/downloadInventoriesPdf", {
+    await inventoryStore.downloadInventoriesPdf({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       ...getFilterParams(params.search)

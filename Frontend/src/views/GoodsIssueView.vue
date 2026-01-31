@@ -20,8 +20,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { storeToRefs } from 'pinia';
+import { useGoodsIssueStore } from '@/stores/goodsIssueStore';
+import { useAuthStore } from '@/stores/auth';
 import { GoodsIssue } from '@/interfaces/goodsIssueInterface';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
 import { useFilters } from '@/composables/useFilters';
@@ -29,8 +31,12 @@ import GoodsIssueList from '@/components/GoodsIssue/GoodsIssueList.vue';
 import GoodsIssueForm from '@/components/GoodsIssue/GoodsIssueForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-const store = useStore();
+const goodsIssueStore = useGoodsIssueStore();
+const authStore = useAuthStore();
 const toast = useToast();
+
+// Destructuring store con storeToRefs para mantener la reactividad
+const { goodsissue, selectedGoodsIssue, selectedIssueDetails, loading, totalGoodsIssue } = storeToRefs(goodsIssueStore);
 
 const filterMap = {
   "Código": 1,
@@ -46,22 +52,19 @@ const search = ref<string | null>(null);
 const drawer = ref(false);
 const form = ref(false);
 const modal = ref(false);
-const selectedGoodsIssue = ref<GoodsIssue | null>(null);
 const action = ref<0 | 1 | 2>(0);
 const downloadingExcel = ref(false);
 
-const goodsissue = computed(() => store.getters['goodsissue/goodsissue']);
-const selectedIssueDetails = computed(() => store.getters['goodsissue/selectedIssueDetails']);
-const loading = computed(() => store.getters['goodsissue/loading']);
-const totalGoodsIssue = computed(() => store.getters['goodsissue/totalGoodsIssue']);
 const stateFilter = computed(() => state.value === 'Activos' ? 1 : 0);
-const canCreate = computed(() => store.getters.hasPermission('salida de productos', 'crear'));
-const canRead = computed(() => store.getters.hasPermission('salida de productos', 'leer'));
-const canEdit = computed(() => store.getters.hasPermission('salida de productos', 'editar'));
-const canDelete = computed(() => store.getters.hasPermission('salida de productos', 'eliminar'));
+
+// Permisos usando el store de auth
+const canCreate = computed(() => authStore.hasPermission('salida de productos', 'crear'));
+const canRead = computed(() => authStore.hasPermission('salida de productos', 'leer'));
+const canEdit = computed(() => authStore.hasPermission('salida de productos', 'editar'));
+const canDelete = computed(() => authStore.hasPermission('salida de productos', 'eliminar'));
 
 const openModal = (payload: { goodsissue: GoodsIssue, action: 0 | 1 | 2 }) => {
-  selectedGoodsIssue.value = payload.goodsissue;
+  goodsIssueStore.selectedItem = payload.goodsissue;
   action.value = payload.action;
   modal.value = true;
 };
@@ -69,14 +72,13 @@ const openModal = (payload: { goodsissue: GoodsIssue, action: 0 | 1 | 2 }) => {
 const openForm = async (goodsissue?: GoodsIssue) => {
   if (goodsissue?.idIssue) {
     try {
-      await store.dispatch('goodsissue/fetchGoodsIssueById', goodsissue.idIssue);
-      selectedGoodsIssue.value = store.getters['goodsissue/selectedGoodsIssue'];
+      await goodsIssueStore.fetchGoodsIssueById(goodsissue.idIssue);
     } catch (error) {
       handleApiError(error, 'Error al cargar los detalles de la salida');
       return;
     }
   } else {
-    selectedGoodsIssue.value = {
+    goodsIssueStore.selectedItem = {
       idIssue: null,
       code: '',
       type: '',
@@ -94,15 +96,14 @@ const openForm = async (goodsissue?: GoodsIssue) => {
 };
 
 const closeForm = () => {
-  store.commit('goodsissue/SET_SELECTED_ISSUE_DETAILS', []);
-  store.commit('goodsissue/SET_SELECTED_ITEM', null);
-  selectedGoodsIssue.value = null;
+  goodsIssueStore.selectedIssueDetails = [];
+  goodsIssueStore.selectedItem = null;
   form.value = false;
 };
 
 const fetchGoodsIssue = async (params?: any) => {
   try {
-    await store.dispatch('goodsissue/fetchGoodsIssue', params || {
+    await goodsIssueStore.fetchGoodsIssue(params || {
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       stateFilter: stateFilter.value,
@@ -122,7 +123,7 @@ const searchGoodsIssue = async (params: any) => {
   endDate.value = params.endDate;
 
   try {
-    await store.dispatch("goodsissue/fetchGoodsIssue", {
+    await goodsIssueStore.fetchGoodsIssue({
       pageNumber: 1,
       pageSize: itemsPerPage.value,
       sort: 'IdIssue',
@@ -163,7 +164,7 @@ const changePage = (page: number) => {
 const downloadExcel = async (params: any) => {
   downloadingExcel.value = true;
   try {
-    await store.dispatch("goodsissue/downloadGoodsIssueExcel", {
+    await goodsIssueStore.downloadGoodsIssueExcel({
       pageNumber: currentPage.value,
       pageSize: itemsPerPage.value,
       sort: 'IdIssue',
@@ -182,7 +183,7 @@ const printPdf = async (goodsissue: GoodsIssue) => {
   if (!goodsissue.idIssue) return;
 
   try {
-    const result = await store.dispatch('goodsissue/openGoodsIssuePdf', goodsissue.idIssue);
+    const result = await goodsIssueStore.openGoodsIssuePdf(goodsissue.idIssue);
 
     if (result.isSuccess) {
       toast.success('PDF abierto correctamente');

@@ -1,5 +1,5 @@
 import { App, DirectiveBinding } from 'vue'
-import store from '@/store'
+import { useAuthStore } from '@/stores/auth'
 
 interface PermissionBinding {
   module: string
@@ -18,7 +18,8 @@ export default {
           return
         }
 
-        const hasPermission = store.getters.hasPermission(module, action)
+        const authStore = useAuthStore()
+        const hasPermission = authStore.hasPermission(module, action)
 
         if (!hasPermission) {
           // Ocultar el elemento
@@ -35,7 +36,8 @@ export default {
 
         if (!module || !action) return
 
-        const hasPermission = store.getters.hasPermission(module, action)
+        const authStore = useAuthStore()
+        const hasPermission = authStore.hasPermission(module, action)
 
         if (!hasPermission) {
           el.style.display = 'none'
@@ -47,7 +49,8 @@ export default {
 
     // Helper global para verificar permisos (opcional)
     app.config.globalProperties.$hasPermission = (module: string, action: string): boolean => {
-      return store.getters.hasPermission(module, action)
+      const authStore = useAuthStore()
+      return authStore.hasPermission(module, action)
     }
   }
 }

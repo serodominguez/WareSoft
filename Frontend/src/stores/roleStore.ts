@@ -1,31 +1,28 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { Brand } from '@/interfaces/brandInterface';
-import { brandService } from '@/services/brandService';
+import { Role } from '@/interfaces/roleInterface';
+import { roleService } from '@/services/roleService';
 import { FilterParams } from '@/interfaces/baseInterface';
 
-export const useBrandStore = defineStore('brand', () => {
-  // Estado
-  const items = ref<Brand[]>([]);
-  const selectedItem = ref<Brand | null>(null);
+export const useRoleStore = defineStore('role', () => {
+  const items = ref<Role[]>([]);
+  const selectedItem = ref<Role | null>(null);
   const totalItems = ref<number>(0);
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
   const lastFilterParams = ref<FilterParams | undefined>(undefined);
 
-  // Getters
-  const brands = computed(() => items.value);
-  const selectedBrand = computed(() => selectedItem.value);
-  const totalBrands = computed(() => totalItems.value || 0);
+  const roles = computed(() => items.value);
+  const selectedRole = computed(() => selectedItem.value);
+  const totalRoles = computed(() => totalItems.value || 0);
 
-  // Acciones
-  async function fetchBrands(params: FilterParams = {}) {
+  async function fetchRoles(params: FilterParams = {}) {
     loading.value = true;
     items.value = [];
     lastFilterParams.value = params;
 
     try {
-      const result = await brandService.fetchAll(params);
+      const result = await roleService.fetchAll(params);
       if (result.isSuccess) {
         items.value = result.data;
         totalItems.value = result.totalRecords;
@@ -39,22 +36,22 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function downloadBrandsExcel(params?: FilterParams) {
+  async function downloadRolesExcel(params?: FilterParams) {
     try {
       const filterParams = params || lastFilterParams.value || {};
-      await brandService.downloadExcel(filterParams);
+      await roleService.downloadExcel(filterParams);
     } catch (err: any) {
       console.error('Error al descargar Excel:', err);
       throw err;
     }
   }
 
-  async function selectBrand() {
+  async function selectRole() {
     loading.value = true;
     items.value = [];
 
     try {
-      const result = await brandService.select();
+      const result = await roleService.select();
       if (result.isSuccess) {
         items.value = result.data;
       } else {
@@ -67,11 +64,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function fetchBrandById(id: number) {
+  async function fetchRoleById(id: number) {
     loading.value = true;
 
     try {
-      const result = await brandService.fetchById(id);
+      const result = await roleService.fetchById(id);
       if (result.isSuccess) {
         selectedItem.value = result.data;
       } else {
@@ -84,11 +81,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function registerBrand(brand: Brand) {
+  async function registerRole(role: Role) {
     try {
-      const result = await brandService.create(brand);
+      const result = await roleService.create(role);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchRoles(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -96,11 +93,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function editBrand(id: number, brand: Brand) {
+  async function editRole(id: number, role: Role) {
     try {
-      const result = await brandService.update(id, brand);
+      const result = await roleService.update(id, role);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchRoles(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -108,11 +105,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function enableBrand(id: number) {
+  async function enableRole(id: number) {
     try {
-      const result = await brandService.enable(id);
+      const result = await roleService.enable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchRoles(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -120,11 +117,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function disableBrand(id: number) {
+  async function disableRole(id: number) {
     try {
-      const result = await brandService.disable(id);
+      const result = await roleService.disable(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchRoles(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -132,11 +129,11 @@ export const useBrandStore = defineStore('brand', () => {
     }
   }
 
-  async function removeBrand(id: number) {
+  async function removeRole(id: number) {
     try {
-      const result = await brandService.remove(id);
+      const result = await roleService.remove(id);
       if (result.isSuccess) {
-        await fetchBrands(lastFilterParams.value || {});
+        await fetchRoles(lastFilterParams.value || {});
       }
       return result;
     } catch (err: any) {
@@ -145,7 +142,6 @@ export const useBrandStore = defineStore('brand', () => {
   }
 
   return {
-    // State
     items,
     selectedItem,
     totalItems,
@@ -153,20 +149,18 @@ export const useBrandStore = defineStore('brand', () => {
     error,
     lastFilterParams,
 
-    // Getters
-    brands,
-    selectedBrand,
-    totalBrands,
+    roles,
+    selectedRole,
+    totalRoles,
 
-    // Actions
-    fetchBrands,
-    downloadBrandsExcel,
-    selectBrand,
-    fetchBrandById,
-    registerBrand,
-    editBrand,
-    enableBrand,
-    disableBrand,
-    removeBrand,
+    fetchRoles,
+    downloadRolesExcel,
+    selectRole,
+    fetchRoleById,
+    registerRole,
+    editRole,
+    enableRole,
+    disableRole,
+    removeRole,
   };
 });
