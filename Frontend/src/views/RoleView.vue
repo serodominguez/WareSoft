@@ -14,187 +14,144 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Role } from '@/interfaces/roleInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import RoleList from '@/components/Role/RoleList.vue';
 import RoleForm from '@/components/Role/RoleForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'RoleView',
-  components: {
-    RoleList,
-    RoleForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedRole: null as Role | null,
-      action: 0,
-      selectedFilter: 'Rol',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    roles() {
-      return this.store.getters['role/roles'];
-    },
-    loading() {
-      return this.store.getters['role/loading'];
-    },
-    totalRoles() {
-      return this.store.getters['role/totalRoles'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('roles', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('roles', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('roles', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('roles', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { role: Role, action: number }) {
-      this.selectedRole = payload.role;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(role?: Role) {
-      this.selectedRole = role ? { ...role } : {
-        idRole: null,
-        roleName: '',
-        auditCreateDate: '',
-        statusRole: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = { "Rol": 1 };
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Rol', filterMap);
 
-    async fetchRoles(params?: any) {
-      try {
-        await this.store.dispatch('role/fetchRoles', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = { "Rol": 1 };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const form = ref(false);
+const modal = ref(false);
 
-    async searchRoles(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const selectedRole = ref<Role | null>(null);
 
-      try {
-        await this.store.dispatch("role/fetchRoles", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar roles');
-      }
-    },
+const action = ref<0 | 1 | 2>(0);
 
-    refreshRoles() {
-      if (this.search?.trim()) {
-        this.searchRoles({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchRoles();
-      }
-    },
+const downloadingExcel = ref(false);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshRoles();
-    },
+const roles = computed(() => store.getters['role/roles']);
+const loading = computed(() => store.getters['role/loading']);
+const totalRoles = computed(() => store.getters['role/totalRoles']);
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshRoles();
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('roles', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('roles', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('roles', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('roles', 'eliminar'));
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("role/downloadRolesExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
-    
-    handleSaved() {
-      this.fetchRoles();
-    },
+const openModal = (payload: { role: Role, action: 0 | 1 | 2 }) => {
+  selectedRole.value = payload.role;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-    handleActionCompleted() {
-      this.fetchRoles();
-    }
-  },
-  mounted() {
-    this.fetchRoles();
+const openForm = (role?: Role) => {
+  selectedRole.value = role ? { ...role } : {
+    idRole: null,
+    roleName: '',
+    auditCreateDate: '',
+    statusRole: ''
+  };
+  form.value = true;
+};
+
+const fetchRoles = async (params?: any) => {
+  try {
+    await store.dispatch('role/fetchRoles', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchRoles = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("role/fetchRoles", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar roles');
+  }
+};
+
+const refreshRoles = () => {
+  if (search.value?.trim()) {
+    searchRoles({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchRoles();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshRoles();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshRoles();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("role/downloadRolesExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchRoles();
+};
+
+const handleActionCompleted = () => {
+  fetchRoles();
+};
+
+onMounted(() => {
+  fetchRoles();
 });
 </script>

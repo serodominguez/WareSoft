@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
@@ -53,118 +53,124 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Store } from '@/interfaces/storeInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  store?: Store | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    store: {
-      type: Object as PropType<Store | null>,
-      default: () => ({
-        idStore: null,
-        storeName: '',
-        manager: '',
-        address: '',
-        phoneNumber: null,
-        city: '',
-        email: '',
-        type: ''
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localStore: { ...this.store } as Store,
-      toast: useToast(),
-      types: ['Casa Matriz', 'Sucursal', 'Almacén'],
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-        onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
-        email: (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Formato de correo inválido.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    store: {
-      handler(newStore: Store) {
-        this.localStore = { ...newStore };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async saveStore() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      this.saving = true;
-      try {
-        const isEditing = !!this.localStore.idStore;
-        let result;
-
-        if (isEditing) {
-          result = await this.$store.dispatch('store/editStore', {
-            id: this.localStore.idStore,
-            store: { ...this.localStore }
-          });
-        } else {
-          result = await this.$store.dispatch('store/registerStore', { ...this.localStore });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Tienda actualizada con éxito!'
-            : 'Tienda registrada con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localStore });
-          this.close();
-        }
-
-      } catch (error: any) {
-        const isEditing = !!this.localStore.idStore;
-        const customMessage = isEditing
-          ? 'Error en actualizar la tienda'
-          : 'Error en guardar la tienda';
-
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  store: () => ({
+    idStore: null,
+    storeName: '',
+    manager: '',
+    address: '',
+    phoneNumber: null,
+    city: '',
+    email: '',
+    type: '',
+    auditCreateDate: '',
+    statusStore: ''
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [store: Store];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localStore = ref<Store>({ ...props.store } as Store);
+const types = ref(['Casa Matriz', 'Sucursal', 'Almacén']);
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
+  onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
+  email: (value: string) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Formato de correo inválido.',
+};
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.store, (newStore) => {
+  if (newStore) {
+    localStore.value = { ...newStore } as Store;
+  }
+}, { deep: true });
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveStore = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localStore.value.idStore;
+    let result;
+
+    if (isEditing) {
+      result = await store.dispatch('store/editStore', {
+        id: localStore.value.idStore,
+        store: { ...localStore.value }
+      });
+    } else {
+      result = await store.dispatch('store/registerStore', { ...localStore.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Tienda actualizada con éxito!'
+        : 'Tienda registrada con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localStore.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localStore.value.idStore;
+    const customMessage = isEditing
+      ? 'Error en actualizar la tienda'
+      : 'Error en guardar la tienda';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

@@ -29,8 +29,8 @@
               <td>{{ item.color }}</td>
               <td>{{ item.categoryName }}</td>
               <td>{{ item.brandName }}</td>
-              <td>{{ item.price }}</td>
-              <td>{{ item.stock }}</td>
+              <td class="text-center">{{ item.price }}</td>
+              <td class="text-center">{{ item.stock }}</td>
               <td class="text-center">
                 <v-btn color="blue" icon="add" variant="text" @click="handleProductAdd(item)" size="small"
                   title="Agregar" />
@@ -102,8 +102,8 @@ const headers = computed(() => [
   { title: 'Color', key: 'color', sortable: false },
   { title: 'Categoría', key: 'categoryName', sortable: false },
   { title: 'Marca', key: 'brandName', sortable: false },
-  { title: 'Precio', key: 'price', sortable: false },
-  { title: 'Cantidad', key: 'stock', sortable: false },
+  { title: 'Precio', key: 'price', sortable: false,  align: 'center' as const },
+  { title: 'Cantidad', key: 'stock', sortable: false,  align: 'center' as const },
   { title: 'Agregar', key: 'actions', sortable: false, align: 'center' as const },
 ]);
 

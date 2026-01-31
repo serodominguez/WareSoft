@@ -16,202 +16,159 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Product } from '@/interfaces/productInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import ProductList from '@/components/Product/ProductList.vue';
 import ProductForm from '@/components/Product/ProductForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'ProductView',
-  components: {
-    ProductList,
-    ProductForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedProduct: null as Product | null,
-      action: 0,
-      selectedFilter: 'Código',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    products() {
-      return this.store.getters['product/products'];
-    },
-    loading() {
-      return this.store.getters['product/loading'];
-    },
-    totalProducts() {
-      return this.store.getters['product/totalProducts'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('productos', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('productos', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('productos', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('productos', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { product: Product, action: number }) {
-      this.selectedProduct = payload.product;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(product?: Product) {
-      this.selectedProduct = product ? { ...product } : {
-        idProduct: null,
-        code: '',
-        description: '',
-        material: '',
-        color: '',
-        unitMeasure: '',
-        idBrand: null,
-        brandName: '',
-        idCategory: null,
-        categoryName: '',
-        auditCreateDate: '',
-        statusProduct: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = {
+  "Código": 1,
+  "Descripción": 2,
+  "Material": 3,
+  "Color": 4,
+  "Marca": 5,
+  "Categoría": 6
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Código', filterMap);
 
-    async fetchProducts(params?: any) {
-      try {
-        await this.store.dispatch('product/fetchProducts', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Código": 1,
-        "Descripción": 2,
-        "Material": 3,
-        "Color": 4,
-        "Marca": 5,
-        "Categoría": 6
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const search = ref<string | null>(null);
+const drawer = ref(false);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const form = ref(false);
+const modal = ref(false);
 
-    async searchProducts(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const selectedProduct = ref<Product | null>(null);
 
-      try {
-        await this.store.dispatch("product/fetchProducts", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar productos');
-      }
-    },
+const action = ref<0 | 1 | 2>(0);
 
-    refreshProducts() {
-      if (this.search?.trim()) {
-        this.searchProducts({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchProducts();
-      }
-    },
+const downloadingExcel = ref(false);
 
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshProducts();
-    },
+const products = computed(() => store.getters['product/products']);
+const loading = computed(() => store.getters['product/loading']);
+const totalProducts = computed(() => store.getters['product/totalProducts']);
 
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshProducts();
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('productos', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('productos', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('productos', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('productos', 'eliminar'));
 
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("product/downloadProductsExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
-    
-    handleSaved() {
-      this.fetchProducts();
-    },
+const openModal = (payload: { product: Product, action: 0 | 1 | 2 }) => {
+  selectedProduct.value = payload.product;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-    handleActionCompleted() {
-      this.fetchProducts();
-    }
-  },
-  mounted() {
-    this.fetchProducts();
+const openForm = (product?: Product) => {
+  selectedProduct.value = product ? { ...product } : {
+    idProduct: null,
+    code: '',
+    description: '',
+    material: '',
+    color: '',
+    unitMeasure: '',
+    idBrand: null,
+    brandName: '',
+    idCategory: null,
+    categoryName: '',
+    auditCreateDate: '',
+    statusProduct: ''
+  };
+  form.value = true;
+};
+
+const fetchProducts = async (params?: any) => {
+  try {
+    await store.dispatch('product/fetchProducts', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchProducts = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("product/fetchProducts", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar productos');
+  }
+};
+
+const refreshProducts = () => {
+  if (search.value?.trim()) {
+    searchProducts({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchProducts();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1; 
+  refreshProducts();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshProducts();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("product/downloadProductsExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchProducts();
+};
+
+const handleActionCompleted = () => {
+  fetchProducts();
+};
+
+onMounted(() => {
+  fetchProducts();
 });
 </script>

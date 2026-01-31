@@ -23,8 +23,8 @@
                 </v-btn>
               </template>
               <template v-if="canEdit && (item as Store).statusStore == 'Activo'">
-                <v-btn color="red" icon="block" variant="text"
-                  @click="$emit('open-modal', { store: item, action: 2 })" size="small" title="Desactivar">
+                <v-btn color="red" icon="block" variant="text" @click="$emit('open-modal', { store: item, action: 2 })"
+                  size="small" title="Desactivar">
                 </v-btn>
               </template>
               <v-btn v-if="canDelete" color="grey" icon="delete" variant="text"
@@ -37,7 +37,8 @@
           <v-toolbar>
             <v-toolbar-title>Gestión de Tiendas</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn v-if="canRead" icon="mdi:mdi-microsoft-excel" @click="handleDownloadExcel" :loading="downloadingExcel" title="Descargar Excel"></v-btn>
+            <v-btn v-if="canRead" icon="mdi:mdi-microsoft-excel" @click="handleDownloadExcel"
+              :loading="downloadingExcel" title="Descargar Excel"></v-btn>
             <v-btn icon="tune" @click="drawerModel = !drawerModel" title="Filtros"></v-btn>
             <v-btn v-if="canCreate" icon="add_box" @click="$emit('open-form')" title="Registrar"></v-btn>
             <v-col cols="4" md="3" lg="3" xl="3" class="pa-1">
@@ -59,169 +60,111 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { Store } from '@/interfaces/storeInterface';
+import { BaseListProps } from '@/interfaces/baselistInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
-export default defineComponent({
-  name: 'StoreList',
-  components: {
-    CommonFilters
-  },
-  props: {
-    stores: {
-      type: Array as PropType<Store[]>,
-      required: true
-    },
-    loading: {
-      type: Boolean,
-      required: true
-    },
-    totalStores: {
-      type: Number,
-      required: true
-    },
-    canCreate: {
-      type: Boolean,
-      required: true
-    },
-    canRead: {
-      type: Boolean,
-      required: true
-    },
-    canEdit: {
-      type: Boolean,
-      required: true
-    },
-    canDelete: {
-      type: Boolean,
-      required: true
-    },
-    drawer: {
-      type: Boolean,
-      default: false
-    },
-    selectedFilter: {
-      type: String,
-      default: 'Tienda'
-    },
-    state: {
-      type: String,
-      default: 'Activos'
-    },
-    startDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    endDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    downloadingExcel: {
-      type: Boolean,
-      default: false
-    },
-    itemsPerPage: {
-      type: Number,
-      default: 10
-    }
-  },
-  emits: [
-    'open-form',
-    'open-modal',
-    'edit-store',
-    'fetch-stores',
-    'search-stores',
-    'update-items-per-page',
-    'change-page',
-    'download-excel',
-    'update:drawer',
-    'update:selectedFilter',
-    'update:state',
-    'update:startDate',
-    'update:endDate'
-  ],
-  data() {
-    return {
-      pages: "Tiendas por Página",
-      search: null as string | null,
-      filterOptions: ['Tienda', 'Encargado', 'Dirección', 'Ciudad']
-    };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      return [
-        { title: 'Tienda', key: 'storeName', sortable: false },
-        { title: 'Encargado', key: 'manager', sortable: false },
-        { title: 'Dirección', key: 'address', sortable: false },
-        { title: 'Ciudad', key: 'city', sortable: false },
-        { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
-        { title: 'Estado', key: 'statusStore', sortable: false },
-        { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
-      ];
-    },
-    drawerModel: {
-      get() {
-        return this.drawer;
-      },
-      set(value: boolean) {
-        this.$emit('update:drawer', value);
-      }
-    },
-    selectedFilterModel: {
-      get() {
-        return this.selectedFilter;
-      },
-      set(value: string) {
-        this.$emit('update:selectedFilter', value);
-      }
-    },
-    stateModel: {
-      get() {
-        return this.state;
-      },
-      set(value: string) {
-        this.$emit('update:state', value);
-      }
-    },
-    startDateModel: {
-      get() {
-        return this.startDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:startDate', value);
-      }
-    },
-    endDateModel: {
-      get() {
-        return this.endDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:endDate', value);
-      }
-    }
-  },
-  methods: {
-    handleSearch() {
-      this.$emit('search-stores', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        state: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    },
+interface Props extends Omit<BaseListProps<Store>, 'items' | 'totalItems'> {
+  stores: Store[];
+  totalStores: number;
+}
 
-    handleDownloadExcel() {
-      this.$emit('download-excel', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        stateFilter: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    }
-  }
+const props = withDefaults(defineProps<Props>(), {
+  drawer: false,
+  selectedFilter: 'Tienda',
+  state: 'Activos',
+  startDate: null,
+  endDate: null,
+  downloadingExcel: false,
+  itemsPerPage: 10
 });
+
+const emit = defineEmits<{
+  'open-form': [];
+  'open-modal': [payload: { store: Store; action: 0 | 1 | 2 }]
+  'edit-store': [store: Store];
+  'fetch-stores': [];
+  'search-stores': [params: {
+    search: string | null;
+    selectedFilter: string;
+    state: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update-items-per-page': [itemsPerPage: number];
+  'change-page': [page: number];
+  'download-excel': [params: {
+    search: string | null;
+    selectedFilter: string;
+    stateFilter: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update:drawer': [value: boolean];
+  'update:selectedFilter': [value: string];
+  'update:state': [value: string];
+  'update:startDate': [value: Date | null];
+  'update:endDate': [value: Date | null];
+}>();
+
+const pages = ref("Tiendas por Página");
+const search = ref<string | null>(null);
+const filterOptions = ref(['Tienda', 'Encargado', 'Dirección', 'Ciudad']);
+
+const headers = computed(() => [
+  { title: 'Tienda', key: 'storeName', sortable: false },
+  { title: 'Encargado', key: 'manager', sortable: false },
+  { title: 'Dirección', key: 'address', sortable: false },
+  { title: 'Ciudad', key: 'city', sortable: false },
+  { title: 'Fecha de registro', key: 'auditCreateDate', sortable: false },
+  { title: 'Estado', key: 'statusStore', sortable: false },
+  { title: 'Acciones', key: 'actions', sortable: false, align: 'center' as const },
+]);
+
+const drawerModel = computed({
+  get: () => props.drawer,
+  set: (value: boolean) => emit('update:drawer', value)
+});
+
+const selectedFilterModel = computed({
+  get: () => props.selectedFilter,
+  set: (value: string) => emit('update:selectedFilter', value)
+});
+
+const stateModel = computed({
+  get: () => props.state,
+  set: (value: string) => emit('update:state', value)
+});
+
+const startDateModel = computed({
+  get: () => props.startDate,
+  set: (value: Date | null) => emit('update:startDate', value)
+});
+
+const endDateModel = computed({
+  get: () => props.endDate,
+  set: (value: Date | null) => emit('update:endDate', value)
+});
+
+const handleSearch = () => {
+  emit('search-stores', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    state: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
+
+const handleDownloadExcel = () => {
+  emit('download-excel', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    stateFilter: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
 </script>

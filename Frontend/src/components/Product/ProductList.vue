@@ -61,171 +61,113 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { Product } from '@/interfaces/productInterface';
+import { BaseListProps } from '@/interfaces/baselistInterface';
 import CommonFilters from '@/components/Common/CommonFilters.vue';
 
-export default defineComponent({
-  name: 'ProductList',
-  components: {
-    CommonFilters
-  },
-  props: {
-    products: {
-      type: Array as PropType<Product[]>,
-      required: true
-    },
-    loading: {
-      type: Boolean,
-      required: true
-    },
-    totalProducts: {
-      type: Number,
-      required: true
-    },
-    canCreate: {
-      type: Boolean,
-      required: true
-    },
-    canRead: {
-      type: Boolean,
-      required: true
-    },
-    canEdit: {
-      type: Boolean,
-      required: true
-    },
-    canDelete: {
-      type: Boolean,
-      required: true
-    },
-    drawer: {
-      type: Boolean,
-      default: false
-    },
-    selectedFilter: {
-      type: String,
-      default: 'Código'
-    },
-    state: {
-      type: String,
-      default: 'Activos'
-    },
-    startDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    endDate: {
-      type: [Date, null] as any,
-      default: null
-    },
-    downloadingExcel: {
-      type: Boolean,
-      default: false
-    },
-    itemsPerPage: {
-      type: Number,
-      default: 10
-    }
-  },
-  emits: [
-    'open-form',
-    'open-modal',
-    'edit-product',
-    'fetch-products',
-    'search-products',
-    'update-items-per-page',
-    'change-page',
-    'download-excel',
-    'update:drawer',
-    'update:selectedFilter',
-    'update:state',
-    'update:startDate',
-    'update:endDate'
-  ],
-  data() {
-    return {
-      pages: "Productos por Página",
-      search: null as string | null,
-      filterOptions: ['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']
-    };
-  },
-  computed: {
-    headers(): Array<{ title: string; key: string; sortable: boolean; align?: 'start' | 'end' | 'center' }> {
-      return [
-        { title: 'Código', key: 'code', sortable: false },
-        { title: 'Descripción', key: 'description', sortable: false },
-        { title: 'Material', key: 'material', sortable: false },
-        { title: 'Color', key: 'color', sortable: false },
-        { title: 'Categoría', key: 'categoryName', sortable: false },
-        { title: 'Marca', key: 'brandName', sortable: false },
-        { title: 'Fecha registro', key: 'auditCreateDate', sortable: false },
-        { title: 'Estado', key: 'statusProduct', sortable: false },
-        { title: 'Acciones', key: 'actions', sortable: false, align: 'center' },
-      ];
-    },
-    drawerModel: {
-      get() {
-        return this.drawer;
-      },
-      set(value: boolean) {
-        this.$emit('update:drawer', value);
-      }
-    },
-    selectedFilterModel: {
-      get() {
-        return this.selectedFilter;
-      },
-      set(value: string) {
-        this.$emit('update:selectedFilter', value);
-      }
-    },
-    stateModel: {
-      get() {
-        return this.state;
-      },
-      set(value: string) {
-        this.$emit('update:state', value);
-      }
-    },
-    startDateModel: {
-      get() {
-        return this.startDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:startDate', value);
-      }
-    },
-    endDateModel: {
-      get() {
-        return this.endDate;
-      },
-      set(value: Date | null) {
-        this.$emit('update:endDate', value);
-      }
-    }
-  },
-  methods: {
-    handleSearch() {
-      this.$emit('search-products', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        state: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    },
+interface Props extends Omit<BaseListProps<Product>, 'items' | 'totalItems'> {
+  products: Product[];
+  totalProducts: number;
+}
 
-    handleDownloadExcel() {
-      this.$emit('download-excel', {
-        search: this.search,
-        selectedFilter: this.selectedFilterModel,
-        stateFilter: this.stateModel,
-        startDate: this.startDateModel,
-        endDate: this.endDateModel
-      });
-    }
-  }
+const props = withDefaults(defineProps<Props>(), {
+  drawer: false,
+  selectedFilter: 'Código',
+  state: 'Activos',
+  startDate: null,
+  endDate: null,
+  downloadingExcel: false,
+  itemsPerPage: 10
 });
+
+const emit = defineEmits<{
+  'open-form': [];
+  'open-modal': [payload: { product: Product; action: 0 | 1 | 2 }]
+  'edit-product': [product: Product];
+  'fetch-products': [];
+  'search-products': [params: {
+    search: string | null;
+    selectedFilter: string;
+    state: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update-items-per-page': [itemsPerPage: number];
+  'change-page': [page: number];
+  'download-excel': [params: {
+    search: string | null;
+    selectedFilter: string;
+    stateFilter: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  }];
+  'update:drawer': [value: boolean];
+  'update:selectedFilter': [value: string];
+  'update:state': [value: string];
+  'update:startDate': [value: Date | null];
+  'update:endDate': [value: Date | null];
+}>();
+
+const pages = ref("Productos por Página");
+const search = ref<string | null>(null);
+const filterOptions = ref(['Código', 'Descripción', 'Material', 'Color', 'Categoría', 'Marca']);
+
+const headers = computed(() => [
+  { title: 'Código', key: 'code', sortable: false },
+  { title: 'Descripción', key: 'description', sortable: false },
+  { title: 'Material', key: 'material', sortable: false },
+  { title: 'Color', key: 'color', sortable: false },
+  { title: 'Categoría', key: 'categoryName', sortable: false },
+  { title: 'Marca', key: 'brandName', sortable: false },
+  { title: 'Fecha registro', key: 'auditCreateDate', sortable: false },
+  { title: 'Estado', key: 'statusProduct', sortable: false },
+  { title: 'Acciones', key: 'actions', sortable: false, align: 'center' as const },
+]);
+
+const drawerModel = computed({
+  get: () => props.drawer,
+  set: (value: boolean) => emit('update:drawer', value)
+});
+
+const selectedFilterModel = computed({
+  get: () => props.selectedFilter,
+  set: (value: string) => emit('update:selectedFilter', value)
+});
+
+const stateModel = computed({
+  get: () => props.state,
+  set: (value: string) => emit('update:state', value)
+});
+
+const startDateModel = computed({
+  get: () => props.startDate,
+  set: (value: Date | null) => emit('update:startDate', value)
+});
+
+const endDateModel = computed({
+  get: () => props.endDate,
+  set: (value: Date | null) => emit('update:endDate', value)
+});
+
+const handleSearch = () => {
+  emit('search-products', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    state: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
+
+const handleDownloadExcel = () => {
+  emit('download-excel', {
+    search: search.value,
+    selectedFilter: selectedFilterModel.value,
+    stateFilter: stateModel.value,
+    startDate: startDateModel.value,
+    endDate: endDateModel.value
+  });
+};
 </script>

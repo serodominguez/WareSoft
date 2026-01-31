@@ -15,198 +15,150 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { Store } from '@/interfaces/storeInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import StoreList from '@/components/Store/StoreList.vue';
 import StoreForm from '@/components/Store/StoreForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'StoreView',
-  components: {
-    StoreList,
-    StoreForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedStore: null as Store | null,
-      action: 0,
-      selectedFilter: 'Tienda',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    stores() {
-      return this.store.getters['store/stores'];
-    },
-    loading() {
-      return this.store.getters['store/loading'];
-    },
-    totalStores() {
-      return this.store.getters['store/totalStores'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('tiendas', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('tiendas', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('tiendas', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('tiendas', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { store: Store, action: number }) {
-      this.selectedStore = payload.store;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(store?: Store) {
-      this.selectedStore = store ? { ...store } : {
-        idStore: null,
-        storeName: '',
-        manager: '',
-        address: '',
-        phoneNumber: null,
-        city: '',
-        email: '',
-        type: '',
-        auditCreateDate: '',
-        statusStore: ''
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = {
+  "Tienda": 1,
+  "Encargado": 2,
+  "Dirección": 3,
+  "Ciudad": 4
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Tienda', filterMap);
 
-    async fetchStores(params?: any) {
-      try {
-        await this.store.dispatch('store/fetchStores', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const search = ref<string | null>(null);
+const drawer = ref(false);
+const form = ref(false);
+const modal = ref(false);
+const selectedStore = ref<Store | null>(null);
+const action = ref<0 | 1 | 2>(0);
+const downloadingExcel = ref(false);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Tienda": 1,
-        "Encargado": 2,
-        "Dirección": 3,
-        "Ciudad": 4
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const stores = computed(() => store.getters['store/stores']);
+const loading = computed(() => store.getters['store/loading']);
+const totalStores = computed(() => store.getters['store/totalStores']);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('tiendas', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('tiendas', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('tiendas', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('tiendas', 'eliminar'));
 
-    async searchStores(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const openModal = (payload: { store: Store, action: 0 | 1 | 2 }) => {
+  selectedStore.value = payload.store;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-      try {
-        await this.store.dispatch("store/fetchStores", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar tiendas');
-      }
-    },
+const openForm = (storeData?: Store) => {
+  selectedStore.value = storeData ? { ...storeData } : {
+    idStore: null,
+    storeName: '',
+    manager: '',
+    address: '',
+    phoneNumber: null,
+    city: '',
+    email: '',
+    type: '',
+    auditCreateDate: '',
+    statusStore: ''
+  };
+  form.value = true;
+};
 
-    refreshStores() {
-      if (this.search?.trim()) {
-        this.searchStores({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchStores();
-      }
-    },
-
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshStores();
-    },
-
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshStores();
-    },
-
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("store/downloadStoresExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
-    
-    handleSaved() {
-      this.fetchStores();
-    },
-
-    handleActionCompleted() {
-      this.fetchStores();
-    }
-  },
-  mounted() {
-    this.fetchStores();
+const fetchStores = async (params?: any) => {
+  try {
+    await store.dispatch('store/fetchStores', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchStores = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("store/fetchStores", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar tiendas');
+  }
+};
+
+const refreshStores = () => {
+  if (search.value?.trim()) {
+    searchStores({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchStores();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshStores();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshStores();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("store/downloadStoresExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchStores();
+};
+
+const handleActionCompleted = () => {
+  fetchStores();
+};
+
+onMounted(() => {
+  fetchStores();
 });
 </script>

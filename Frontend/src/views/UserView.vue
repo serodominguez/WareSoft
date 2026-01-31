@@ -15,204 +15,156 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { User } from '@/interfaces/userInterface';
-import { formatDate } from '@/utils/date';
 import { handleApiError, handleSilentError } from '@/helpers/errorHandler';
+import { useFilters } from '@/composables/useFilters';
 import UserList from '@/components/User/UserList.vue';
 import UserForm from '@/components/User/UserForm.vue';
 import CommonModal from '@/components/Common/CommonModal.vue';
 
-export default defineComponent({
-  name: 'UserView',
-  components: {
-    UserList,
-    UserForm,
-    CommonModal
-  },
-  setup() {
-    const store = useStore();
-    const toast = useToast();
-    return { store, toast };
-  },
-  data() {
-    return {
-      currentPage: 1,
-      itemsPerPage: 10,
-      search: null as string | null,
-      form: false,
-      modal: false,
-      selectedUser: null as User | null,
-      action: 0,
-      selectedFilter: 'Usuario',
-      drawer: false,
-      state: 'Activos',
-      startDate: null,
-      endDate: null,
-      downloadingExcel: false
-    };
-  },
-  computed: {
-    users() {
-      return this.store.getters['user/users'];
-    },
-    loading() {
-      return this.store.getters['user/loading'];
-    },
-    totalUsers() {
-      return this.store.getters['user/totalUsers'];
-    },
-    stateFilter(): number {
-      return this.state === 'Activos' ? 1 : 0;
-    },
-    canCreate(): boolean {
-      return this.$store.getters.hasPermission('usuarios', 'crear');
-    },
-    canRead(): boolean {
-      return this.$store.getters.hasPermission('usuarios', 'leer');
-    },
-    canEdit(): boolean {
-      return this.$store.getters.hasPermission('usuarios', 'editar');
-    },
-    canDelete(): boolean {
-      return this.$store.getters.hasPermission('usuarios', 'eliminar');
-    }
-  },
-  methods: {
-    openModal(payload: { user: User, action: number }) {
-      this.selectedUser = payload.user;
-      this.action = payload.action;
-      this.modal = true;
-    },
+const store = useStore();
+const toast = useToast();
 
-    openForm(user?: User) {
-      this.selectedUser = user ? { ...user } : {
-        idUser: null,
-        userName: '',
-        password: '',
-        passwordHash: '',
-        names: '',
-        lastNames: '',
-        identificationNumber: '',
-        phoneNumber: null,
-        idRole: null,
-        roleName: '',
-        idStore: null,
-        storeName: '',
-        auditCreateDate: '',
-        statusUser: '',
-        updatePassword: false
-      };
-      this.form = true;
-    },
+const filterMap: Record<string, number> = {
+  "Usuario": 1,
+  "Nombres": 2,
+  "Apellidos": 3,
+  "Tienda": 4,
+  "Rol": 5
+};
+const { selectedFilter, state, startDate, endDate, getFilterParams } = useFilters('Usuario', filterMap);
 
-    async fetchUsers(params?: any) {
-      try {
-        await this.store.dispatch('user/fetchUsers', params || {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          stateFilter: this.stateFilter
-        });
-      } catch (error) {
-        handleSilentError(error);
-      }
-    },
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const search = ref<string | null>(null);
+const drawer = ref(false);
+const form = ref(false);
+const modal = ref(false);
+const selectedUser = ref<User | null>(null);
+const action = ref<0 | 1 | 2>(0);
+const downloadingExcel = ref(false);
 
-    getFilterParams(params: any) {
-      const filterMap: { [key: string]: number } = {
-        "Usuario": 1,
-        "Nombres": 2,
-        "Apellidos": 3,
-        "Tienda": 4,
-        "Rol": 5
-      };
-      const numberFilterValue = filterMap[params.selectedFilter || this.selectedFilter];
-      const textFilterValue = params.search?.trim() || null;
-      const startDateStr = params.startDate ? formatDate(params.startDate) : null;
-      const endDateStr = params.endDate ? formatDate(params.endDate) : null;
+const users = computed(() => store.getters['user/users']);
+const loading = computed(() => store.getters['user/loading']);
+const totalUsers = computed(() => store.getters['user/totalUsers']);
 
-      return {
-        textFilter: textFilterValue,
-        numberFilter: numberFilterValue,
-        stateFilter: this.stateFilter,
-        startDate: startDateStr,
-        endDate: endDateStr
-      };
-    },
+const canCreate = computed((): boolean => store.getters.hasPermission('usuarios', 'crear'));
+const canRead = computed((): boolean => store.getters.hasPermission('usuarios', 'leer'));
+const canEdit = computed((): boolean => store.getters.hasPermission('usuarios', 'editar'));
+const canDelete = computed((): boolean => store.getters.hasPermission('usuarios', 'eliminar'));
 
-    async searchUsers(params: any) {
-      this.search = params.search;
-      this.selectedFilter = params.selectedFilter;
-      this.state = params.state;
-      this.startDate = params.startDate;
-      this.endDate = params.endDate;
+const openModal = (payload: { user: User, action: 0 | 1 | 2 }) => {
+  selectedUser.value = payload.user;
+  action.value = payload.action;
+  modal.value = true;
+};
 
-      try {
-        await this.store.dispatch("user/fetchUsers", {
-          pageNumber: 1,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.currentPage = 1;
-      } catch (error) {
-        handleApiError(error, 'Error al buscar usuarios');
-      }
-    },
+const openForm = (user?: User) => {
+  selectedUser.value = user ? { ...user } : {
+    idUser: null,
+    userName: '',
+    password: '',
+    passwordHash: '',
+    names: '',
+    lastNames: '',
+    identificationNumber: '',
+    phoneNumber: null,
+    idRole: null,
+    roleName: '',
+    idStore: null,
+    storeName: '',
+    auditCreateDate: '',
+    statusUser: '',
+    updatePassword: false
+  };
+  form.value = true;
+};
 
-    refreshUsers() {
-      if (this.search?.trim()) {
-        this.searchUsers({
-          search: this.search,
-          selectedFilter: this.selectedFilter,
-          state: this.state,
-          startDate: this.startDate,
-          endDate: this.endDate
-        });
-      } else {
-        this.fetchUsers();
-      }
-    },
-
-    updateItemsPerPage(itemsPerPage: number) {
-      this.itemsPerPage = itemsPerPage;
-      this.currentPage = 1;
-      this.refreshUsers();
-    },
-
-    changePage(page: number) {
-      this.currentPage = page;
-      this.refreshUsers();
-    },
-
-    async downloadExcel(params: any) {
-      this.downloadingExcel = true;
-      try {
-        await this.store.dispatch("user/downloadUsersExcel", {
-          pageNumber: this.currentPage,
-          pageSize: this.itemsPerPage,
-          ...this.getFilterParams(params)
-        });
-        this.toast.success('Archivo descargado correctamente');
-      } catch (error) {
-        handleApiError(error, 'Error al descargar el archivo Excel');
-      } finally {
-        this.downloadingExcel = false;
-      }
-    },
-    
-    handleSaved() {
-      this.fetchUsers();
-    },
-
-    handleActionCompleted() {
-      this.fetchUsers();
-    }
-  },
-  mounted() {
-    this.fetchUsers();
+const fetchUsers = async (params?: any) => {
+  try {
+    await store.dispatch('user/fetchUsers', params || {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      stateFilter: state.value === 'Activos' ? 1 : 0
+    });
+  } catch (error) {
+    handleSilentError(error);
   }
+};
+
+const searchUsers = async (params: any) => {
+  search.value = params.search;
+  selectedFilter.value = params.selectedFilter;
+  state.value = params.state;
+  startDate.value = params.startDate;
+  endDate.value = params.endDate;
+
+  try {
+    await store.dispatch("user/fetchUsers", {
+      pageNumber: 1,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    currentPage.value = 1;
+  } catch (error) {
+    handleApiError(error, 'Error al buscar usuarios');
+  }
+};
+
+const refreshUsers = () => {
+  if (search.value?.trim()) {
+    searchUsers({
+      search: search.value,
+      selectedFilter: selectedFilter.value,
+      state: state.value,
+      startDate: startDate.value,
+      endDate: endDate.value
+    });
+  } else {
+    fetchUsers();
+  }
+};
+
+const updateItemsPerPage = (newItemsPerPage: number) => {
+  itemsPerPage.value = newItemsPerPage;
+  currentPage.value = 1;
+  refreshUsers();
+};
+
+const changePage = (page: number) => {
+  currentPage.value = page;
+  refreshUsers();
+};
+
+const downloadExcel = async (params: any) => {
+  downloadingExcel.value = true;
+  try {
+    await store.dispatch("user/downloadUsersExcel", {
+      pageNumber: currentPage.value,
+      pageSize: itemsPerPage.value,
+      ...getFilterParams(params.search)
+    });
+    toast.success('Archivo descargado correctamente');
+  } catch (error) {
+    handleApiError(error, 'Error al descargar el archivo Excel');
+  } finally {
+    downloadingExcel.value = false;
+  }
+};
+
+const handleSaved = () => {
+  fetchUsers();
+};
+
+const handleActionCompleted = () => {
+  fetchUsers();
+};
+
+onMounted(() => {
+  fetchUsers();
 });
 </script>

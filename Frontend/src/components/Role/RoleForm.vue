@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="12" md="12" lg="12" xl="12">
@@ -29,108 +29,115 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { Role } from '@/interfaces/roleInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  role?: Role | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    role: {
-      type: Object as PropType<Role | null>,
-      default: () => ({
-        idRole: null,
-        roleName: ''
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localRole: { ...this.role } as Role,
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-      },
-    };
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    role: {
-      handler(newRole: Role) {
-        this.localRole = { ...newRole };
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    close() {
-      this.isOpen = false;
-    },
-    async saveRole() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      try {
-        const isEditing = !!this.localRole.idRole;
-        let result;
-
-        if (isEditing) {
-          result = await this.$store.dispatch('role/editRole', {
-            id: this.localRole.idRole,
-            role: { ...this.localRole }
-          });
-        } else {
-          result = await this.$store.dispatch('role/registerRole', { ...this.localRole });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Rol actualizado con éxito!'
-            : 'Rol registrado con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localRole });
-          this.close();
-        }
-
-      } catch (error: any) {
-        const isEditing = !!this.localRole.idRole;
-        const customMessage = isEditing
-          ? 'Error en actualizar el rol'
-          : 'Error en guardar el rol';
-
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  role: () => ({
+    idRole: null,
+    roleName: '',
+    auditCreateDate: '',
+    statusRole: ''
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [role: Role];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localRole = ref<Role>({ ...props.role } as Role);
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
+};
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.role, (newRole) => {
+  if (newRole) {
+    localRole.value = { ...newRole } as Role;
+  }
+}, { deep: true });
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveRole = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localRole.value.idRole;
+    let result;
+
+    if (isEditing) {
+      result = await store.dispatch('role/editRole', {
+        id: localRole.value.idRole,
+        role: { ...localRole.value }
+      });
+    } else {
+      result = await store.dispatch('role/registerRole', { ...localRole.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Rol actualizado con éxito!'
+        : 'Rol registrado con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localRole.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localRole.value.idRole;
+    const customMessage = isEditing
+      ? 'Error en actualizar el rol'
+      : 'Error en guardar el rol';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>

@@ -6,7 +6,7 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-container>
             <v-row>
               <v-col cols="6" md="6" lg="6" xl="12">
@@ -60,155 +60,163 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { Store as VuexStore } from 'vuex';
+<script setup lang="ts">
+import { ref, watch, computed } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
-import { defineComponent, PropType } from 'vue';
 import { User } from '@/interfaces/userInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
 interface FormRef {
-  validate: () => boolean;
+  validate: () => Promise<{ valid: boolean }>;
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<any>;
-  }
+interface Props {
+  modelValue: boolean;
+  user?: User | null;
 }
 
-export default defineComponent({
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    user: {
-      type: Object as PropType<User | null>,
-      default: () => ({
-        idUser: null,
-        userName: '',
-        password: '',
-        passwordHash: '',
-        names: '',
-        lastNames: '',
-        identificationNumber: '',
-        phoneNumber: null,
-        idRole: null,
-        idStore: null,
-        updatePassword: false
-      }),
-    },
-  },
-  data() {
-    return {
-      isOpen: this.modelValue,
-      valid: false,
-      saving: false,
-      localUser: { ...this.user } as User,
-      oldPassword: '',
-      toast: useToast(),
-      rules: {
-        required: (value: string) => !!value || 'Este campo es requerido.',
-        onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
-        onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
-      },
-    };
-  },
-  computed: {
-    roles() {
-      const rolesFromStore = this.$store.getters['role/roles'];
-      return Array.isArray(rolesFromStore) ? rolesFromStore : [];
-    },
-    loadingRoles(): boolean {
-      return this.$store.getters['role/loading'];
-    },
-    stores() {
-      const storesFromStore = this.$store.getters['store/stores'];
-      return Array.isArray(storesFromStore) ? storesFromStore : [];
-    },
-    loadingStores(): boolean {
-      return this.$store.getters['store/loading'];
-    },
-  },
-  watch: {
-    modelValue(newValue: boolean) {
-      this.isOpen = newValue;
-      if (newValue) {
-        this.$store.dispatch('role/selectRole');
-        this.$store.dispatch('store/selectStore');
-      }
-    },
-    isOpen(newValue: boolean) {
-      this.$emit('update:modelValue', newValue);
-    },
-    user: {
-      handler(newUser: User) {
-        this.localUser = { ...newUser };
-        if (newUser.idUser) {
-          this.oldPassword = newUser.passwordHash;
-        } else {
-          this.oldPassword = '';
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    uppercase() {
-      this.localUser.userName = this.localUser.userName.toUpperCase();
-    },
-    close() {
-      this.isOpen = false;
-    },
-    async saveUser() {
-      const form = this.$refs.form as FormRef;
-      if (!form.validate()) {
-        this.toast.warning('Por favor completa todos los campos requeridos');
-        return;
-      }
-      this.saving = true;
-      try {
-        const isEditing = !!this.localUser.idUser;
-        let result;
-
-        if (isEditing) {
-          if (this.localUser.passwordHash !== this.oldPassword) {
-            this.localUser.updatePassword = true;
-            this.localUser.password = this.localUser.passwordHash;
-          } else {
-            this.localUser.updatePassword = false;
-            this.localUser.password = this.localUser.passwordHash;
-          }
-          result = await this.$store.dispatch('user/editUser', {
-            id: this.localUser.idUser,
-            user: { ...this.localUser }
-          });
-        } else {
-          this.localUser.password = this.localUser.passwordHash;
-          result = await this.$store.dispatch('user/registerUser', { ...this.localUser });
-        }
-
-        if (result.isSuccess) {
-          const successMsg = isEditing
-            ? 'Usuario actualizado con éxito!'
-            : 'Usuario registrado con éxito!';
-
-          this.toast.success(successMsg);
-          this.$emit('saved', { ...this.localUser });
-          this.close();
-        }
-
-      } catch (error: any) {
-        const isEditing = !!this.localUser.idUser;
-        const customMessage = isEditing
-          ? 'Error en actualizar el usuario'
-          : 'Error en guardar el usuario';
-        handleApiError(error, customMessage);
-      } finally {
-        this.saving = false;
-      }
-    },
-  },
+const props = withDefaults(defineProps<Props>(), {
+  user: () => ({
+    idUser: null,
+    userName: '',
+    password: '',
+    passwordHash: '',
+    names: '',
+    lastNames: '',
+    identificationNumber: '',
+    phoneNumber: null,
+    idRole: null,
+    roleName: '',
+    idStore: null,
+    storeName: '',
+    auditCreateDate: '',
+    statusUser: '',
+    updatePassword: false
+  })
 });
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  'saved': [user: User];
+}>();
+
+const store = useStore();
+const toast = useToast();
+
+const formRef = ref<FormRef | null>(null);
+const isOpen = ref(props.modelValue);
+const valid = ref(false);
+const saving = ref(false);
+const localUser = ref<User>({ ...props.user } as User);
+const oldPassword = ref('');
+
+const rules = {
+  required: (value: string) => !!value || 'Este campo es requerido.',
+  onlyLetters: (value: string) => !value || /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value) || 'Solo se permiten letras.',
+  onlyNumbers: (value: string) => !value || /^[0-9]+$/.test(value) || 'Solo se permiten números.',
+};
+
+const roles = computed(() => {
+  const rolesFromStore = store.getters['role/roles'];
+  return Array.isArray(rolesFromStore) ? rolesFromStore : [];
+});
+
+const loadingRoles = computed((): boolean => store.getters['role/loading']);
+
+const stores = computed(() => {
+  const storesFromStore = store.getters['store/stores'];
+  return Array.isArray(storesFromStore) ? storesFromStore : [];
+});
+
+const loadingStores = computed((): boolean => store.getters['store/loading']);
+
+watch(() => props.modelValue, (newValue: boolean) => {
+  isOpen.value = newValue;
+  if (newValue) {
+    store.dispatch('role/selectRole');
+    store.dispatch('store/selectStore');
+  }
+});
+
+watch(isOpen, (newValue: boolean) => {
+  emit('update:modelValue', newValue);
+});
+
+watch(() => props.user, (newUser) => {
+  if (newUser) {
+    localUser.value = { ...newUser } as User;
+    if (newUser.idUser) {
+      oldPassword.value = newUser.passwordHash;
+    } else {
+      oldPassword.value = '';
+    }
+  }
+}, { deep: true });
+
+const uppercase = () => {
+  localUser.value.userName = localUser.value.userName.toUpperCase();
+};
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const saveUser = async () => {
+  if (!formRef.value) {
+    toast.warning('Error al acceder al formulario');
+    return;
+  }
+
+  const validation = await formRef.value.validate();
+  
+  if (!validation.valid) {
+    toast.warning('Por favor completa todos los campos requeridos');
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const isEditing = !!localUser.value.idUser;
+    let result;
+
+    if (isEditing) {
+      if (localUser.value.passwordHash !== oldPassword.value) {
+        localUser.value.updatePassword = true;
+        localUser.value.password = localUser.value.passwordHash;
+      } else {
+        localUser.value.updatePassword = false;
+        localUser.value.password = localUser.value.passwordHash;
+      }
+      result = await store.dispatch('user/editUser', {
+        id: localUser.value.idUser,
+        user: { ...localUser.value }
+      });
+    } else {
+      localUser.value.password = localUser.value.passwordHash;
+      result = await store.dispatch('user/registerUser', { ...localUser.value });
+    }
+
+    if (result.isSuccess) {
+      const successMsg = isEditing
+        ? 'Usuario actualizado con éxito!'
+        : 'Usuario registrado con éxito!';
+
+      toast.success(successMsg);
+      emit('saved', { ...localUser.value });
+      close();
+    }
+
+  } catch (error: any) {
+    const isEditing = !!localUser.value.idUser;
+    const customMessage = isEditing
+      ? 'Error en actualizar el usuario'
+      : 'Error en guardar el usuario';
+
+    handleApiError(error, customMessage);
+  } finally {
+    saving.value = false;
+  }
+};
 </script>
