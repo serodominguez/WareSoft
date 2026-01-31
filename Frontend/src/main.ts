@@ -4,13 +4,16 @@ import App from './App.vue'
 
 // Plugins y Rutas
 import router from './router'
-import store from './store'
+import pinia from './stores'
 import { vuetify, i18n } from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import permissionsPlugin from './plugins/permissions'
 
 // Configuración de Axios
 import { configureAxiosDefaults, setupAxiosInterceptors } from './plugins/axiosInterceptor'
+
+// Store de autenticación
+import { useAuthStore } from './stores/auth'
 
 // Toast
 import Toast from 'vue-toastification'
@@ -47,7 +50,7 @@ const toastOptions = {
   const app = createApp(App)
 
   app.use(router)
-  app.use(store)
+  app.use(pinia)
   app.use(vuetify)
   app.use(i18n)
   app.use(Toast, toastOptions)
@@ -63,7 +66,8 @@ const toastOptions = {
   }
 
   // Espera a que se cargue la autenticación
-   await store.dispatch('initializeAuth');
+   const authStore = useAuthStore()
+   await authStore.initializeAuth()
 
   // Montar la app después de que la autenticación esté lista
   app.mount('#app')

@@ -24,9 +24,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
 import { handleApiError } from '@/helpers/errorHandler';
+import { useStoreMapper } from '@/composables/useStoreMapper';
 
 // Props del componente
 interface Props {
@@ -51,8 +51,8 @@ const emit = defineEmits<{
 }>();
 
 // Inicialización de servicios
-const store = useStore();
 const toast = useToast();
+const { getStoreAction } = useStoreMapper();
 
 // Estado reactivo
 const processing = ref(false);
@@ -108,17 +108,17 @@ const handleAction = async () => {
 
     const actionMap = {
         0: {
-            storeAction: `${props.moduleName}/remove${props.entityName}`,
+            actionType: 'eliminar' as const,
             successMsg: `${props.name} eliminad${genderSuffix} con éxito!`,
             errorMsg: `Error al eliminar ${props.name.toLowerCase()}`
         },
         1: {
-            storeAction: `${props.moduleName}/enable${props.entityName}`,
+            actionType: 'habilitar' as const,
             successMsg: `${props.name} habilitad${genderSuffix} con éxito!`,
             errorMsg: `Error al habilitar ${props.name.toLowerCase()}`
         },
         2: {
-            storeAction: `${props.moduleName}/disable${props.entityName}`,
+            actionType: 'deshabilitar' as const,
             successMsg: `${props.name} deshabilitad${genderSuffix} con éxito!`,
             errorMsg: `Error al deshabilitar ${props.name.toLowerCase()}`
         }
@@ -127,7 +127,14 @@ const handleAction = async () => {
     const currentAction = actionMap[props.action];
 
     try {
-        const result = await store.dispatch(currentAction.storeAction, props.itemId);
+        // Obtener la acción del store correspondiente
+        const storeAction = getStoreAction(
+            props.moduleName,
+            currentAction.actionType,
+            props.entityName
+        );
+
+        const result = await storeAction(props.itemId);
 
         if (result.isSuccess) {
             toast.success(currentAction.successMsg);

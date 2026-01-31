@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import store, { RootState } from '@/store';
+import { useAuthStore } from '@/stores/auth';
 import { normalize } from '@/utils/string';
 import HomeView from '../views/HomeView.vue'
 import BrandView from '@/views/BrandView.vue'
@@ -175,10 +175,15 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
 
-  const state = store.state as RootState
-  const currentUser = state.currentUser
+  // Esperar a que la autenticación esté inicializada
+  if (!authStore.authInitialized) {
+    await authStore.initializeAuth()
+  }
+
+  const currentUser = authStore.currentUser
 
   // Rutas libres
   if (to.matched.some(record => record.meta.free)) {

@@ -4,10 +4,10 @@
       <v-app-bar-nav-icon v-if="currentUser" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title v-if="currentUser" class="text-uppercase">
         <span class="font-weight-light"></span>
-        <span style="font-size: 70%"><strong>Sucursal: {{ $store.state.currentUser.storeName }} </strong></span>
+        <span style="font-size: 70%"><strong>Sucursal: {{ currentUser.storeName }} </strong></span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <span v-if="currentUser" style="font-size: 90%; margin-right: 10px;"><strong> Usuario:  {{ $store.state.currentUser.userName}}</strong></span>
+      <span v-if="currentUser" style="font-size: 90%; margin-right: 10px;"><strong> Usuario:  {{ currentUser.userName}}</strong></span>
       <v-btn v-if="currentUser" @click="logout" icon="logout"></v-btn>
     </v-app-bar>
   </nav>
@@ -16,21 +16,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 import NavigationDrawer from './NavigationDrawer.vue';
 
 // Inicialización del store
-const store = useStore();
+const authStore = useAuthStore();
 
 // Estado reactivo
 const drawer = ref(false);
 
 // Computed property para el usuario actual
-const currentUser = computed(() => store.state.currentUser);
+const currentUser = computed(() => authStore.currentUser);
 
 // Método para cerrar sesión
 const logout = (): void => {
-  store.dispatch("logout");
+  authStore.logout();
 };
 </script>
 <style scoped>

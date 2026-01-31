@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 import { normalize } from '@/utils/string';
 
 // Interface que define la estructura de un enlace del menú de navegación
@@ -113,7 +113,7 @@ const emit = defineEmits<{
 }>();
 
 // Inicialización del store
-const store = useStore();
+const authStore = useAuthStore();
 
 // Enlaces directos del menú de Almacén (sin Entradas/Salidas)
 const linkDirectStore: Link[] = [
@@ -152,7 +152,7 @@ const hasModuleAccess = (module: string): boolean => {
   }
 
   // Obtiene el usuario actual del store
-  const currentUser = store.state.currentUser;
+  const currentUser = authStore.currentUser;
 
   // Si no hay usuario o no tiene permisos, deniega el acceso
   if (!currentUser || !currentUser.permissions) {

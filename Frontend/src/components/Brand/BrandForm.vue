@@ -30,8 +30,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { useToast } from 'vue-toastification';
+import { useBrandStore } from '@/stores/brandStore';
 import { Brand } from '@/interfaces/brandInterface';
 import { handleApiError } from '@/helpers/errorHandler';
 
@@ -66,7 +66,7 @@ const emit = defineEmits<{
 }>();
 
 // Inicialización de servicios
-const store = useStore();
+const brandStore = useBrandStore();
 const toast = useToast();
 
 // Referencias del formulario - IMPORTANTE: el nombre debe coincidir con ref="formRef" en el template
@@ -125,15 +125,15 @@ const saveBrand = async () => {
     const isEditing = !!localBrand.value.idBrand;
     let result;
 
-    if (isEditing) {
-      // Llama al action de Vuex para editar entidad existente
-      result = await store.dispatch('brand/editBrand', {
-        id: localBrand.value.idBrand,
-        brand: { ...localBrand.value }
-      });
+    if (isEditing && localBrand.value.idBrand !== null) {
+      // Llama a la action de Pinia para editar entidad existente
+      result = await brandStore.editBrand(
+        localBrand.value.idBrand,
+        { ...localBrand.value }
+      );
     } else {
-      // Llama al action de Vuex para registrar nuevo
-      result = await store.dispatch('brand/registerBrand', { ...localBrand.value });
+      // Llama a la action de Pinia para registrar nuevo
+      result = await brandStore.registerBrand({ ...localBrand.value });
     }
 
     // Si la operación fue exitosa

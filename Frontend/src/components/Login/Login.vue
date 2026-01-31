@@ -30,7 +30,7 @@
 import axios, { AxiosError } from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { useAuthStore } from '@/stores/auth';
 
 interface ApiResponse {
   isSuccess: boolean;
@@ -44,7 +44,7 @@ interface ErrorResponse {
 }
 
 const router = useRouter();
-const store = useStore();
+const authStore = useAuthStore();
 
 const show = ref(false);
 const user = ref('');
@@ -96,7 +96,7 @@ const login = async () => {
     // PASO 4: Verificar respuesta exitosa
     if (token && response.data.isSuccess) {
       // PASO 5: Guardar token Y cargar permisos (espera a que termine)
-      await store.dispatch("saveToken", token);
+      await authStore.saveToken(token);
 
       // PASO 6: Todo listo, navegar al home
       router.push({ name: "home" });
