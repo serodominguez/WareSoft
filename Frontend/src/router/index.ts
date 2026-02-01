@@ -2,22 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth';
 import { normalize } from '@/utils/string';
 import HomeView from '../views/HomeView.vue'
-import BrandView from '@/views/BrandView.vue'
-import CategoryView from '@/views/CategoryView.vue'
-import CustomerView from '@/views/CustomerView.vue';
-import GoodsIssueView from '@/views/GoodsIssueView.vue';
-import GoodsReceiptView from '@/views/GoodsReceiptView.vue';
-import InventoryView from '@/views/InventoryView.vue';
 import LoginView from '@/views/LoginView.vue';
-import ModuleView from '@/views/ModuleView.vue';
-import PermissionView from '@/views/PermissionView.vue';
-import ProductView from '@/views/ProductView.vue';
-import RoleView from '@/views/RoleView.vue'
-import StoreView from '@/views/StoreView.vue'
-import SupplierView from '@/views/SupplierView.vue';
-import UserView from '@/views/UserView.vue'
 
- 
 declare module 'vue-router' {
   interface RouteMeta {
     free?: boolean;
@@ -46,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/marcas",
     name: "brand",
-    component: BrandView,
+    component: () => import("@/views/BrandView.vue"),
     meta: {
       requiresAuth: true,
       module: "marcas",
@@ -55,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/categorias",
     name: "category",
-    component: CategoryView,
+    component: () => import("@/views/CategoryView.vue"),
     meta: {
       requiresAuth: true,
       module: "categorias",
@@ -64,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/clientes",
     name: "customer",
-    component: CustomerView,
+    component: () => import("@/views/CustomerView.vue"),
     meta: {
       requiresAuth: true,
       module: "clientes",
@@ -73,7 +59,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/salidas",
     name: "goodsissue",
-    component: GoodsIssueView,
+    component: () => import("@/views/GoodsIssueView.vue"),
     meta: {
       requiresAuth: true,
       module: "salida de productos",
@@ -82,7 +68,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/entradas",
     name: "goodsreceipt",
-    component: GoodsReceiptView,
+    component: () => import("@/views/GoodsReceiptView.vue"),
     meta: {
       requiresAuth: true,
       module: "entrada de productos",
@@ -91,7 +77,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/inventario",
     name: "inventory",
-    component: InventoryView,
+    component: () => import("@/views/InventoryView.vue"),
     meta: {
       requiresAuth: true,
       module: "inventario",
@@ -108,7 +94,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/modulos",
     name: "module",
-    component: ModuleView,
+    component: () => import("@/views/ModuleView.vue"),
     meta: {
       requiresAuth: true,
       module: "modulos",
@@ -117,7 +103,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/permisos",
     name: "permission",
-    component: PermissionView,
+    component: () => import("@/views/PermissionView.vue"),
     meta: {
       requiresAuth: true,
       module: "permisos",
@@ -126,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/productos",
     name: "product",
-    component: ProductView,
+    component: () => import("@/views/ProductView.vue"),
     meta: {
       requiresAuth: true,
       module: "productos",
@@ -135,7 +121,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/roles",
     name: "role",
-    component: RoleView,
+    component: () => import("@/views/RoleView.vue"),
     meta: {
       requiresAuth: true,
       module: "roles",
@@ -144,7 +130,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/tiendas",
     name: "store",
-    component: StoreView,
+    component: () => import("@/views/StoreView.vue"),
     meta: {
       requiresAuth: true,
       module: "tiendas",
@@ -153,7 +139,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/proveedores",
     name: "supplier",
-    component: SupplierView,
+    component: () => import("@/views/SupplierView.vue"),
     meta: {
       requiresAuth: true,
       module: "proveedores",
@@ -162,7 +148,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/usuarios",
     name: "user",
-    component: UserView,
+    component: () => import("@/views/UserView.vue"),
     meta: {
       requiresAuth: true,
       module: "usuarios",
